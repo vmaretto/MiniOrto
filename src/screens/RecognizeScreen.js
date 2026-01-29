@@ -33,6 +33,27 @@ function RecognizeScreen() {
     fileInputRef.current.click();
   };
 
+  // Compress image to reduce size
+  const compressImage = (file, maxWidth = 800) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ratio = Math.min(maxWidth / img.width, maxWidth / img.height, 1);
+          canvas.width = img.width * ratio;
+          canvas.height = img.height * ratio;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8));
+        };
+      };
+    });
+  };
+
   const handleRecognize = async () => {
     if (!image) {
       setError(t('recognize.noImage', 'Scatta o carica una foto del prodotto'));
@@ -42,44 +63,36 @@ function RecognizeScreen() {
     setLoading(true);
     setError(null);
 
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onloadend = async () => {
-      try {
-        const base64Image = reader.result;
+    try {
+      // Compress image before sending
+      const base64Image = await compressImage(image, 800);
         
-        const response = await fetch('/api/recognize-product', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ image: base64Image }),
-        });
+      const response = await fetch('/api/recognize-product', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: base64Image }),
+      });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Recognition failed');
-        }
-
-        const data = await response.json();
-        setRecognized(data);
-        
-        // Store recognized product
-        sessionStorage.setItem('recognizedProduct', JSON.stringify(data));
-        sessionStorage.setItem('productImage', base64Image);
-        
-        setLoading(false);
-      } catch (err) {
-        console.error('Error recognizing product:', err);
-        setError(t('recognize.error', 'Errore nel riconoscimento') + ': ' + err.message);
-        setLoading(false);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.details || errorData.error || 'Recognition failed');
       }
-    };
-    
-    reader.onerror = () => {
-      setError(t('recognize.error', 'Errore nel riconoscimento') + ': Could not read image');
+
+      const data = await response.json();
+      setRecognized(data);
+      
+      // Store recognized product
+      sessionStorage.setItem('recognizedProduct', JSON.stringify(data));
+      sessionStorage.setItem('productImage', base64Image);
+      
       setLoading(false);
-    };
+    } catch (err) {
+      console.error('Error recognizing product:', err);
+      setError(t('recognize.error', 'Errore nel riconoscimento') + ': ' + err.message);
+      setLoading(false);
+    }
   };
 
   const handleScanChoice = (method) => {
