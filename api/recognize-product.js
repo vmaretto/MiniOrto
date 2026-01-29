@@ -68,7 +68,7 @@ Return a JSON object with these fields:
   "name": string (specific Italian name, e.g., "Peperone giallo", "Bietola da costa", "Pomodoro cuore di bue"),
   "nameEn": string (English name),
   "category": string (one of: "frutta", "verdura", "ortaggio", "legume", "erba aromatica", "altro"),
-  "emoji": string (single emoji representing the product),
+  "emoji": string (single emoji - use exact match: 🍎apple, 🍐pear, 🍊orange, 🍋lemon, 🍌banana, 🍉watermelon, 🍇grapes, 🍓strawberry, 🫐blueberry, 🍑peach, 🥭mango, 🍍pineapple, 🥝kiwi, 🍒cherry, 🥬leafy greens/chard, 🥒cucumber, 🥕carrot, 🌽corn, 🫑pepper, 🍆eggplant, 🥦broccoli, 🧅onion, 🧄garlic, 🥔potato, 🍅tomato, 🌶️chili. For plum/prugna use 🟣, for zucchini use 🥒, if no match use 🥬),
   "confidence": "alta" | "media" | "bassa",
   "description": string (brief description in Italian, max 20 words),
   "visualCues": string (what visual features led to this identification),
