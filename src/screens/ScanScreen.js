@@ -13,9 +13,14 @@ function ScanScreen() {
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [recognizedProduct, setRecognizedProduct] = useState(null);
 
-  // Scroll to upload area on mount (after questionnaire)
+  // Load recognized product and scroll to upload area on mount
   useEffect(() => {
+    const storedProduct = sessionStorage.getItem('recognizedProduct');
+    if (storedProduct) {
+      setRecognizedProduct(JSON.parse(storedProduct));
+    }
     if (uploadAreaRef.current) {
       uploadAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -93,6 +98,30 @@ function ScanScreen() {
     <div className="screen">
       <div className="card">
         <h2>{t('scan.title')}</h2>
+        
+        {/* Show recognized product if available */}
+        {recognizedProduct && (
+          <div style={{
+            background: '#e8f5e9',
+            borderRadius: '10px',
+            padding: '12px 16px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <span style={{ fontSize: '2rem' }}>{recognizedProduct.emoji || '🥬'}</span>
+            <div>
+              <div style={{ fontWeight: 'bold', color: '#2e7d32' }}>
+                {recognizedProduct.name}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#666' }}>
+                {t('scan.uploadScioFor', 'Carica lo screenshot SCIO per questo prodotto')}
+              </div>
+            </div>
+          </div>
+        )}
+
         <p style={{ color: '#666', marginBottom: '20px' }}>
           {t('scan.instructions')}
         </p>

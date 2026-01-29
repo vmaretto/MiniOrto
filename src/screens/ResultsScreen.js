@@ -9,6 +9,8 @@ function ResultsScreen() {
   
   const [results, setResults] = useState(null);
   const [image, setImage] = useState(null);
+  const [recognizedProduct, setRecognizedProduct] = useState(null);
+  const [productImage, setProductImage] = useState(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState(null);
@@ -16,12 +18,20 @@ function ResultsScreen() {
   useEffect(() => {
     const storedResults = sessionStorage.getItem('scioResults');
     const storedImage = sessionStorage.getItem('scioImage');
+    const storedProduct = sessionStorage.getItem('recognizedProduct');
+    const storedProductImage = sessionStorage.getItem('productImage');
     
     if (storedResults) {
       setResults(JSON.parse(storedResults));
     }
     if (storedImage) {
       setImage(storedImage);
+    }
+    if (storedProduct) {
+      setRecognizedProduct(JSON.parse(storedProduct));
+    }
+    if (storedProductImage) {
+      setProductImage(storedProductImage);
     }
   }, []);
 
@@ -103,24 +113,85 @@ function ResultsScreen() {
       <div className="card">
         <h2>📊 {t('results.title')}</h2>
 
-        {/* Scanned Image Preview */}
+        {/* Recognized Product Card - shows the product identified earlier */}
+        {recognizedProduct && (
+          <div style={{
+            background: 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%)',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          }}>
+            {/* Product Image or Emoji */}
+            {productImage ? (
+              <img 
+                src={productImage} 
+                alt={recognizedProduct.name}
+                style={{
+                  width: '70px',
+                  height: '70px',
+                  borderRadius: '10px',
+                  objectFit: 'cover',
+                  border: '2px solid #4CAF50'
+                }}
+              />
+            ) : (
+              <div style={{
+                width: '70px',
+                height: '70px',
+                borderRadius: '10px',
+                background: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '2.5rem'
+              }}>
+                {recognizedProduct.emoji || '🥬'}
+              </div>
+            )}
+            <div style={{ flex: 1 }}>
+              <div style={{ 
+                fontSize: '1.2rem', 
+                fontWeight: 'bold', 
+                color: '#2e7d32',
+                marginBottom: '4px'
+              }}>
+                {recognizedProduct.name}
+              </div>
+              {recognizedProduct.category && (
+                <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                  {recognizedProduct.category}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* SCIO Screenshot Preview (smaller, secondary) */}
         {image && (
           <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.85rem', color: '#666', margin: '0 0 8px 0' }}>
+              {t('results.scioData', 'Dati SCIO')}
+            </p>
             <img 
               src={image} 
-              alt="Scanned food" 
+              alt="SCIO screenshot" 
               style={{
-                maxWidth: '150px',
-                maxHeight: '150px',
+                maxWidth: '120px',
+                maxHeight: '120px',
                 borderRadius: '8px',
-                border: '2px solid #4CAF50'
+                border: '1px solid #ddd',
+                opacity: 0.9
               }}
             />
           </div>
         )}
 
-        {/* Food Name */}
-        {results.foodName && (
+        {/* Food Name from SCIO (fallback if no recognized product) */}
+        {!recognizedProduct && results.foodName && (
           <div style={{
             background: '#e8f5e9',
             borderRadius: '8px',
