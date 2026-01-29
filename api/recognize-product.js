@@ -49,16 +49,29 @@ module.exports = async (req, res) => {
             },
             {
               type: 'text',
-              text: `Identify the fruit or vegetable in this image.
+              text: `Identify the fruit or vegetable in this image. This is from an Italian mini-orto (vegetable garden), so expect common Italian produce.
+
+IMPORTANT VISUAL DISTINCTIONS:
+- Peperone giallo (yellow bell pepper): blocky shape, thick walls, stem on top, smooth shiny skin, hollow inside
+- Papaya: oval/pear shape, thin skin, orange flesh with black seeds when cut, tropical fruit
+- Bietola da costa (Swiss chard): large green leaves with thick white/colored stalks (coste)
+- Bietola da taglio: smaller leaves, thinner stalks, used for cutting
+- Spinacio (spinach): smaller, darker green leaves, no thick stalks
+
+COMMON ITALIAN GARDEN PRODUCE:
+- Vegetables: pomodoro, zucchina, melanzana, peperone (rosso/giallo/verde), cetriolo, fagiolino, insalata, bietola, spinacio, cavolo, broccolo, cavolfiore
+- Herbs: basilico, prezzemolo, rosmarino, salvia, menta
+- Fruits: fragola, lampone, mirtillo, ribes
 
 Return a JSON object with these fields:
 {
-  "name": string (name in Italian, e.g., "Mela Golden", "Pomodoro", "Zucchina"),
-  "nameEn": string (name in English),
-  "category": string (one of: "frutta", "verdura", "ortaggio", "legume", "altro"),
+  "name": string (specific Italian name, e.g., "Peperone giallo", "Bietola da costa", "Pomodoro cuore di bue"),
+  "nameEn": string (English name),
+  "category": string (one of: "frutta", "verdura", "ortaggio", "legume", "erba aromatica", "altro"),
   "emoji": string (single emoji representing the product),
   "confidence": "alta" | "media" | "bassa",
   "description": string (brief description in Italian, max 20 words),
+  "visualCues": string (what visual features led to this identification),
   "commonVarieties": array of strings (common varieties if applicable)
 }
 
@@ -70,6 +83,7 @@ If you cannot identify a fruit or vegetable, return:
   "emoji": "❓",
   "confidence": "bassa",
   "description": "Impossibile identificare il prodotto nell'immagine",
+  "visualCues": "",
   "commonVarieties": []
 }
 

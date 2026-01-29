@@ -1,5 +1,5 @@
 // src/screens/RecognizeScreen.js
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -7,12 +7,20 @@ function RecognizeScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const uploadAreaRef = useRef(null);
   
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [recognized, setRecognized] = useState(null);
+
+  // Scroll to upload area on mount
+  useEffect(() => {
+    if (uploadAreaRef.current) {
+      uploadAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
@@ -115,6 +123,7 @@ function RecognizeScreen() {
 
         {/* Camera/Upload Area */}
         <div 
+          ref={uploadAreaRef}
           onClick={handleCameraClick}
           style={{
             border: '3px dashed #4CAF50',
@@ -122,7 +131,7 @@ function RecognizeScreen() {
             padding: '40px 20px',
             textAlign: 'center',
             cursor: 'pointer',
-            marginBottom: '20px',
+            marginBottom: imagePreview ? '10px' : '20px',
             backgroundColor: imagePreview ? 'transparent' : '#f5f5f5',
             transition: 'all 0.3s ease'
           }}
@@ -146,6 +155,31 @@ function RecognizeScreen() {
             </>
           )}
         </div>
+
+        {/* Change Photo Button */}
+        {imagePreview && !recognized && (
+          <button
+            onClick={handleCameraClick}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '20px',
+              background: '#fff',
+              border: '2px solid #ff9800',
+              borderRadius: '8px',
+              color: '#ff9800',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              fontWeight: '500'
+            }}
+          >
+            🔄 {t('recognize.changePhoto', 'Cambia foto')}
+          </button>
+        )}
 
         <input
           type="file"
@@ -214,6 +248,34 @@ function RecognizeScreen() {
                 </p>
               )}
             </div>
+
+            {/* Retry button if wrong recognition */}
+            <button
+              onClick={() => {
+                setRecognized(null);
+                setImage(null);
+                setImagePreview(null);
+                sessionStorage.removeItem('recognizedProduct');
+                sessionStorage.removeItem('productImage');
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                width: '100%',
+                padding: '10px',
+                marginBottom: '16px',
+                background: '#fff',
+                border: '2px solid #ff9800',
+                borderRadius: '8px',
+                color: '#ff9800',
+                cursor: 'pointer',
+                fontSize: '0.9rem'
+              }}
+            >
+              🔄 {t('recognize.wrongProduct', 'Non è corretto? Riprova')}
+            </button>
 
             <p style={{ textAlign: 'center', color: '#666', marginBottom: '16px' }}>
               {t('recognize.chooseMethod', 'Come vuoi analizzare i valori nutrizionali?')}
