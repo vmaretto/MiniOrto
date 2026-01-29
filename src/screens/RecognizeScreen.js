@@ -152,7 +152,6 @@ function RecognizeScreen() {
           ref={fileInputRef}
           onChange={handleImageSelect}
           accept="image/*"
-          capture="environment"
           style={{ display: 'none' }}
         />
 
