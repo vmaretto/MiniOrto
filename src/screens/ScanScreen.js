@@ -1,5 +1,5 @@
 // src/screens/ScanScreen.js
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -7,11 +7,19 @@ function ScanScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const uploadAreaRef = useRef(null);
   
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Scroll to upload area on mount (after questionnaire)
+  useEffect(() => {
+    if (uploadAreaRef.current) {
+      uploadAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
@@ -91,6 +99,7 @@ function ScanScreen() {
 
         {/* Upload Area */}
         <div 
+          ref={uploadAreaRef}
           onClick={handleUploadClick}
           style={{
             border: '3px dashed #4CAF50',
@@ -98,7 +107,7 @@ function ScanScreen() {
             padding: '40px 20px',
             textAlign: 'center',
             cursor: 'pointer',
-            marginBottom: '20px',
+            marginBottom: imagePreview ? '10px' : '20px',
             backgroundColor: imagePreview ? 'transparent' : '#f5f5f5',
             transition: 'all 0.3s ease'
           }}
@@ -120,6 +129,31 @@ function ScanScreen() {
             </>
           )}
         </div>
+
+        {/* Change Photo Button - visible when image is loaded */}
+        {imagePreview && (
+          <button
+            onClick={handleUploadClick}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '20px',
+              background: '#fff',
+              border: '2px solid #ff9800',
+              borderRadius: '8px',
+              color: '#ff9800',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              fontWeight: '500'
+            }}
+          >
+            🔄 {t('scan.changePhoto', 'Cambia foto')}
+          </button>
+        )}
 
         <input
           type="file"

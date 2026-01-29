@@ -50,20 +50,29 @@ module.exports = async (req, res) => {
             {
               type: 'text',
               text: `Analyze this SCIO spectrometer app screenshot and extract the nutritional values.
-              
+
+IMPORTANT for food identification:
+- Look at the food name displayed in the app interface
+- Common vegetables in Italian: "Peperone" (pepper), "Bietola" (chard), "Pomodoro" (tomato), "Zucchina" (zucchini), "Melanzana" (eggplant)
+- "Peperone giallo" = yellow bell pepper (NOT papaya!)
+- "Bietola da costa" or "Bietola" = Swiss chard
+- If the displayed name seems wrong for the nutritional values shown, note this in confidence
+- NEVER confuse tropical fruits (papaya, mango) with common Italian vegetables
+
 Return a JSON object with these fields (use null if not found):
 {
-  "water": number or null (grams),
-  "carbs": number or null (grams),
-  "calories": number or null,
-  "sugar": number or null (grams),
-  "fiber": number or null (grams),
-  "protein": number or null (grams),
-  "fat": number or null (grams),
-  "portion": number or null (grams),
-  "foodName": string or null (name of the food if visible),
+  "water": number or null (grams per 100g),
+  "carbs": number or null (grams per 100g),
+  "calories": number or null (kcal per 100g),
+  "sugar": number or null (grams per 100g),
+  "fiber": number or null (grams per 100g),
+  "protein": number or null (grams per 100g),
+  "fat": number or null (grams per 100g),
+  "portion": number or null (grams, if specified),
+  "foodName": string or null (exact name shown in the app, in Italian if that's what's displayed),
+  "foodNameOriginal": string or null (raw text from the app if different from foodName),
   "scanDate": string or null (date if visible, ISO format),
-  "brix": number or null (if shown),
+  "brix": number or null (if shown, degrees Brix),
   "confidence": "high" | "medium" | "low"
 }
 
