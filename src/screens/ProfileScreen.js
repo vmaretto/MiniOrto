@@ -35,8 +35,8 @@ function ProfileScreen() {
     // Store profile data in sessionStorage
     sessionStorage.setItem('profileData', JSON.stringify(formData));
     
-    // Navigate to scan
-    navigate('/scan');
+    // Navigate to recognize product first
+    navigate('/recognize');
   };
 
   const isFormValid = formData.age && formData.gender && formData.profession && formData.consumption && 
