@@ -41,11 +41,11 @@ function ScanScreen() {
     setLoading(true);
     setError(null);
 
-    try {
-      // Convert image to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(image);
-      reader.onloadend = async () => {
+    // Convert image to base64
+    const reader = new FileReader();
+    reader.readAsDataURL(image);
+    reader.onloadend = async () => {
+      try {
         const base64Image = reader.result;
         
         // Call Vision API to extract values
@@ -58,7 +58,8 @@ function ScanScreen() {
         });
 
         if (!response.ok) {
-          throw new Error('Analysis failed');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Analysis failed');
         }
 
         const data = await response.json();
@@ -67,12 +68,17 @@ function ScanScreen() {
         sessionStorage.setItem('scioResults', JSON.stringify(data));
         sessionStorage.setItem('scioImage', base64Image);
         navigate('/results');
-      };
-    } catch (err) {
-      console.error('Error analyzing image:', err);
-      setError(t('scan.error'));
+      } catch (err) {
+        console.error('Error analyzing image:', err);
+        setError(t('scan.error') + ': ' + err.message);
+        setLoading(false);
+      }
+    };
+    
+    reader.onerror = () => {
+      setError(t('scan.error') + ': Could not read image');
       setLoading(false);
-    }
+    };
   };
 
   return (
