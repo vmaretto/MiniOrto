@@ -1,9 +1,16 @@
 // api/migrate.js
 // One-time migration to create scio_scans table
 
-const { sql } = require('@vercel/postgres');
+import { Pool } from 'pg';
 
-module.exports = async (req, res) => {
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+export default async function handler(req, res) {
   // Simple auth check
   if (req.query.key !== 'setup2026') {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -11,19 +18,19 @@ module.exports = async (req, res) => {
 
   try {
     // Create scio_scans table
-    await sql`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS scio_scans (
         id SERIAL PRIMARY KEY,
         scan_data JSONB NOT NULL,
         received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create index
-    await sql`
+    await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_scio_scans_received 
       ON scio_scans(received_at DESC)
-    `;
+    `);
 
     return res.status(200).json({
       success: true,
@@ -37,4 +44,4 @@ module.exports = async (req, res) => {
       details: error.message
     });
   }
-};
+}

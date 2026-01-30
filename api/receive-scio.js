@@ -1,10 +1,17 @@
 // api/receive-scio.js
 // Endpoint to receive SCIO scan data directly from iOS app
-// Uses Vercel Postgres for persistence across serverless invocations
+// Uses pg Pool for Postgres (Supabase/Neon compatible)
 
-const { sql } = require('@vercel/postgres');
+import { Pool } from 'pg';
 
-module.exports = async (req, res) => {
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -23,38 +30,24 @@ module.exports = async (req, res) => {
     
     console.log('[receive-scio] Received data from iOS app:', JSON.stringify(payload, null, 2));
     
-    // Validate required fields
     if (!payload) {
       return res.status(400).json({ error: 'No payload received' });
     }
 
     // Extract and normalize the data
     const scioData = {
-      // Model info
       modelName: payload.modelName || 'Unknown',
       modelType: payload.modelType || 'unknown',
-      
-      // Measured values
       value: payload.value,
       units: payload.units,
       aggregatedValue: payload.aggregatedValue,
-      
-      // Confidence
       confidence: payload.confidence,
       lowConfidence: payload.lowConfidence,
-      
-      // Food info
       foodName: payload.foodName,
-      
-      // Metadata
       timestamp: payload.timestamp,
       scanDate: payload.scanDate || new Date().toISOString(),
       source: payload.source || 'scio-ios-app',
-      
-      // Device info
       deviceInfo: payload.deviceInfo || {},
-      
-      // Nutritional data (if provided directly)
       nutrition: payload.nutrition || {
         water: payload.water,
         carbs: payload.carbs,
@@ -65,12 +58,10 @@ module.exports = async (req, res) => {
         fat: payload.fat,
         brix: payload.brix
       },
-      
-      // Received timestamp
       receivedAt: new Date().toISOString()
     };
 
-    // Clean up undefined values
+    // Clean up undefined values in nutrition
     Object.keys(scioData.nutrition).forEach(key => {
       if (scioData.nutrition[key] === undefined) {
         delete scioData.nutrition[key];
@@ -78,20 +69,20 @@ module.exports = async (req, res) => {
     });
 
     // Store in Postgres
-    await sql`
-      INSERT INTO scio_scans (scan_data, received_at)
-      VALUES (${JSON.stringify(scioData)}, NOW())
-    `;
+    await pool.query(
+      'INSERT INTO scio_scans (scan_data, received_at) VALUES ($1, NOW())',
+      [JSON.stringify(scioData)]
+    );
     
     // Clean up old scans (keep last 100)
-    await sql`
+    await pool.query(`
       DELETE FROM scio_scans 
       WHERE id NOT IN (
         SELECT id FROM scio_scans 
         ORDER BY received_at DESC 
         LIMIT 100
       )
-    `;
+    `);
 
     console.log('[receive-scio] Successfully stored scan in database');
     
@@ -102,10 +93,10 @@ module.exports = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('[receive-scio] Error processing request:', error);
+    console.error('[receive-scio] Error:', error);
     return res.status(500).json({ 
       error: 'Failed to process scan data',
       details: error.message 
     });
   }
-};
+}
