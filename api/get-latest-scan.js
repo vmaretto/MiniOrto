@@ -1,9 +1,8 @@
 // api/get-latest-scan.js
 // Returns the latest scan received for a session
+// Uses Vercel Postgres for persistence across serverless invocations
 
-// In-memory storage for recent scans (in production, use a database)
-// This is shared with receive-scio.js
-const recentScans = global.recentScans || (global.recentScans = []);
+const { sql } = require('@vercel/postgres');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,16 +20,19 @@ module.exports = async (req, res) => {
   try {
     const { session } = req.query;
     const sessionTime = parseInt(session) || 0;
+    const sessionDate = new Date(sessionTime).toISOString();
 
     // Find scans that came after the session started
-    const newScans = recentScans.filter(scan => {
-      const scanTime = new Date(scan.receivedAt).getTime();
-      return scanTime > sessionTime;
-    });
+    const result = await sql`
+      SELECT scan_data, received_at 
+      FROM scio_scans 
+      WHERE received_at > ${sessionDate}
+      ORDER BY received_at DESC
+      LIMIT 1
+    `;
 
-    if (newScans.length > 0) {
-      // Return the most recent scan
-      const latestScan = newScans[newScans.length - 1];
+    if (result.rows.length > 0) {
+      const latestScan = result.rows[0].scan_data;
       return res.status(200).json({
         found: true,
         scan: latestScan

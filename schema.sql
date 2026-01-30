@@ -29,7 +29,15 @@ INSERT INTO foods (name_it, name_en, emoji, is_reference) VALUES
 ('Peperone', 'Bell Pepper', '🫑', FALSE)
 ON CONFLICT DO NOTHING;
 
+-- Temporary scans table (for SCIO real-time polling)
+CREATE TABLE IF NOT EXISTS scio_scans (
+    id SERIAL PRIMARY KEY,
+    scan_data JSONB NOT NULL,
+    received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_participants_timestamp ON participants(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_participants_language ON participants(language);
 CREATE INDEX IF NOT EXISTS idx_foods_reference ON foods(is_reference);
+CREATE INDEX IF NOT EXISTS idx_scio_scans_received ON scio_scans(received_at DESC);

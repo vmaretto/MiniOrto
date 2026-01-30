@@ -1,10 +1,8 @@
 // api/receive-scio.js
 // Endpoint to receive SCIO scan data directly from iOS app
-// No more screenshots needed!
+// Uses Vercel Postgres for persistence across serverless invocations
 
-// In-memory storage for recent scans (shared with get-latest-scan.js)
-const recentScans = global.recentScans || (global.recentScans = []);
-const MAX_SCANS = 100; // Keep last 100 scans in memory
+const { sql } = require('@vercel/postgres');
 
 module.exports = async (req, res) => {
   // CORS headers
@@ -79,27 +77,23 @@ module.exports = async (req, res) => {
       }
     });
 
-    // Store in memory for polling
-    recentScans.push(scioData);
+    // Store in Postgres
+    await sql`
+      INSERT INTO scio_scans (scan_data, received_at)
+      VALUES (${JSON.stringify(scioData)}, NOW())
+    `;
     
-    // Keep only last MAX_SCANS
-    while (recentScans.length > MAX_SCANS) {
-      recentScans.shift();
-    }
-    
-    // TODO: Store in database (Firebase/Supabase)
-    // await db.collection('scans').add(scioData);
-    
-    // TODO: Trigger any real-time updates
-    // await notifyDashboard(scioData);
+    // Clean up old scans (keep last 100)
+    await sql`
+      DELETE FROM scio_scans 
+      WHERE id NOT IN (
+        SELECT id FROM scio_scans 
+        ORDER BY received_at DESC 
+        LIMIT 100
+      )
+    `;
 
-    // TODO: Forward to Mini-orto external API if configured
-    // if (process.env.MINIORTO_API_URL) {
-    //   await forwardToMiniOrto(scioData);
-    // }
-
-    console.log('[receive-scio] Successfully processed scan data');
-    console.log('[receive-scio] Total scans in memory:', recentScans.length);
+    console.log('[receive-scio] Successfully stored scan in database');
     
     return res.status(200).json({
       success: true,
@@ -115,5 +109,3 @@ module.exports = async (req, res) => {
     });
   }
 };
-
-// Trigger deploy Fri Jan 30 23:27:16 CET 2026
