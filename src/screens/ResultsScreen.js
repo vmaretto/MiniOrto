@@ -11,9 +11,6 @@ function ResultsScreen() {
   const [image, setImage] = useState(null);
   const [recognizedProduct, setRecognizedProduct] = useState(null);
   const [productImage, setProductImage] = useState(null);
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const storedResults = sessionStorage.getItem('scioResults');
@@ -53,40 +50,6 @@ function ResultsScreen() {
       setProductImage(storedProductImage);
     }
   }, []);
-
-  const handleSendToMiniOrto = async () => {
-    setSending(true);
-    setError(null);
-
-    try {
-      // Get profile data
-      const profileData = JSON.parse(sessionStorage.getItem('profileData') || '{}');
-      
-      // Send to Mini-orto API (placeholder endpoint)
-      const response = await fetch('/api/send-to-miniorto', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nutritionData: results,
-          profile: profileData,
-          timestamp: new Date().toISOString()
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to send data');
-      }
-
-      setSent(true);
-    } catch (err) {
-      console.error('Error sending to Mini-orto:', err);
-      setError(t('results.sendError'));
-    } finally {
-      setSending(false);
-    }
-  };
 
   const handleNewScan = () => {
     sessionStorage.removeItem('scioResults');
@@ -297,40 +260,6 @@ function ResultsScreen() {
             </div>
           )}
         </div>
-
-        {error && (
-          <div style={{
-            background: '#ffebee',
-            color: '#c62828',
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '20px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {sent ? (
-          <div style={{
-            background: '#e8f5e9',
-            color: '#2e7d32',
-            padding: '15px',
-            borderRadius: '8px',
-            marginBottom: '20px',
-            textAlign: 'center'
-          }}>
-            ✅ {t('results.sentSuccess')}
-          </div>
-        ) : (
-          <button 
-            className="btn btn-primary" 
-            onClick={handleSendToMiniOrto}
-            disabled={sending}
-            style={{ marginBottom: '10px' }}
-          >
-            {sending ? t('results.sending') : t('results.sendToMiniOrto')}
-          </button>
-        )}
 
         <button 
           className="btn btn-secondary" 
