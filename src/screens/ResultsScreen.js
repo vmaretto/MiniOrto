@@ -21,9 +21,28 @@ function ResultsScreen() {
     const storedProduct = sessionStorage.getItem('recognizedProduct');
     const storedProductImage = sessionStorage.getItem('productImage');
     
-    if (storedResults) {
+    // Also check for direct SCIO scan data
+    const directScanData = sessionStorage.getItem('scioScanData');
+    const scanMethod = sessionStorage.getItem('scanMethod');
+    
+    if (directScanData && scanMethod === 'direct') {
+      // Use direct scan data from SCIO app
+      const scanData = JSON.parse(directScanData);
+      setResults({
+        value: scanData.value,
+        units: scanData.units,
+        confidence: scanData.confidence,
+        modelName: scanData.modelName,
+        modelType: scanData.modelType,
+        aggregatedValue: scanData.aggregatedValue,
+        source: 'direct-scio',
+        scanDate: scanData.scanDate || new Date().toISOString(),
+        ...scanData.nutrition
+      });
+    } else if (storedResults) {
       setResults(JSON.parse(storedResults));
     }
+    
     if (storedImage) {
       setImage(storedImage);
     }
