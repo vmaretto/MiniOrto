@@ -2,6 +2,10 @@
 // Endpoint to receive SCIO scan data directly from iOS app
 // No more screenshots needed!
 
+// In-memory storage for recent scans (shared with get-latest-scan.js)
+const recentScans = global.recentScans || (global.recentScans = []);
+const MAX_SCANS = 100; // Keep last 100 scans in memory
+
 module.exports = async (req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -75,6 +79,14 @@ module.exports = async (req, res) => {
       }
     });
 
+    // Store in memory for polling
+    recentScans.push(scioData);
+    
+    // Keep only last MAX_SCANS
+    while (recentScans.length > MAX_SCANS) {
+      recentScans.shift();
+    }
+    
     // TODO: Store in database (Firebase/Supabase)
     // await db.collection('scans').add(scioData);
     
@@ -87,6 +99,7 @@ module.exports = async (req, res) => {
     // }
 
     console.log('[receive-scio] Successfully processed scan data');
+    console.log('[receive-scio] Total scans in memory:', recentScans.length);
     
     return res.status(200).json({
       success: true,

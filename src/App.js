@@ -15,6 +15,8 @@ import SpectrometerScreen from './screens/SpectrometerScreen';
 import ResultsScreen from './screens/ResultsScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import AdminScreen from './screens/AdminScreen';
+import ScanFlowScreen from './screens/ScanFlowScreen';
+import './screens/ScanFlowScreen.css';
 
 function App() {
   return (
@@ -30,6 +32,7 @@ function App() {
             <Route path="/results" element={<ResultsScreen />} />
             <Route path="/dashboard" element={<DashboardScreen />} />
             <Route path="/admin" element={<AdminScreen />} />
+            <Route path="/scan-flow" element={<ScanFlowScreen />} />
           </Routes>
         </main>
         <FooterSwitch />
