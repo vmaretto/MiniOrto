@@ -12,6 +12,7 @@ function SpectrometerScreen() {
   const pollIntervalRef = useRef(null);
   const countdownIntervalRef = useRef(null);
   const sessionStartRef = useRef(null);
+  const foundDataRef = useRef(false); // Prevent race condition
   
   const recognizedProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
 
@@ -37,6 +38,7 @@ function SpectrometerScreen() {
     setWaitingForScan(true);
     setCountdown(120);
     sessionStartRef.current = Date.now();
+    foundDataRef.current = false; // Reset flag
     
     // Start countdown
     countdownIntervalRef.current = setInterval(() => {
@@ -52,12 +54,18 @@ function SpectrometerScreen() {
     
     // Start polling for scan data
     pollIntervalRef.current = setInterval(async () => {
+      // Skip if we already found data (prevent race condition)
+      if (foundDataRef.current) return;
+      
       try {
         const response = await fetch(`/api/get-latest-scan?session=${sessionStartRef.current}`);
         const data = await response.json();
         
         if (data.found && data.scan) {
-          // Scan received!
+          // Mark as found immediately to prevent duplicate processing
+          foundDataRef.current = true;
+          
+          // Scan received! Stop timers first
           handleCancelWait();
           
           // Save scan data to session storage
