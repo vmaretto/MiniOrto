@@ -225,20 +225,46 @@ function ResultsScreen() {
         )}
 
         {/* Confidence indicator */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginBottom: '20px',
-          padding: '8px 12px',
-          background: results.confidence === 'high' ? '#e8f5e9' : 
-                     results.confidence === 'medium' ? '#fff3e0' : '#ffebee',
-          borderRadius: '8px',
-          fontSize: '0.85rem'
-        }}>
-          <span>{results.confidence === 'high' ? '✅' : results.confidence === 'medium' ? '⚠️' : '❓'}</span>
-          <span>{t(`results.confidence.${results.confidence}`)}</span>
-        </div>
+        {results.confidence !== undefined && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '20px',
+            padding: '8px 12px',
+            background: results.lowConfidence ? '#ffebee' : '#e8f5e9',
+            borderRadius: '8px',
+            fontSize: '0.85rem'
+          }}>
+            <span>{results.lowConfidence ? '⚠️' : '✅'}</span>
+            <span>{results.lowConfidence ? t('results.lowConfidence', 'Confidenza bassa') : t('results.goodConfidence', 'Dati affidabili')}</span>
+          </div>
+        )}
+
+        {/* SCIO Measurement Value */}
+        {results.value !== undefined && (
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '20px',
+            color: 'white',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '8px' }}>
+              🔬 {results.modelName || 'SCIO'}
+            </div>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
+              {typeof results.value === 'number' ? results.value.toFixed(2) : results.value}
+              <span style={{ fontSize: '1.2rem', marginLeft: '4px' }}>{results.units || ''}</span>
+            </div>
+            {results.modelType && (
+              <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '8px' }}>
+                {results.modelType === 'estimation' ? 'Stima' : results.modelType}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Nutritional Values */}
         <div style={{
@@ -257,6 +283,13 @@ function ResultsScreen() {
           <NutrientRow label={t('results.fat')} value={results.fat} unit="g" />
           <NutrientRow label={t('results.water')} value={results.water} unit="g" />
           {results.brix && <NutrientRow label="°Brix" value={results.brix} unit="" />}
+          
+          {/* Show message if no detailed nutrition available */}
+          {!results.calories && !results.carbs && !results.sugar && !results.protein && !results.fat && (
+            <div style={{ color: '#999', fontSize: '0.9rem', textAlign: 'center', padding: '10px' }}>
+              {t('results.noDetailedNutrition', 'Dettagli nutrizionali non disponibili per questo modello')}
+            </div>
+          )}
           
           {results.portion && (
             <div style={{ marginTop: '10px', color: '#666', fontSize: '0.85rem' }}>
