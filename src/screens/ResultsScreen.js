@@ -3,6 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+// Convert product name to slug for embed URL
+function getProductSlug(name) {
+  if (!name) return 'pomodoro-ciliegino';
+  
+  // Map common names to slugs
+  const slugMap = {
+    'pomodoro': 'pomodoro-ciliegino',
+    'pomodoro ciliegino': 'pomodoro-ciliegino',
+    'mela': 'mela',
+    'mela golden': 'mela',
+  };
+  
+  const normalized = name.toLowerCase().trim();
+  return slugMap[normalized] || normalized.replace(/\s+/g, '-');
+}
+
 function ResultsScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -260,6 +276,24 @@ function ResultsScreen() {
             </div>
           )}
         </div>
+
+        {/* Embedded Product Card */}
+        {recognizedProduct && (
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ marginBottom: '10px', color: '#333' }}>🍅 Scheda Prodotto</h3>
+            <iframe
+              src={`/embed/product/${getProductSlug(recognizedProduct.name)}${results.value ? `?sugar=${results.value.toFixed(2)}` : ''}`}
+              style={{
+                width: '100%',
+                height: '800px',
+                border: 'none',
+                borderRadius: '16px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+              }}
+              title="Scheda prodotto"
+            />
+          </div>
+        )}
 
         <button 
           className="btn btn-secondary" 
