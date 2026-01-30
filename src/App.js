@@ -6,6 +6,19 @@ import './App.css';
 
 import FooterSwitch from './components/FooterSwitch';
 
+// Import screens
+import WelcomeScreen from './screens/WelcomeScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import RecognizeScreen from './screens/RecognizeScreen';
+import ScanScreen from './screens/ScanScreen';
+import SpectrometerScreen from './screens/SpectrometerScreen';
+import ResultsScreen from './screens/ResultsScreen';
+import DashboardScreen from './screens/DashboardScreen';
+import AdminScreen from './screens/AdminScreen';
+import ScanFlowScreen from './screens/ScanFlowScreen';
+import EmbedProductScreen from './screens/EmbedProductScreen';
+import './screens/ScanFlowScreen.css';
+
 // Wrapper to conditionally show footer
 function AppContent({ children }) {
   const location = useLocation();
@@ -20,19 +33,6 @@ function AppContent({ children }) {
     </div>
   );
 }
-
-// Import screens
-import WelcomeScreen from './screens/WelcomeScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import RecognizeScreen from './screens/RecognizeScreen';
-import ScanScreen from './screens/ScanScreen';
-import SpectrometerScreen from './screens/SpectrometerScreen';
-import ResultsScreen from './screens/ResultsScreen';
-import DashboardScreen from './screens/DashboardScreen';
-import AdminScreen from './screens/AdminScreen';
-import ScanFlowScreen from './screens/ScanFlowScreen';
-import EmbedProductScreen from './screens/EmbedProductScreen';
-import './screens/ScanFlowScreen.css';
 
 function App() {
   return (
