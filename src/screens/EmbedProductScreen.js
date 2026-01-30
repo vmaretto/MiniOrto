@@ -60,7 +60,11 @@ function EmbedProductScreen() {
   const [searchParams] = useSearchParams();
   
   const measuredSugar = searchParams.get('sugar');
+  const customImage = searchParams.get('image');
   const product = products[productId] || products['pomodoro-ciliegino'];
+  
+  // Use custom image if provided, otherwise use default
+  const displayImage = customImage || product.image;
   
   // Calcola la qualità basata sullo zucchero misurato
   const getQualityIndicator = () => {
@@ -97,7 +101,7 @@ function EmbedProductScreen() {
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
       }}>
         <img 
-          src={product.image} 
+          src={displayImage} 
           alt={product.name}
           style={{
             width: '100%',

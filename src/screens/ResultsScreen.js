@@ -282,7 +282,10 @@ function ResultsScreen() {
           <div style={{ marginBottom: '20px' }}>
             <h3 style={{ marginBottom: '10px', color: '#333' }}>🍅 Scheda Prodotto</h3>
             <iframe
-              src={`/embed/product/${getProductSlug(recognizedProduct.name)}${results.value ? `?sugar=${results.value.toFixed(2)}` : ''}`}
+              src={`/embed/product/${getProductSlug(recognizedProduct.name)}?${new URLSearchParams({
+                ...(results.value && { sugar: results.value.toFixed(2) }),
+                ...(productImage && { image: productImage })
+              }).toString()}`}
               style={{
                 width: '100%',
                 height: '800px',
