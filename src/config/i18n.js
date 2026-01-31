@@ -243,7 +243,15 @@ const resources = {
       "products.apple.tip3": "🥧 Perfetta per torte e dolci",
       "products.apple.curiosity": "Una mela al giorno toglie il medico di torno: contiene pectina che aiuta la digestione!",
       "products.unknown.name": "Prodotto",
-      "products.unknown.description": "Informazioni non disponibili per questo prodotto."
+      "products.unknown.description": "Informazioni non disponibili per questo prodotto.",
+      
+      // Environmental Card
+      "environmental.title": "Impatto Ambientale",
+      "environmental.loading": "Caricamento dati ambientali...",
+      "environmental.envScore": "Punteggio Ambientale",
+      "environmental.litersPerKg": "litri/kg",
+      "environmental.approximate": "approssimativo",
+      "environmental.explanation": "Dati calcolati per 1 kg di prodotto. Fonte: SWITCH Food Explorer Database."
     }
   },
   en: {
@@ -486,7 +494,15 @@ const resources = {
       "products.apple.tip3": "🥧 Perfect for pies and desserts",
       "products.apple.curiosity": "An apple a day keeps the doctor away: it contains pectin that aids digestion!",
       "products.unknown.name": "Product",
-      "products.unknown.description": "Information not available for this product."
+      "products.unknown.description": "Information not available for this product.",
+      
+      // Environmental Card
+      "environmental.title": "Environmental Impact",
+      "environmental.loading": "Loading environmental data...",
+      "environmental.envScore": "Environmental Score",
+      "environmental.litersPerKg": "liters/kg",
+      "environmental.approximate": "approximate",
+      "environmental.explanation": "Data calculated per 1 kg of product. Source: SWITCH Food Explorer Database."
     }
   }
 };

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
+import EnvironmentalCard from '../components/EnvironmentalCard';
 
 function ResultsScreen() {
   const { t } = useTranslation();
@@ -12,6 +13,8 @@ function ResultsScreen() {
   const [image, setImage] = useState(null);
   const [recognizedProduct, setRecognizedProduct] = useState(null);
   const [productImage, setProductImage] = useState(null);
+  const [switchData, setSwitchData] = useState(null);
+  const [switchLoading, setSwitchLoading] = useState(false);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -56,6 +59,37 @@ function ResultsScreen() {
       setProductImage(storedProductImage);
     }
   }, []);
+
+  // Fetch environmental data from SWITCH API
+  useEffect(() => {
+    const fetchSwitchData = async () => {
+      if (!recognizedProduct) return;
+      
+      // Use nameEn if available, otherwise use name
+      const searchTerm = recognizedProduct.nameEn || recognizedProduct.name;
+      if (!searchTerm) return;
+      
+      setSwitchLoading(true);
+      try {
+        const response = await fetch('/api/switch-lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nameEn: searchTerm })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSwitchData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching SWITCH data:', error);
+      } finally {
+        setSwitchLoading(false);
+      }
+    };
+    
+    fetchSwitchData();
+  }, [recognizedProduct]);
 
   const handleNewScan = () => {
     sessionStorage.clear();
@@ -266,6 +300,14 @@ function ResultsScreen() {
           )}
         </div>
 
+        {/* Environmental Impact from SWITCH */}
+        {recognizedProduct && (
+          <EnvironmentalCard 
+            data={switchData} 
+            loading={switchLoading} 
+          />
+        )}
+
         {/* Product Card with details */}
         {recognizedProduct && (
           <div style={{ marginBottom: '20px' }}>
@@ -274,6 +316,7 @@ function ResultsScreen() {
               productName={recognizedProduct.name}
               measuredValue={results.value}
               productImage={productImage}
+              switchData={switchData}
             />
           </div>
         )}
