@@ -2,22 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-
-// Convert product name to slug for embed URL
-function getProductSlug(name) {
-  if (!name) return 'pomodoro-ciliegino';
-  
-  // Map common names to slugs
-  const slugMap = {
-    'pomodoro': 'pomodoro-ciliegino',
-    'pomodoro ciliegino': 'pomodoro-ciliegino',
-    'mela': 'mela',
-    'mela golden': 'mela',
-  };
-  
-  const normalized = name.toLowerCase().trim();
-  return slugMap[normalized] || normalized.replace(/\s+/g, '-');
-}
+import ProductCard from '../components/ProductCard';
 
 function ResultsScreen() {
   const { t } = useTranslation();
@@ -282,23 +267,14 @@ function ResultsScreen() {
           )}
         </div>
 
-        {/* Embedded Product Card */}
+        {/* Product Card with details */}
         {recognizedProduct && (
           <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ marginBottom: '10px', color: '#333' }}>🍅 Scheda Prodotto</h3>
-            <iframe
-              src={`/embed/product/${getProductSlug(recognizedProduct.name)}?${new URLSearchParams({
-                ...(results.value && { sugar: results.value.toFixed(2) }),
-                ...(productImage && { image: productImage })
-              }).toString()}`}
-              style={{
-                width: '100%',
-                height: '800px',
-                border: 'none',
-                borderRadius: '16px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-              }}
-              title="Scheda prodotto"
+            <h3 style={{ marginBottom: '10px', color: '#333' }}>🍅 {t('results.productCard')}</h3>
+            <ProductCard 
+              productName={recognizedProduct.name}
+              measuredValue={results.value}
+              productImage={productImage}
             />
           </div>
         )}

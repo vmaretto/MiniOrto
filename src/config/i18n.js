@@ -158,7 +158,77 @@ const resources = {
       "model.Watermelon_brix": "Anguria - Brix",
       "model.Avocado_dry_matter": "Avocado - Materia secca",
       "model.category.fruit": "Frutta",
-      "model.category.vegetable": "Verdura"
+      "model.category.vegetable": "Verdura",
+      
+      // Recognize Screen
+      "recognize.title": "Riconosci Prodotto",
+      "recognize.instructions": "Fotografa il frutto o la verdura da analizzare",
+      "recognize.tapToPhoto": "Tocca per fotografare o caricare",
+      "recognize.analyzing": "Riconoscimento in corso...",
+      "recognize.recognize": "Riconosci prodotto",
+      "recognize.uploadScreenshot": "Carica screenshot SCIO",
+      "recognize.goToScan": "Vai alla scansione",
+      "recognize.recognized": "Prodotto riconosciuto",
+      
+      // Spectrometer Screen
+      "spectrometer.title": "Scansione Spettrometro",
+      "spectrometer.productToAnalyze": "Prodotto da analizzare",
+      "spectrometer.instructions": "I dati arriveranno automaticamente, oppure fai uno screenshot",
+      "spectrometer.waitForScan": "Attendi scan diretto dall'app SCIO",
+      "spectrometer.uploadScreenshot": "Ho già lo screenshot, caricalo",
+      "spectrometer.waiting": "In attesa dello scan...",
+      "spectrometer.waitingDesc": "Apri l'app SCIO sul tuo iPhone e fai la scansione. I dati arriveranno automaticamente.",
+      "spectrometer.cancel": "Annulla",
+      "spectrometer.timeout": "Timeout: nessuno scan ricevuto. Riprova.",
+      "spectrometer.goBack": "Torna indietro",
+      
+      // Additional Results
+      "results.productCard": "Scheda Prodotto",
+      "results.scioData": "Dati SCIO",
+      "results.lowConfidence": "Confidenza bassa",
+      "results.goodConfidence": "Dati affidabili",
+      "results.noDetailedNutrition": "Dettagli nutrizionali non disponibili per questo modello",
+      
+      // Additional Scan
+      "scan.uploadScioFor": "Carica lo screenshot SCIO per questo prodotto",
+      
+      // Product Card
+      "productCard.scioMeasurement": "Misurazione SCIO",
+      "productCard.sugarContent": "Contenuto zuccherino",
+      "productCard.nutritionalValues": "Valori Nutrizionali",
+      "productCard.sugar": "Zuccheri",
+      "productCard.calories": "Calorie",
+      "productCard.water": "Acqua",
+      "productCard.fiber": "Fibre",
+      "productCard.vitaminC": "Vitamina C",
+      "productCard.seasonality": "Stagionalità",
+      "productCard.tips": "Consigli",
+      "productCard.didYouKnow": "Lo sapevi?",
+      "productCard.quality.optimal": "Ottimale",
+      "productCard.quality.belowAverage": "Sotto la media",
+      "productCard.quality.aboveAverage": "Sopra la media",
+      
+      // Products
+      "products.category.fruit": "Frutta",
+      "products.category.vegetable": "Ortaggio",
+      "products.category.other": "Altro",
+      "products.tomato.name": "Pomodoro",
+      "products.tomato.description": "Il pomodoro è un ortaggio versatile e ricco di licopene.",
+      "products.tomato.tip1": "🌡️ Conservare a temperatura ambiente per massimo sapore",
+      "products.tomato.tip2": "🚫 Evitare il frigorifero se possibile",
+      "products.tomato.tip3": "🥗 Ottimo crudo in insalate o come snack",
+      "products.tomato.tip4": "🍳 Perfetto per sughi veloci",
+      "products.tomato.curiosity": "Il licopene, responsabile del colore rosso, è un potente antiossidante che aumenta con la cottura!",
+      "products.cherryTomato.name": "Pomodoro Ciliegino",
+      "products.cherryTomato.description": "Il pomodoro ciliegino è una varietà caratterizzata da frutti piccoli e dolci.",
+      "products.apple.name": "Mela",
+      "products.apple.description": "La mela è uno dei frutti più diffusi, dal sapore dolce e leggermente acidulo.",
+      "products.apple.tip1": "❄️ Conservare in frigorifero per mantenerla croccante",
+      "products.apple.tip2": "🍯 Ottima con miele e noci",
+      "products.apple.tip3": "🥧 Perfetta per torte e dolci",
+      "products.apple.curiosity": "Una mela al giorno toglie il medico di torno: contiene pectina che aiuta la digestione!",
+      "products.unknown.name": "Prodotto",
+      "products.unknown.description": "Informazioni non disponibili per questo prodotto."
     }
   },
   en: {
@@ -316,7 +386,77 @@ const resources = {
       "model.Watermelon_brix": "Watermelon - Brix",
       "model.Avocado_dry_matter": "Avocado - Dry Matter",
       "model.category.fruit": "Fruit",
-      "model.category.vegetable": "Vegetable"
+      "model.category.vegetable": "Vegetable",
+      
+      // Recognize Screen
+      "recognize.title": "Recognize Product",
+      "recognize.instructions": "Take a photo of the fruit or vegetable to analyze",
+      "recognize.tapToPhoto": "Tap to take photo or upload",
+      "recognize.analyzing": "Recognition in progress...",
+      "recognize.recognize": "Recognize product",
+      "recognize.uploadScreenshot": "Upload SCIO screenshot",
+      "recognize.goToScan": "Go to scan",
+      "recognize.recognized": "Product recognized",
+      
+      // Spectrometer Screen
+      "spectrometer.title": "Spectrometer Scan",
+      "spectrometer.productToAnalyze": "Product to analyze",
+      "spectrometer.instructions": "Data will arrive automatically, or take a screenshot",
+      "spectrometer.waitForScan": "Wait for direct scan from SCIO app",
+      "spectrometer.uploadScreenshot": "I already have the screenshot, upload it",
+      "spectrometer.waiting": "Waiting for scan...",
+      "spectrometer.waitingDesc": "Open the SCIO app on your iPhone and scan. Data will arrive automatically.",
+      "spectrometer.cancel": "Cancel",
+      "spectrometer.timeout": "Timeout: no scan received. Try again.",
+      "spectrometer.goBack": "Go back",
+      
+      // Additional Results
+      "results.productCard": "Product Card",
+      "results.scioData": "SCIO Data",
+      "results.lowConfidence": "Low confidence",
+      "results.goodConfidence": "Reliable data",
+      "results.noDetailedNutrition": "Nutritional details not available for this model",
+      
+      // Additional Scan
+      "scan.uploadScioFor": "Upload the SCIO screenshot for this product",
+      
+      // Product Card
+      "productCard.scioMeasurement": "SCIO Measurement",
+      "productCard.sugarContent": "Sugar content",
+      "productCard.nutritionalValues": "Nutritional Values",
+      "productCard.sugar": "Sugar",
+      "productCard.calories": "Calories",
+      "productCard.water": "Water",
+      "productCard.fiber": "Fiber",
+      "productCard.vitaminC": "Vitamin C",
+      "productCard.seasonality": "Seasonality",
+      "productCard.tips": "Tips",
+      "productCard.didYouKnow": "Did you know?",
+      "productCard.quality.optimal": "Optimal",
+      "productCard.quality.belowAverage": "Below average",
+      "productCard.quality.aboveAverage": "Above average",
+      
+      // Products
+      "products.category.fruit": "Fruit",
+      "products.category.vegetable": "Vegetable",
+      "products.category.other": "Other",
+      "products.tomato.name": "Tomato",
+      "products.tomato.description": "The tomato is a versatile vegetable rich in lycopene.",
+      "products.tomato.tip1": "🌡️ Store at room temperature for best flavor",
+      "products.tomato.tip2": "🚫 Avoid refrigerator if possible",
+      "products.tomato.tip3": "🥗 Great raw in salads or as a snack",
+      "products.tomato.tip4": "🍳 Perfect for quick sauces",
+      "products.tomato.curiosity": "Lycopene, responsible for the red color, is a powerful antioxidant that increases with cooking!",
+      "products.cherryTomato.name": "Cherry Tomato",
+      "products.cherryTomato.description": "The cherry tomato is a variety characterized by small and sweet fruits.",
+      "products.apple.name": "Apple",
+      "products.apple.description": "The apple is one of the most common fruits, with a sweet and slightly tart taste.",
+      "products.apple.tip1": "❄️ Store in refrigerator to keep it crisp",
+      "products.apple.tip2": "🍯 Great with honey and nuts",
+      "products.apple.tip3": "🥧 Perfect for pies and desserts",
+      "products.apple.curiosity": "An apple a day keeps the doctor away: it contains pectin that aids digestion!",
+      "products.unknown.name": "Product",
+      "products.unknown.description": "Information not available for this product."
     }
   }
 };

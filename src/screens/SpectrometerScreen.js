@@ -109,7 +109,7 @@ function SpectrometerScreen() {
   return (
     <div className="screen">
       <div className="card">
-        <h2>🔬 {t('spectrometer.title', 'Scansione Spettrometro')}</h2>
+        <h2>🔬 {t('spectrometer.title')}</h2>
         
         {recognizedProduct.name && (
           <div style={{
@@ -125,7 +125,7 @@ function SpectrometerScreen() {
             <div>
               <strong>{recognizedProduct.name}</strong>
               <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>
-                Prodotto da analizzare
+                {t('spectrometer.productToAnalyze')}
               </p>
             </div>
           </div>
@@ -139,27 +139,9 @@ function SpectrometerScreen() {
               padding: '20px',
               marginBottom: '20px'
             }}>
-              <h3 style={{ margin: '0 0 16px 0', color: '#e65100' }}>
-                📋 {t('spectrometer.instructions', 'Istruzioni')}
-              </h3>
-              
-              <ol style={{ margin: 0, paddingLeft: '20px', color: '#666' }}>
-                <li style={{ marginBottom: '12px' }}>
-                  Assicurati che lo spettrometro <strong>SCIO</strong> sia acceso e connesso via Bluetooth
-                </li>
-                <li style={{ marginBottom: '12px' }}>
-                  Apri l'app <strong>SCIO</strong> sul tuo dispositivo
-                </li>
-                <li style={{ marginBottom: '12px' }}>
-                  Posiziona lo spettrometro sulla superficie del prodotto
-                </li>
-                <li style={{ marginBottom: '12px' }}>
-                  Esegui la scansione nell'app SCIO
-                </li>
-                <li>
-                  I dati arriveranno <strong>automaticamente</strong>, oppure fai uno screenshot
-                </li>
-              </ol>
+              <p style={{ margin: 0, color: '#666' }}>
+                {t('spectrometer.instructions')}
+              </p>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -177,7 +159,7 @@ function SpectrometerScreen() {
                   cursor: 'pointer'
                 }}
               >
-                📡 Attendi scan diretto dall'app SCIO
+                📡 {t('spectrometer.waitForScan')}
               </button>
               
               <button 
@@ -193,7 +175,7 @@ function SpectrometerScreen() {
                   cursor: 'pointer'
                 }}
               >
-                📱 {t('spectrometer.uploadScreenshot', 'Ho già lo screenshot, caricalo')}
+                📱 {t('spectrometer.uploadScreenshot')}
               </button>
               
               <button 
@@ -207,7 +189,7 @@ function SpectrometerScreen() {
                   fontSize: '0.9rem'
                 }}
               >
-                ← {t('spectrometer.back', 'Torna indietro')}
+                ← {t('spectrometer.goBack')}
               </button>
             </div>
           </>
@@ -227,12 +209,11 @@ function SpectrometerScreen() {
             }} />
             
             <h3 style={{ margin: '0 0 10px', color: '#333' }}>
-              In attesa dello scan...
+              {t('spectrometer.waiting')}
             </h3>
             
             <p style={{ color: '#666', marginBottom: '10px' }}>
-              Apri l'app SCIO sul tuo iPhone e fai la scansione.<br/>
-              I dati arriveranno automaticamente.
+              {t('spectrometer.waitingDesc')}
             </p>
             
             <p style={{ 
@@ -255,7 +236,7 @@ function SpectrometerScreen() {
                 cursor: 'pointer'
               }}
             >
-              Annulla
+              {t('spectrometer.cancel')}
             </button>
             
             <style>{`
