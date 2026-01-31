@@ -3,9 +3,77 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+// Product name translations
+const productNames = {
+  'pomodoro': { it: 'Pomodoro', en: 'Tomato' },
+  'pomodoro ciliegino': { it: 'Pomodoro ciliegino', en: 'Cherry tomato' },
+  'mela': { it: 'Mela', en: 'Apple' },
+  'mela golden': { it: 'Mela Golden', en: 'Golden Apple' },
+  'arancia': { it: 'Arancia', en: 'Orange' },
+  'limone': { it: 'Limone', en: 'Lemon' },
+  'banana': { it: 'Banana', en: 'Banana' },
+  'fragola': { it: 'Fragola', en: 'Strawberry' },
+  'uva': { it: 'Uva', en: 'Grape' },
+  'pera': { it: 'Pera', en: 'Pear' },
+  'pesca': { it: 'Pesca', en: 'Peach' },
+  'anguria': { it: 'Anguria', en: 'Watermelon' },
+  'melone': { it: 'Melone', en: 'Melon' },
+  'kiwi': { it: 'Kiwi', en: 'Kiwi' },
+  'avocado': { it: 'Avocado', en: 'Avocado' },
+  'carota': { it: 'Carota', en: 'Carrot' },
+  'zucchina': { it: 'Zucchina', en: 'Zucchini' },
+  'peperone': { it: 'Peperone', en: 'Bell pepper' },
+  'cetriolo': { it: 'Cetriolo', en: 'Cucumber' },
+  'lattuga': { it: 'Lattuga', en: 'Lettuce' },
+  'spinaci': { it: 'Spinaci', en: 'Spinach' },
+  'broccoli': { it: 'Broccoli', en: 'Broccoli' },
+  'cavolfiore': { it: 'Cavolfiore', en: 'Cauliflower' },
+  'patata': { it: 'Patata', en: 'Potato' },
+  'cipolla': { it: 'Cipolla', en: 'Onion' },
+  'aglio': { it: 'Aglio', en: 'Garlic' },
+};
+
+const categoryNames = {
+  'frutta': { it: 'frutta', en: 'fruit' },
+  'verdura': { it: 'verdura', en: 'vegetable' },
+  'ortaggio': { it: 'ortaggio', en: 'vegetable' },
+};
+
 function RecognizeScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  
+  // Helper to translate product name
+  const translateProductName = (name) => {
+    if (!name) return '';
+    const key = name.toLowerCase().trim();
+    const translation = productNames[key];
+    if (translation) {
+      return i18n.language === 'en' ? translation.en : translation.it;
+    }
+    return name; // Return original if not found
+  };
+  
+  // Helper to translate category
+  const translateCategory = (category) => {
+    if (!category) return '';
+    const key = category.toLowerCase().trim();
+    const translation = categoryNames[key];
+    if (translation) {
+      return i18n.language === 'en' ? translation.en : translation.it;
+    }
+    return category;
+  };
+  
+  // Helper to translate confidence
+  const translateConfidence = (confidence) => {
+    if (!confidence) return '';
+    const key = confidence.toLowerCase().trim();
+    if (key === 'alta' || key === 'high') return t('recognize.confidence.high');
+    if (key === 'media' || key === 'medium') return t('recognize.confidence.medium');
+    if (key === 'bassa' || key === 'low') return t('recognize.confidence.low');
+    return confidence;
+  };
   const fileInputRef = useRef(null);
   const uploadAreaRef = useRef(null);
   
@@ -62,7 +130,7 @@ function RecognizeScreen() {
 
   const handleRecognize = async () => {
     if (!image) {
-      setError(t('recognize.noImage', 'Scatta o carica una foto del prodotto'));
+      setError(t('recognize.noImage'));
       return;
     }
 
@@ -96,7 +164,7 @@ function RecognizeScreen() {
       setLoading(false);
     } catch (err) {
       console.error('Error recognizing product:', err);
-      setError(t('recognize.error', 'Errore nel riconoscimento') + ': ' + err.message);
+      setError(t('recognize.error') + ': ' + err.message);
       setLoading(false);
     }
   };
@@ -114,9 +182,9 @@ function RecognizeScreen() {
   return (
     <div className="screen">
       <div className="card">
-        <h2>📸 {t('recognize.title', 'Riconosci Prodotto')}</h2>
+        <h2>📸 {t('recognize.title')}</h2>
         <p style={{ color: '#666', marginBottom: '20px' }}>
-          {t('recognize.instructions', 'Fotografa il frutto o la verdura da analizzare')}
+          {t('recognize.instructions')}
         </p>
 
         {/* Camera/Upload Area */}
@@ -148,7 +216,7 @@ function RecognizeScreen() {
             <>
               <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📷</div>
               <p style={{ color: '#666', margin: 0 }}>
-                {t('recognize.tapToPhoto', 'Tocca per fotografare o caricare')}
+                {t('recognize.tapToPhoto')}
               </p>
             </>
           )}
@@ -175,7 +243,7 @@ function RecognizeScreen() {
               fontWeight: '500'
             }}
           >
-            🔄 {t('recognize.changePhoto', 'Cambia foto')}
+            🔄 {t('recognize.changePhoto')}
           </button>
         )}
 
@@ -206,7 +274,7 @@ function RecognizeScreen() {
             disabled={!image || loading}
             style={{ opacity: (!image || loading) ? 0.6 : 1 }}
           >
-            {loading ? t('recognize.analyzing', 'Riconoscimento in corso...') : t('recognize.recognize', 'Riconosci prodotto')}
+            {loading ? t('recognize.analyzing') : t('recognize.recognize')}
           </button>
         )}
 
@@ -214,7 +282,7 @@ function RecognizeScreen() {
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <div className="spinner"></div>
             <p style={{ color: '#666', marginTop: '10px' }}>
-              {t('recognize.processing', 'Analisi AI in corso...')}
+              {t('recognize.processing')}
             </p>
           </div>
         )}
@@ -233,16 +301,16 @@ function RecognizeScreen() {
                 {recognized.emoji || '🥬'}
               </div>
               <h3 style={{ margin: '0 0 8px 0', color: '#2e7d32' }}>
-                {recognized.name || 'Prodotto riconosciuto'}
+                {translateProductName(recognized.name) || t('recognize.recognized')}
               </h3>
               {recognized.confidence && (
                 <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
-                  Affidabilità: {recognized.confidence}
+                  {t('recognize.confidence')}: {translateConfidence(recognized.confidence)}
                 </p>
               )}
               {recognized.category && (
                 <p style={{ margin: '8px 0 0 0', color: '#888', fontSize: '0.85rem' }}>
-                  Categoria: {recognized.category}
+                  {t('recognize.category')}: {translateCategory(recognized.category)}
                 </p>
               )}
             </div>
@@ -272,11 +340,11 @@ function RecognizeScreen() {
                 fontSize: '0.9rem'
               }}
             >
-              🔄 {t('recognize.wrongProduct', 'Non è corretto? Riprova')}
+              🔄 {t('recognize.wrongProduct')}
             </button>
 
             <p style={{ textAlign: 'center', color: '#666', marginBottom: '16px' }}>
-              {t('recognize.chooseMethod', 'Come vuoi analizzare i valori nutrizionali?')}
+              {t('recognize.chooseMethod')}
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -285,7 +353,7 @@ function RecognizeScreen() {
                 onClick={() => handleScanChoice('screenshot')}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
-                📱 {t('recognize.uploadScreenshot', 'Carica screenshot SCIO')}
+                📱 {t('recognize.uploadScreenshot')}
               </button>
               
               <button 
@@ -301,7 +369,7 @@ function RecognizeScreen() {
                   color: '#4CAF50'
                 }}
               >
-                🔬 {t('recognize.startScan', 'Avvia scansione spettrometro')}
+                🔬 {t('recognize.startScan')}
               </button>
             </div>
           </div>
