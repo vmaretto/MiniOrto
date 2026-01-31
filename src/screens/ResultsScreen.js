@@ -58,9 +58,8 @@ function ResultsScreen() {
   }, []);
 
   const handleNewScan = () => {
-    sessionStorage.removeItem('scioResults');
-    sessionStorage.removeItem('scioImage');
-    navigate('/scan');
+    sessionStorage.clear();
+    navigate('/recognize');
   };
 
   const handleStartOver = () => {
@@ -88,7 +87,7 @@ function ResultsScreen() {
       <div className="screen">
         <div className="card">
           <h2>{t('results.noData')}</h2>
-          <button className="btn btn-primary" onClick={() => navigate('/scan')}>
+          <button className="btn btn-primary" onClick={() => navigate('/recognize')}>
             {t('results.goToScan')}
           </button>
         </div>

@@ -3,9 +3,50 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+// Product name translations (same as RecognizeScreen)
+const productNames = {
+  'pomodoro': { it: 'Pomodoro', en: 'Tomato' },
+  'pomodoro ciliegino': { it: 'Pomodoro ciliegino', en: 'Cherry tomato' },
+  'mela': { it: 'Mela', en: 'Apple' },
+  'mela golden': { it: 'Mela Golden', en: 'Golden Apple' },
+  'arancia': { it: 'Arancia', en: 'Orange' },
+  'limone': { it: 'Limone', en: 'Lemon' },
+  'banana': { it: 'Banana', en: 'Banana' },
+  'fragola': { it: 'Fragola', en: 'Strawberry' },
+  'uva': { it: 'Uva', en: 'Grape' },
+  'pera': { it: 'Pera', en: 'Pear' },
+  'pesca': { it: 'Pesca', en: 'Peach' },
+  'anguria': { it: 'Anguria', en: 'Watermelon' },
+  'melone': { it: 'Melone', en: 'Melon' },
+  'kiwi': { it: 'Kiwi', en: 'Kiwi' },
+  'avocado': { it: 'Avocado', en: 'Avocado' },
+  'carota': { it: 'Carota', en: 'Carrot' },
+  'zucchina': { it: 'Zucchina', en: 'Zucchini' },
+  'peperone': { it: 'Peperone', en: 'Bell pepper' },
+  'cetriolo': { it: 'Cetriolo', en: 'Cucumber' },
+  'lattuga': { it: 'Lattuga', en: 'Lettuce' },
+  'spinaci': { it: 'Spinaci', en: 'Spinach' },
+  'broccoli': { it: 'Broccoli', en: 'Broccoli' },
+  'cavolfiore': { it: 'Cavolfiore', en: 'Cauliflower' },
+  'patata': { it: 'Patata', en: 'Potato' },
+  'cipolla': { it: 'Cipolla', en: 'Onion' },
+  'aglio': { it: 'Aglio', en: 'Garlic' },
+};
+
 function ScanScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  
+  // Helper to translate product name
+  const translateProductName = (name) => {
+    if (!name) return '';
+    const key = name.toLowerCase().trim();
+    const translation = productNames[key];
+    if (translation) {
+      return i18n.language === 'en' ? translation.en : translation.it;
+    }
+    return name;
+  };
   const fileInputRef = useRef(null);
   const uploadAreaRef = useRef(null);
   
@@ -111,10 +152,10 @@ function ScanScreen() {
             <span style={{ fontSize: '2rem' }}>{recognizedProduct.emoji || '🥬'}</span>
             <div>
               <div style={{ fontWeight: 'bold', color: '#2e7d32' }}>
-                {recognizedProduct.name}
+                {translateProductName(recognizedProduct.name)}
               </div>
               <div style={{ fontSize: '0.8rem', color: '#666' }}>
-                {t('scan.uploadScioFor', 'Carica lo screenshot SCIO per questo prodotto')}
+                {t('scan.uploadScioFor')}
               </div>
             </div>
           </div>
@@ -178,7 +219,7 @@ function ScanScreen() {
               fontWeight: '500'
             }}
           >
-            🔄 {t('scan.changePhoto', 'Cambia foto')}
+            🔄 {t('scan.changePhoto')}
           </button>
         )}
 

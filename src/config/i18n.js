@@ -205,6 +205,7 @@ const resources = {
       
       // Additional Scan
       "scan.uploadScioFor": "Carica lo screenshot SCIO per questo prodotto",
+      "scan.changePhoto": "Cambia foto",
       
       // Product Card
       "productCard.scioMeasurement": "Misurazione SCIO",
@@ -447,6 +448,7 @@ const resources = {
       
       // Additional Scan
       "scan.uploadScioFor": "Upload the SCIO screenshot for this product",
+      "scan.changePhoto": "Change photo",
       
       // Product Card
       "productCard.scioMeasurement": "SCIO Measurement",
