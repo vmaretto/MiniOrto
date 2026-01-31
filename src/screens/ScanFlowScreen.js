@@ -1,25 +1,20 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Camera, Upload, Scan, BarChart3, ChevronRight, Loader2, Check, Leaf } from 'lucide-react';
 
 const SCIO_MODELS = [
-  { id: 'Apple_total_soluble_solids', name: 'Mela - Solidi solubili (Brix)', category: 'Frutta' },
-  { id: 'Tomato_brix', name: 'Pomodoro - Brix', category: 'Verdura' },
-  { id: 'Tomato_lycopene', name: 'Pomodoro - Licopene', category: 'Verdura' },
-  { id: 'Pepper_brix', name: 'Peperone - Brix', category: 'Verdura' },
-  { id: 'Grape_brix', name: 'Uva - Brix', category: 'Frutta' },
-  { id: 'Orange_brix', name: 'Arancia - Brix', category: 'Frutta' },
-  { id: 'Watermelon_brix', name: 'Anguria - Brix', category: 'Frutta' },
-  { id: 'Avocado_dry_matter', name: 'Avocado - Materia secca', category: 'Frutta' },
-];
-
-const STEPS = [
-  { id: 'photo', title: 'Foto', icon: Camera },
-  { id: 'model', title: 'Modello', icon: Scan },
-  { id: 'scan', title: 'Scansione', icon: Upload },
-  { id: 'results', title: 'Risultati', icon: BarChart3 },
+  { id: 'Apple_total_soluble_solids', category: 'fruit' },
+  { id: 'Tomato_brix', category: 'vegetable' },
+  { id: 'Tomato_lycopene', category: 'vegetable' },
+  { id: 'Pepper_brix', category: 'vegetable' },
+  { id: 'Grape_brix', category: 'fruit' },
+  { id: 'Orange_brix', category: 'fruit' },
+  { id: 'Watermelon_brix', category: 'fruit' },
+  { id: 'Avocado_dry_matter', category: 'fruit' },
 ];
 
 export default function ScanFlowScreen() {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const [photo, setPhoto] = useState(null);
   const [recognizedFood, setRecognizedFood] = useState(null);
@@ -32,6 +27,19 @@ export default function ScanFlowScreen() {
   
   const fileInputRef = useRef(null);
   const pollIntervalRef = useRef(null);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
+
+  // Steps with translated titles
+  const STEPS = [
+    { id: 'photo', title: t('scanflow.steps.photo'), icon: Camera },
+    { id: 'model', title: t('scanflow.steps.model'), icon: Scan },
+    { id: 'scan', title: t('scanflow.steps.scan'), icon: Upload },
+    { id: 'results', title: t('scanflow.steps.results'), icon: BarChart3 },
+  ];
 
   // Step 1: Handle photo upload and recognition
   const handlePhotoUpload = async (e) => {
@@ -67,7 +75,7 @@ export default function ScanFlowScreen() {
         setCurrentStep(1);
       }
     } catch (err) {
-      setError('Errore nel riconoscimento: ' + err.message);
+      setError(t('scanflow.error.recognition') + ' ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -105,7 +113,7 @@ export default function ScanFlowScreen() {
       setScanData(data);
       setCurrentStep(3);
     } catch (err) {
-      setError('Errore analisi screenshot: ' + err.message);
+      setError(t('scanflow.error.screenshot') + ' ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -141,7 +149,7 @@ export default function ScanFlowScreen() {
       if (waitingForScan) {
         clearInterval(pollIntervalRef.current);
         setWaitingForScan(false);
-        setError('Timeout: nessuno scan ricevuto. Riprova.');
+        setError(t('scanflow.scan.timeout'));
       }
     }, 120000);
   };
@@ -158,8 +166,8 @@ export default function ScanFlowScreen() {
       case 0: // Photo upload
         return (
           <div className="step-content">
-            <h2>📸 Fotografa l'alimento</h2>
-            <p>Carica una foto dell'alimento che vuoi analizzare</p>
+            <h2>{t('scanflow.photo.title')}</h2>
+            <p>{t('scanflow.photo.subtitle')}</p>
             
             <input
               type="file"
@@ -176,9 +184,9 @@ export default function ScanFlowScreen() {
               disabled={loading}
             >
               {loading ? (
-                <><Loader2 className="spin" /> Analisi in corso...</>
+                <><Loader2 className="spin" /> {t('scanflow.photo.analyzing')}</>
               ) : (
-                <><Camera /> Scatta o carica foto</>
+                <><Camera /> {t('scanflow.photo.button')}</>
               )}
             </button>
 
@@ -193,19 +201,19 @@ export default function ScanFlowScreen() {
       case 1: // Model selection
         return (
           <div className="step-content">
-            <h2>📋 Seleziona il modello SCIO</h2>
+            <h2>{t('scanflow.model.title')}</h2>
             
             {recognizedFood && (
               <div className="recognized-food">
                 <Leaf />
                 <div>
-                  <strong>Alimento riconosciuto:</strong>
+                  <strong>{t('scanflow.model.recognized')}</strong>
                   <span>{recognizedFood.name || recognizedFood.foodName}</span>
                 </div>
               </div>
             )}
 
-            <p>Scegli il modello per la misurazione:</p>
+            <p>{t('scanflow.model.choose')}</p>
             
             <div className="model-list">
               {SCIO_MODELS.map((model) => (
@@ -215,8 +223,8 @@ export default function ScanFlowScreen() {
                   onClick={() => handleSelectModel(model)}
                 >
                   <div className="model-info">
-                    <span className="model-name">{model.name}</span>
-                    <span className="model-category">{model.category}</span>
+                    <span className="model-name">{t(`model.${model.id}`)}</span>
+                    <span className="model-category">{t(`model.category.${model.category}`)}</span>
                   </div>
                   <ChevronRight />
                 </button>
@@ -228,28 +236,28 @@ export default function ScanFlowScreen() {
       case 2: // Scan options
         return (
           <div className="step-content">
-            <h2>🔬 Scansione SCIO</h2>
+            <h2>{t('scanflow.scan.title')}</h2>
             
             <div className="scan-info">
-              <p><strong>Alimento:</strong> {recognizedFood?.name || recognizedFood?.foodName}</p>
-              <p><strong>Modello:</strong> {selectedModel?.name}</p>
+              <p><strong>{t('scanflow.scan.food')}</strong> {recognizedFood?.name || recognizedFood?.foodName}</p>
+              <p><strong>{t('scanflow.scan.model')}</strong> {selectedModel ? t(`model.${selectedModel.id}`) : ''}</p>
             </div>
 
             {!waitingForScan ? (
               <div className="scan-options">
                 <div className="scan-option">
-                  <h3>📱 Scan diretto</h3>
-                  <p>Usa l'app SCIO e i dati arriveranno automaticamente</p>
+                  <h3>{t('scanflow.scan.direct.title')}</h3>
+                  <p>{t('scanflow.scan.direct.desc')}</p>
                   <button className="btn-primary" onClick={startWaitingForScan}>
-                    <Scan /> Avvia e attendi scan
+                    <Scan /> {t('scanflow.scan.direct.button')}
                   </button>
                 </div>
 
-                <div className="divider">oppure</div>
+                <div className="divider">{t('scanflow.scan.or')}</div>
 
                 <div className="scan-option">
-                  <h3>📸 Carica screenshot</h3>
-                  <p>Carica uno screenshot dall'app SCIO</p>
+                  <h3>{t('scanflow.scan.screenshot.title')}</h3>
+                  <p>{t('scanflow.scan.screenshot.desc')}</p>
                   <input
                     type="file"
                     accept="image/*"
@@ -258,17 +266,17 @@ export default function ScanFlowScreen() {
                     style={{ display: 'none' }}
                   />
                   <label htmlFor="screenshot-input" className="btn-secondary">
-                    <Upload /> Carica screenshot
+                    <Upload /> {t('scanflow.scan.screenshot.button')}
                   </label>
                 </div>
               </div>
             ) : (
               <div className="waiting-scan">
                 <Loader2 className="spin large" />
-                <h3>In attesa dello scan...</h3>
-                <p>Apri l'app SCIO sul tuo iPhone e fai la scansione.<br/>I dati arriveranno automaticamente.</p>
+                <h3>{t('scanflow.scan.waiting')}</h3>
+                <p>{t('scanflow.scan.waitingDesc')}</p>
                 <button className="btn-cancel" onClick={cancelWaiting}>
-                  Annulla
+                  {t('scanflow.scan.cancel')}
                 </button>
               </div>
             )}
@@ -278,69 +286,69 @@ export default function ScanFlowScreen() {
       case 3: // Results
         return (
           <div className="step-content">
-            <h2>📊 Risultati</h2>
+            <h2>{t('scanflow.results.title')}</h2>
             
             <div className="results-card">
               <div className="result-header">
                 <Check className="success-icon" />
-                <h3>Analisi completata!</h3>
+                <h3>{t('scanflow.results.complete')}</h3>
               </div>
 
               <div className="result-food">
                 {photo && <img src={photo} alt="Food" className="food-thumb" />}
                 <div>
                   <strong>{recognizedFood?.name || recognizedFood?.foodName}</strong>
-                  <span>{selectedModel?.name}</span>
+                  <span>{selectedModel ? t(`model.${selectedModel.id}`) : ''}</span>
                 </div>
               </div>
 
               <div className="result-values">
                 {scanData?.value && (
                   <div className="value-item main">
-                    <span className="label">Valore misurato</span>
+                    <span className="label">{t('scanflow.results.value')}</span>
                     <span className="value">{scanData.value} {scanData.units || selectedModel?.id.includes('brix') ? '°Brix' : ''}</span>
                   </div>
                 )}
                 
                 {scanData?.confidence && (
                   <div className="value-item">
-                    <span className="label">Confidenza</span>
+                    <span className="label">{t('scanflow.results.confidence')}</span>
                     <span className="value">{(scanData.confidence * 100).toFixed(0)}%</span>
                   </div>
                 )}
 
                 {scanData?.water && (
                   <div className="value-item">
-                    <span className="label">Acqua</span>
+                    <span className="label">{t('scanflow.results.water')}</span>
                     <span className="value">{scanData.water} g/100g</span>
                   </div>
                 )}
 
                 {scanData?.carbs && (
                   <div className="value-item">
-                    <span className="label">Carboidrati</span>
+                    <span className="label">{t('scanflow.results.carbs')}</span>
                     <span className="value">{scanData.carbs} g/100g</span>
                   </div>
                 )}
 
                 {scanData?.sugar && (
                   <div className="value-item">
-                    <span className="label">Zuccheri</span>
+                    <span className="label">{t('scanflow.results.sugar')}</span>
                     <span className="value">{scanData.sugar} g/100g</span>
                   </div>
                 )}
 
                 {scanData?.calories && (
                   <div className="value-item">
-                    <span className="label">Calorie</span>
+                    <span className="label">{t('scanflow.results.calories')}</span>
                     <span className="value">{scanData.calories} kcal</span>
                   </div>
                 )}
               </div>
 
               <div className="result-meta">
-                <span>📅 {new Date().toLocaleDateString('it-IT')}</span>
-                <span>🔬 {scanMethod === 'direct' ? 'Scan diretto' : 'Screenshot'}</span>
+                <span>📅 {new Date().toLocaleDateString()}</span>
+                <span>🔬 {scanMethod === 'direct' ? t('scanflow.results.scanDirect') : t('scanflow.results.scanScreenshot')}</span>
               </div>
             </div>
 
@@ -352,7 +360,7 @@ export default function ScanFlowScreen() {
               setScanData(null);
               setScanMethod(null);
             }}>
-              Nuova analisi
+              {t('scanflow.results.newScan')}
             </button>
           </div>
         );
