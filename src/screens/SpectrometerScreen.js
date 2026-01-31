@@ -16,6 +16,11 @@ function SpectrometerScreen() {
   
   const recognizedProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {

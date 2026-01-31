@@ -15,11 +15,9 @@ function RecognizeScreen() {
   const [error, setError] = useState(null);
   const [recognized, setRecognized] = useState(null);
 
-  // Scroll to upload area on mount
+  // Scroll to top on mount
   useEffect(() => {
-    if (uploadAreaRef.current) {
-      uploadAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleImageSelect = (e) => {

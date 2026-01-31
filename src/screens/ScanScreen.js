@@ -15,14 +15,12 @@ function ScanScreen() {
   const [error, setError] = useState(null);
   const [recognizedProduct, setRecognizedProduct] = useState(null);
 
-  // Load recognized product and scroll to upload area on mount
+  // Scroll to top and load recognized product on mount
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const storedProduct = sessionStorage.getItem('recognizedProduct');
     if (storedProduct) {
       setRecognizedProduct(JSON.parse(storedProduct));
-    }
-    if (uploadAreaRef.current) {
-      uploadAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, []);
 

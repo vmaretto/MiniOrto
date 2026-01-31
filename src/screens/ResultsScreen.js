@@ -28,6 +28,11 @@ function ResultsScreen() {
   const [recognizedProduct, setRecognizedProduct] = useState(null);
   const [productImage, setProductImage] = useState(null);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     const storedResults = sessionStorage.getItem('scioResults');
     const storedImage = sessionStorage.getItem('scioImage');

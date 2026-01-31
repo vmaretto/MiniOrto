@@ -1,11 +1,16 @@
 // src/screens/ProfileScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 function ProfileScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
   
   const [formData, setFormData] = useState({
     age: '',
