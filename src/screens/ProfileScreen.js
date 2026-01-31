@@ -71,16 +71,6 @@ function ProfileScreen() {
           <div className="form-group">
             <label className="form-label">{t('profile.gender')}</label>
             <div className="radio-group">
-              <label className={`radio-option ${formData.gender === 'F' ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="F"
-                  checked={formData.gender === 'F'}
-                  onChange={(e) => handleChange('gender', e.target.value)}
-                />
-                {t('profile.gender.f')}
-              </label>
               <label className={`radio-option ${formData.gender === 'M' ? 'selected' : ''}`}>
                 <input
                   type="radio"
@@ -91,6 +81,26 @@ function ProfileScreen() {
                 />
                 {t('profile.gender.m')}
               </label>
+              <label className={`radio-option ${formData.gender === 'F' ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="F"
+                  checked={formData.gender === 'F'}
+                  onChange={(e) => handleChange('gender', e.target.value)}
+                />
+                {t('profile.gender.f')}
+              </label>
+              <label className={`radio-option ${formData.gender === 'NB' ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="NB"
+                  checked={formData.gender === 'NB'}
+                  onChange={(e) => handleChange('gender', e.target.value)}
+                />
+                {t('profile.gender.nb')}
+              </label>
               <label className={`radio-option ${formData.gender === 'Other' ? 'selected' : ''}`}>
                 <input
                   type="radio"
@@ -100,6 +110,16 @@ function ProfileScreen() {
                   onChange={(e) => handleChange('gender', e.target.value)}
                 />
                 {t('profile.gender.other')}
+              </label>
+              <label className={`radio-option ${formData.gender === 'PNR' ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="PNR"
+                  checked={formData.gender === 'PNR'}
+                  onChange={(e) => handleChange('gender', e.target.value)}
+                />
+                {t('profile.gender.pnr')}
               </label>
             </div>
           </div>
