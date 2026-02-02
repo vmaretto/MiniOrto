@@ -41,7 +41,7 @@ export default function QuizScreen() {
   const [product, setProduct] = useState(null);
   const [switchData, setSwitchData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentQuestion, setCurrentQuestion] = useState(-1);
+  const [currentQuestion, setCurrentQuestion] = useState(0); // Start directly at first question
   const [answers, setAnswers] = useState({});
 
   // Carica prodotto e dati SWITCH
