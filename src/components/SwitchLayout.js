@@ -106,78 +106,109 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
         {children}
       </main>
 
-      {/* Footer */}
+      {/* Footer - Official SWITCH branding */}
       <footer style={{
         background: SWITCH_COLORS.darkBlue,
-        padding: '20px',
+        padding: '30px 20px',
         textAlign: 'center',
         marginTop: 'auto',
         width: '100%'
       }}>
+        {/* Logo */}
         <img 
           src="https://switchdiet.eu/wp-content/uploads/2023/03/H-white-logo_switch.png" 
-          alt="Switch Diet"
-          style={{ height: '32px', marginBottom: '8px' }}
+          alt="SWITCH"
+          style={{ height: '40px', marginBottom: '20px' }}
           onError={(e) => e.target.style.display = 'none'}
         />
+        
+        {/* Navigation Links - Vertical */}
         <nav style={{ 
           display: 'flex', 
-          justifyContent: 'center', 
-          gap: '20px', 
-          marginBottom: '12px',
-          flexWrap: 'wrap'
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px', 
+          marginBottom: '20px'
         }}>
-          {['FOOD HUBS', 'ABOUT', 'NEWS', 'CONTACTS'].map(item => (
+          {[
+            { label: 'FOOD HUBS', url: 'https://switchdiet.eu/food-hubs/' },
+            { label: 'ABOUT', url: 'https://switchdiet.eu/about/' },
+            { label: 'NEWS & EVENTS', url: 'https://switchdiet.eu/news/' },
+            { label: 'CONTACTS', url: 'https://switchdiet.eu/contacts/' }
+          ].map(item => (
             <a 
-              key={item}
-              href={`https://switchdiet.eu/${item.toLowerCase().replace(' ', '-')}/`}
+              key={item.label}
+              href={item.url}
               target="_blank"
               rel="noopener noreferrer"
               style={{ 
                 color: 'white', 
                 textDecoration: 'none', 
-                fontSize: '0.7rem',
-                opacity: 0.8
+                fontSize: '0.8rem',
+                fontWeight: '500'
               }}
             >
-              {item}
+              {item.label}
             </a>
           ))}
         </nav>
+
+        {/* Follow us */}
+        <p style={{ 
+          color: 'white', 
+          fontSize: '0.85rem', 
+          marginBottom: '12px',
+          fontWeight: '500'
+        }}>
+          Follow us
+        </p>
         
+        {/* Social Icons */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
-          gap: '12px',
-          marginBottom: '12px'
+          gap: '16px',
+          marginBottom: '20px',
+          fontSize: '1.4rem'
         }}>
-          {[
-            { name: 'Twitter', url: 'https://twitter.com/switchdiet' },
-            { name: 'LinkedIn', url: 'https://www.linkedin.com/company/switchdiet/' },
-            { name: 'Instagram', url: 'https://www.instagram.com/switch.diet/' }
-          ].map(social => (
-            <a 
-              key={social.name}
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ 
-                color: 'white', 
-                fontSize: '0.7rem',
-                opacity: 0.7
-              }}
-            >
-              {social.name}
-            </a>
-          ))}
+          <a href="https://twitter.com/switchdiet" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>𝕏</a>
+          <a href="https://www.linkedin.com/company/switchdiet/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>in</a>
+          <a href="https://www.instagram.com/switch.diet/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>📷</a>
+          <a href="https://www.facebook.com/SWITCHdiet" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>f</a>
+          <a href="https://www.tiktok.com/@switch.diet" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>♪</a>
+          <a href="https://www.youtube.com/@SWITCHDiet" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>▶</a>
         </div>
 
+        {/* Privacy Links */}
         <div style={{ 
           display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          marginBottom: '8px'
+          justifyContent: 'center', 
+          gap: '20px',
+          marginBottom: '20px'
         }}>
+          <a 
+            href="https://switchdiet.eu/privacy-and-cookie-policy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'white', fontSize: '0.7rem', textDecoration: 'underline' }}
+          >
+            Privacy and Cookie Policy
+          </a>
+          <a 
+            href="https://switchdiet.eu/project-privacy-policy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'white', fontSize: '0.7rem', textDecoration: 'underline' }}
+          >
+            Project Privacy Policy
+          </a>
+        </div>
+
+        {/* Divider */}
+        <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.2)', margin: '20px 0' }} />
+
+        {/* EU Badge */}
+        <div style={{ marginBottom: '12px' }}>
           <img 
             src="https://switchdiet.eu/wp-content/uploads/2023/03/EN-Funded-by-the-EU-WHITE-Outline-1024x215.png"
             alt="Funded by the European Union"
@@ -186,14 +217,37 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
           />
         </div>
 
+        {/* Project Info */}
+        <p style={{ 
+          fontSize: '0.7rem', 
+          color: 'white', 
+          margin: '0 0 8px 0',
+          fontWeight: '500'
+        }}>
+          SWITCH – Project number: 101060483
+        </p>
+        
+        <p style={{ 
+          fontSize: '0.6rem', 
+          color: 'white', 
+          opacity: 0.8,
+          margin: '0 0 12px 0'
+        }}>
+          Call: HORIZON-CL6-2021-FARM2FORK-01-15: Transition to sustainable and healthy dietary behaviour
+        </p>
+
+        {/* Full Disclaimer */}
         <p style={{ 
           fontSize: '0.55rem', 
           color: 'white', 
-          opacity: 0.5,
+          opacity: 0.6,
           margin: 0,
-          lineHeight: 1.4
+          lineHeight: 1.5,
+          maxWidth: '500px',
+          marginLeft: 'auto',
+          marginRight: 'auto'
         }}>
-          Funded by the European Union. Views expressed are those of the author(s) only.
+          Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union. Neither the European Union nor the granting authority can be held responsible for them.
         </p>
       </footer>
     </div>
