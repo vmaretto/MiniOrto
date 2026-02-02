@@ -298,6 +298,19 @@ function ResultsScreen() {
               {t('results.portion')}: {results.portion}g
             </div>
           )}
+          
+          {/* Source note for nutritional values */}
+          <div style={{ 
+            marginTop: '12px', 
+            padding: '10px', 
+            background: '#f0f7ff', 
+            borderRadius: '8px',
+            fontSize: '0.75rem', 
+            color: '#666',
+            fontStyle: 'italic'
+          }}>
+            ℹ️ {t('results.nutritionSource', 'Dati calcolati per 100g di prodotto. Fonte: SWITCH Food Explorer Database.')}
+          </div>
         </div>
 
         {/* Environmental Impact from SWITCH */}
@@ -320,6 +333,18 @@ function ResultsScreen() {
             />
           </div>
         )}
+
+        {/* Continue to Feedback button */}
+        <button 
+          className="btn btn-primary" 
+          onClick={() => navigate('/feedback')}
+          style={{ 
+            marginBottom: '10px',
+            width: '100%'
+          }}
+        >
+          ✨ {t('results.continueToFeedback', 'Continua')}
+        </button>
 
         <button 
           className="btn btn-secondary" 

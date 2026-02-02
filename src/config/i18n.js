@@ -251,7 +251,32 @@ const resources = {
       "environmental.envScore": "Punteggio Ambientale",
       "environmental.litersPerKg": "litri/kg",
       "environmental.approximate": "approssimativo",
-      "environmental.explanation": "Dati calcolati per 1 kg di prodotto. Fonte: SWITCH Food Explorer Database."
+      "environmental.explanation": "Dati calcolati per 1 kg di prodotto. Fonte: SWITCH Food Explorer Database.",
+      
+      // Results additions
+      "results.nutritionSource": "Dati calcolati per 100g di prodotto. Fonte: SWITCH Food Explorer Database.",
+      "results.continueToFeedback": "Continua",
+      
+      // Feedback Screen
+      "feedback.title": "Il tuo feedback",
+      "feedback.q1_differences": "Hai trovato differenze tra le misurazioni SCIO e i valori medi del database SWITCH?",
+      "feedback.option_yes": "Sì",
+      "feedback.option_somewhat": "In parte",
+      "feedback.option_no": "No",
+      "feedback.q2_explanation": "Come ti spieghi queste differenze?",
+      "feedback.explanation_placeholder": "Es. varietà del prodotto, maturazione, provenienza...",
+      "feedback.q3_spectrometer": "Quanto hai trovato utile usare lo spettrometro?",
+      "feedback.not_useful": "Per niente",
+      "feedback.very_useful": "Molto utile",
+      "feedback.q4_rating": "Come valuti complessivamente l'esperienza?",
+      "feedback.q5_comments": "Commenti o suggerimenti (opzionale)",
+      "feedback.comments_placeholder": "Scrivi qui le tue osservazioni...",
+      "feedback.submit": "Invia feedback",
+      "feedback.submitting": "Invio in corso...",
+      "feedback.skip": "Salta",
+      "feedback.pleaseRate": "Per favore, dai una valutazione con le stelle",
+      "feedback.thankYou": "Grazie!",
+      "feedback.thankYouMessage": "Il tuo feedback è prezioso per migliorare l'esperienza."
     }
   },
   en: {
@@ -502,7 +527,32 @@ const resources = {
       "environmental.envScore": "Environmental Score",
       "environmental.litersPerKg": "liters/kg",
       "environmental.approximate": "approximate",
-      "environmental.explanation": "Data calculated per 1 kg of product. Source: SWITCH Food Explorer Database."
+      "environmental.explanation": "Data calculated per 1 kg of product. Source: SWITCH Food Explorer Database.",
+      
+      // Results additions
+      "results.nutritionSource": "Data calculated per 100g of product. Source: SWITCH Food Explorer Database.",
+      "results.continueToFeedback": "Continue",
+      
+      // Feedback Screen
+      "feedback.title": "Your Feedback",
+      "feedback.q1_differences": "Did you find differences between SCIO measurements and SWITCH database average values?",
+      "feedback.option_yes": "Yes",
+      "feedback.option_somewhat": "Somewhat",
+      "feedback.option_no": "No",
+      "feedback.q2_explanation": "How do you explain these differences?",
+      "feedback.explanation_placeholder": "E.g. product variety, ripeness, origin...",
+      "feedback.q3_spectrometer": "How useful did you find using the spectrometer?",
+      "feedback.not_useful": "Not at all",
+      "feedback.very_useful": "Very useful",
+      "feedback.q4_rating": "How do you rate the overall experience?",
+      "feedback.q5_comments": "Comments or suggestions (optional)",
+      "feedback.comments_placeholder": "Write your observations here...",
+      "feedback.submit": "Submit feedback",
+      "feedback.submitting": "Submitting...",
+      "feedback.skip": "Skip",
+      "feedback.pleaseRate": "Please give a star rating",
+      "feedback.thankYou": "Thank you!",
+      "feedback.thankYouMessage": "Your feedback is valuable to improve the experience."
     }
   }
 };

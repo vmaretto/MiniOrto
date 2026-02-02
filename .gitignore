@@ -27,3 +27,5 @@ yarn-error.log*
 .firebaserc
 firebase-debug.log
 firestore-debug.log
+.vercel
+.env*.local

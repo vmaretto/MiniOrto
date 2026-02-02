@@ -17,12 +17,22 @@ import DashboardScreen from './screens/DashboardScreen';
 import AdminScreen from './screens/AdminScreen';
 import ScanFlowScreen from './screens/ScanFlowScreen';
 import EmbedProductScreen from './screens/EmbedProductScreen';
+import FeedbackScreen from './screens/FeedbackScreen';
 import './screens/ScanFlowScreen.css';
+import { initGA, trackPageView } from './utils/analytics';
 
-// Wrapper to conditionally show footer
+// Initialize analytics on app load
+initGA();
+
+// Wrapper to conditionally show footer and track page views
 function AppContent({ children }) {
   const location = useLocation();
   const isEmbed = location.pathname.startsWith('/embed');
+  
+  // Track page views
+  React.useEffect(() => {
+    trackPageView(location.pathname, document.title);
+  }, [location.pathname]);
   
   return (
     <div className="App">
@@ -48,6 +58,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardScreen />} />
           <Route path="/admin" element={<AdminScreen />} />
           <Route path="/scan-flow" element={<ScanFlowScreen />} />
+          <Route path="/feedback" element={<FeedbackScreen />} />
           <Route path="/embed/product/:productId" element={<EmbedProductScreen />} />
         </Routes>
       </AppContent>
