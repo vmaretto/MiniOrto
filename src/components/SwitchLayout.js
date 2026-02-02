@@ -106,148 +106,100 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
         {children}
       </main>
 
-      {/* Footer - Official SWITCH branding */}
+      {/* Footer - Compact SWITCH branding */}
       <footer style={{
         background: SWITCH_COLORS.darkBlue,
-        padding: '30px 20px',
+        padding: '20px',
         textAlign: 'center',
         marginTop: 'auto',
         width: '100%'
       }}>
-        {/* Logo */}
-        <img 
-          src="https://switchdiet.eu/wp-content/uploads/2023/03/H-white-logo_switch.png" 
-          alt="SWITCH"
-          style={{ height: '40px', marginBottom: '20px' }}
-          onError={(e) => e.target.style.display = 'none'}
-        />
-        
-        {/* Navigation Links - Vertical */}
-        <nav style={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '8px', 
-          marginBottom: '20px'
-        }}>
-          {[
-            { label: 'FOOD HUBS', url: 'https://switchdiet.eu/food-hubs/' },
-            { label: 'ABOUT', url: 'https://switchdiet.eu/about/' },
-            { label: 'NEWS & EVENTS', url: 'https://switchdiet.eu/news/' },
-            { label: 'CONTACTS', url: 'https://switchdiet.eu/contacts/' }
-          ].map(item => (
-            <a 
-              key={item.label}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ 
-                color: 'white', 
-                textDecoration: 'none', 
-                fontSize: '0.8rem',
-                fontWeight: '500'
-              }}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-
-        {/* Follow us */}
-        <p style={{ 
-          color: 'white', 
-          fontSize: '0.85rem', 
-          marginBottom: '12px',
-          fontWeight: '500'
-        }}>
-          Follow us
-        </p>
-        
-        {/* Social Icons */}
+        {/* Row 1: Logo + Nav Links (horizontal) */}
         <div style={{ 
           display: 'flex', 
-          justifyContent: 'center', 
-          gap: '16px',
-          marginBottom: '20px',
-          fontSize: '1.4rem'
-        }}>
-          <a href="https://twitter.com/switchdiet" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>𝕏</a>
-          <a href="https://www.linkedin.com/company/switchdiet/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>in</a>
-          <a href="https://www.instagram.com/switch.diet/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>📷</a>
-          <a href="https://www.facebook.com/SWITCHdiet" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>f</a>
-          <a href="https://www.tiktok.com/@switch.diet" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>♪</a>
-          <a href="https://www.youtube.com/@SWITCHDiet" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>▶</a>
-        </div>
-
-        {/* Privacy Links */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          flexWrap: 'wrap',
           gap: '20px',
-          marginBottom: '20px'
+          marginBottom: '12px'
         }}>
-          <a 
-            href="https://switchdiet.eu/privacy-and-cookie-policy/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'white', fontSize: '0.7rem', textDecoration: 'underline' }}
-          >
-            Privacy and Cookie Policy
-          </a>
-          <a 
-            href="https://switchdiet.eu/project-privacy-policy/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'white', fontSize: '0.7rem', textDecoration: 'underline' }}
-          >
-            Project Privacy Policy
-          </a>
-        </div>
-
-        {/* Divider */}
-        <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.2)', margin: '20px 0' }} />
-
-        {/* EU Badge */}
-        <div style={{ marginBottom: '12px' }}>
           <img 
-            src="https://switchdiet.eu/wp-content/uploads/2023/03/EN-Funded-by-the-EU-WHITE-Outline-1024x215.png"
-            alt="Funded by the European Union"
-            style={{ height: '40px' }}
+            src="https://switchdiet.eu/wp-content/uploads/2023/03/H-white-logo_switch.png" 
+            alt="SWITCH"
+            style={{ height: '28px' }}
             onError={(e) => e.target.style.display = 'none'}
           />
+          <nav style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {[
+              { label: 'Food Hubs', url: 'https://switchdiet.eu/discover-our-food-hubs/' },
+              { label: 'About', url: 'https://switchdiet.eu/about-switch-project/' },
+              { label: 'News', url: 'https://switchdiet.eu/news-and-events/' },
+              { label: 'Contact', url: 'https://switchdiet.eu/contact/' }
+            ].map(item => (
+              <a 
+                key={item.label}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'white', textDecoration: 'none', fontSize: '0.75rem', opacity: 0.9 }}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
         </div>
 
-        {/* Project Info */}
-        <p style={{ 
-          fontSize: '0.7rem', 
-          color: 'white', 
-          margin: '0 0 8px 0',
-          fontWeight: '500'
+        {/* Row 2: Social + Privacy (horizontal) */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
+          marginBottom: '12px'
         }}>
-          SWITCH – Project number: 101060483
-        </p>
-        
-        <p style={{ 
-          fontSize: '0.6rem', 
-          color: 'white', 
-          opacity: 0.8,
-          margin: '0 0 12px 0'
-        }}>
-          Call: HORIZON-CL6-2021-FARM2FORK-01-15: Transition to sustainable and healthy dietary behaviour
-        </p>
+          <div style={{ display: 'flex', gap: '12px', fontSize: '1rem' }}>
+            <a href="https://twitter.com/switchdiet" target="_blank" rel="noopener noreferrer" style={{ color: 'white', opacity: 0.8 }}>𝕏</a>
+            <a href="https://www.linkedin.com/company/switchdiet/" target="_blank" rel="noopener noreferrer" style={{ color: 'white', opacity: 0.8 }}>in</a>
+            <a href="https://www.instagram.com/switch.diet/" target="_blank" rel="noopener noreferrer" style={{ color: 'white', opacity: 0.8 }}>📷</a>
+            <a href="https://www.youtube.com/@SWITCHDiet" target="_blank" rel="noopener noreferrer" style={{ color: 'white', opacity: 0.8 }}>▶</a>
+          </div>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>|</span>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <a href="https://switchdiet.eu/privacy-policy/" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: '0.65rem', opacity: 0.7 }}>Privacy Policy</a>
+            <a href="https://switchdiet.eu/project-privacy-policy/" target="_blank" rel="noopener noreferrer" style={{ color: 'white', fontSize: '0.65rem', opacity: 0.7 }}>Project Privacy</a>
+          </div>
+        </div>
 
-        {/* Full Disclaimer */}
-        <p style={{ 
-          fontSize: '0.55rem', 
-          color: 'white', 
-          opacity: 0.6,
-          margin: 0,
-          lineHeight: 1.5,
-          maxWidth: '500px',
-          marginLeft: 'auto',
-          marginRight: 'auto'
+        {/* Row 3: EU Badge + Project info (horizontal) */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
+          marginBottom: '8px'
         }}>
-          Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union. Neither the European Union nor the granting authority can be held responsible for them.
+          <img 
+            src="https://switchdiet.eu/wp-content/uploads/2023/03/EN-Funded-by-the-EU-WHITE-Outline-1024x215.png"
+            alt="Funded by EU"
+            style={{ height: '28px' }}
+            onError={(e) => e.target.style.display = 'none'}
+          />
+          <span style={{ fontSize: '0.6rem', color: 'white', opacity: 0.7 }}>
+            SWITCH Project 101060483 | HORIZON-FARM2FORK
+          </span>
+        </div>
+
+        {/* Row 4: Disclaimer (compact) */}
+        <p style={{ 
+          fontSize: '0.5rem', 
+          color: 'white', 
+          opacity: 0.5,
+          margin: 0,
+          lineHeight: 1.4
+        }}>
+          Funded by the EU. Views expressed are those of the author(s) only.
         </p>
       </footer>
     </div>
