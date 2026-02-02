@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { trackEvent } from '../utils/analytics';
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
+import GlobalProgress from '../components/GlobalProgress';
 
 function FeedbackScreen() {
   const { t, i18n } = useTranslation();
@@ -49,7 +50,7 @@ function FeedbackScreen() {
       const recognizedProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
       const scanMethod = sessionStorage.getItem('scanMethod') || 'unknown';
       const profileData = JSON.parse(sessionStorage.getItem('profileData') || '{}');
-      const quizResults = JSON.parse(sessionStorage.getItem('quizResults') || 'null');
+      const quizResults = JSON.parse(sessionStorage.getItem('quizAnswers') || 'null');
 
       // Timeout di 10 secondi per l'invio
       const controller = new AbortController();
@@ -127,6 +128,7 @@ function FeedbackScreen() {
         title={language === 'it' ? 'Grazie!' : 'Thank You!'} 
         subtitle={language === 'it' ? 'Il tuo feedback è stato registrato' : 'Your feedback has been recorded'}
       >
+        <GlobalProgress currentStep="feedback" language={language} />
         <div style={{ textAlign: 'center', padding: '20px 0' }}>
           <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🎉</div>
           <h2 style={{ color: SWITCH_COLORS.green, marginBottom: '16px' }}>
@@ -197,6 +199,8 @@ function FeedbackScreen() {
       subtitle={language === 'it' ? 'Aiutaci a migliorare' : 'Help us improve'}
       compact={true}
     >
+      <GlobalProgress currentStep="feedback" language={language} />
+      
       {/* Question 1: Found differences? */}
       <div style={{ marginBottom: '24px' }}>
         <label style={{ 

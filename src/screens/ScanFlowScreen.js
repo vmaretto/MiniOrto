@@ -1,27 +1,30 @@
 // src/screens/ScanFlowScreen.js
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Camera, Upload, Scan, BarChart3, ChevronRight, Loader2, Check, Leaf } from 'lucide-react';
+import { Upload, Scan, BarChart3, ChevronRight, Loader2, Check, Leaf } from 'lucide-react';
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
+import GlobalProgress from '../components/GlobalProgress';
 
 const SCIO_MODELS = [
-  { id: 'Apple_total_soluble_solids', category: 'fruit' },
-  { id: 'Tomato_brix', category: 'vegetable' },
-  { id: 'Tomato_lycopene', category: 'vegetable' },
-  { id: 'Pepper_brix', category: 'vegetable' },
-  { id: 'Grape_brix', category: 'fruit' },
-  { id: 'Orange_brix', category: 'fruit' },
-  { id: 'Watermelon_brix', category: 'fruit' },
-  { id: 'Avocado_dry_matter', category: 'fruit' },
+  { id: 'Apple_total_soluble_solids', category: 'fruit', match: ['mela', 'apple'] },
+  { id: 'Tomato_brix', category: 'vegetable', match: ['pomodoro', 'tomato'] },
+  { id: 'Tomato_lycopene', category: 'vegetable', match: ['pomodoro', 'tomato'] },
+  { id: 'Pepper_brix', category: 'vegetable', match: ['peperone', 'pepper'] },
+  { id: 'Grape_brix', category: 'fruit', match: ['uva', 'grape'] },
+  { id: 'Orange_brix', category: 'fruit', match: ['arancia', 'orange'] },
+  { id: 'Watermelon_brix', category: 'fruit', match: ['anguria', 'watermelon'] },
+  { id: 'Avocado_dry_matter', category: 'fruit', match: ['avocado'] },
 ];
 
 export default function ScanFlowScreen() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const language = i18n.language || 'it';
   
-  const [currentStep, setCurrentStep] = useState(0);
-  const [photo, setPhoto] = useState(null);
+  const [currentStep, setCurrentStep] = useState(0); // 0: select model, 1: scan, 2: done
   const [recognizedFood, setRecognizedFood] = useState(null);
+  const [productImage, setProductImage] = useState(null);
   const [selectedModel, setSelectedModel] = useState(null);
   const [scanMethod, setScanMethod] = useState(null);
   const [scanData, setScanData] = useState(null);
@@ -29,60 +32,47 @@ export default function ScanFlowScreen() {
   const [error, setError] = useState(null);
   const [waitingForScan, setWaitingForScan] = useState(false);
   
-  const fileInputRef = useRef(null);
   const pollIntervalRef = useRef(null);
+
+  // Carica dati prodotto riconosciuto
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    const storedProduct = sessionStorage.getItem('recognizedProduct');
+    const storedImage = sessionStorage.getItem('productImage');
+    
+    if (!storedProduct) {
+      navigate('/recognize');
+      return;
+    }
+    
+    setRecognizedFood(JSON.parse(storedProduct));
+    if (storedImage) setProductImage(storedImage);
+    
+    // Auto-select best model based on product name
+    const product = JSON.parse(storedProduct);
+    const productName = (product.name || '').toLowerCase();
+    const matchedModel = SCIO_MODELS.find(m => 
+      m.match.some(keyword => productName.includes(keyword))
+    );
+    if (matchedModel) {
+      setSelectedModel(matchedModel);
+    }
+  }, [navigate]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStep]);
 
   const STEPS = [
-    { id: 'photo', title: t('scanflow.steps.photo'), icon: Camera },
-    { id: 'model', title: t('scanflow.steps.model'), icon: Scan },
-    { id: 'scan', title: t('scanflow.steps.scan'), icon: Upload },
-    { id: 'results', title: t('scanflow.steps.results'), icon: BarChart3 },
+    { id: 'model', title: t('scanflow.steps.model'), icon: BarChart3 },
+    { id: 'scan', title: t('scanflow.steps.scan'), icon: Scan },
+    { id: 'done', title: t('scanflow.steps.results'), icon: Check },
   ];
-
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const base64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-      });
-
-      setPhoto(base64);
-
-      const response = await fetch('/api/recognize-product', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64 }),
-      });
-
-      const data = await response.json();
-      
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setRecognizedFood(data);
-        setCurrentStep(1);
-      }
-    } catch (err) {
-      setError(t('scanflow.error.recognition') + ' ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSelectModel = (model) => {
     setSelectedModel(model);
-    setCurrentStep(2);
+    setCurrentStep(1);
   };
 
   const handleScreenshotUpload = async (e) => {
@@ -107,7 +97,13 @@ export default function ScanFlowScreen() {
 
       const data = await response.json();
       setScanData(data);
-      setCurrentStep(3);
+      
+      // Salva i dati SCIO in sessionStorage
+      sessionStorage.setItem('scioResults', JSON.stringify(data));
+      sessionStorage.setItem('scioImage', base64);
+      sessionStorage.setItem('scanMethod', 'screenshot');
+      
+      setCurrentStep(2);
     } catch (err) {
       setError(t('scanflow.error.screenshot') + ' ' + err.message);
     } finally {
@@ -131,7 +127,12 @@ export default function ScanFlowScreen() {
           clearInterval(pollIntervalRef.current);
           setWaitingForScan(false);
           setScanData(data.scan);
-          setCurrentStep(3);
+          
+          // Salva i dati SCIO
+          sessionStorage.setItem('scioScanData', JSON.stringify(data.scan));
+          sessionStorage.setItem('scanMethod', 'direct');
+          
+          setCurrentStep(2);
         }
       } catch (err) {
         console.error('Poll error:', err);
@@ -153,12 +154,15 @@ export default function ScanFlowScreen() {
     setScanMethod(null);
   };
 
+  const handleContinueToResults = () => {
+    navigate('/results');
+  };
+
   const getStepTitle = () => {
     switch (currentStep) {
-      case 0: return language === 'it' ? 'Fotografa il prodotto' : 'Take a photo';
-      case 1: return language === 'it' ? 'Seleziona modello' : 'Select model';
-      case 2: return language === 'it' ? 'Scansiona' : 'Scan';
-      case 3: return language === 'it' ? 'Risultati' : 'Results';
+      case 0: return language === 'it' ? 'Seleziona modello SCIO' : 'Select SCIO model';
+      case 1: return language === 'it' ? 'Scansiona con SCIO' : 'Scan with SCIO';
+      case 2: return language === 'it' ? 'Scansione completata!' : 'Scan complete!';
       default: return 'Scan Flow';
     }
   };
@@ -166,59 +170,6 @@ export default function ScanFlowScreen() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return (
-          <>
-            <p style={{ color: '#666', marginBottom: '20px', textAlign: 'center' }}>
-              {t('scanflow.photo.subtitle')}
-            </p>
-            
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handlePhotoUpload}
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-            />
-            
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                border: `3px dashed ${SWITCH_COLORS.gold}`,
-                borderRadius: '16px',
-                padding: '60px 20px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                backgroundColor: SWITCH_COLORS.lightBg,
-                marginBottom: '20px'
-              }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={48} color={SWITCH_COLORS.gold} style={{ animation: 'spin 1s linear infinite' }} />
-                  <p style={{ color: SWITCH_COLORS.darkBlue, marginTop: '12px' }}>{t('scanflow.photo.analyzing')}</p>
-                </>
-              ) : (
-                <>
-                  <Camera size={48} color={SWITCH_COLORS.gold} />
-                  <p style={{ color: SWITCH_COLORS.darkBlue, marginTop: '12px', fontWeight: '500' }}>
-                    {t('scanflow.photo.button')}
-                  </p>
-                </>
-              )}
-            </div>
-
-            {photo && (
-              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <img src={photo} alt="Preview" style={{ maxWidth: '200px', borderRadius: '12px' }} />
-              </div>
-            )}
-            
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          </>
-        );
-
-      case 1:
         return (
           <>
             {recognizedFood && (
@@ -232,10 +183,16 @@ export default function ScanFlowScreen() {
                 gap: '12px',
                 border: `2px solid ${SWITCH_COLORS.gold}`
               }}>
-                <Leaf size={24} color={SWITCH_COLORS.green} />
+                {productImage ? (
+                  <img src={productImage} alt={recognizedFood.name} style={{
+                    width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover'
+                  }} />
+                ) : (
+                  <div style={{ fontSize: '2rem' }}>{recognizedFood.emoji || '🥬'}</div>
+                )}
                 <div>
                   <strong style={{ color: SWITCH_COLORS.darkBlue }}>{t('scanflow.model.recognized')}</strong>
-                  <div style={{ color: '#666' }}>{recognizedFood.name || recognizedFood.foodName}</div>
+                  <div style={{ color: '#666' }}>{recognizedFood.name}</div>
                 </div>
               </div>
             )}
@@ -274,7 +231,7 @@ export default function ScanFlowScreen() {
           </>
         );
 
-      case 2:
+      case 1:
         return (
           <>
             <div style={{
@@ -283,7 +240,7 @@ export default function ScanFlowScreen() {
               padding: '16px',
               marginBottom: '20px'
             }}>
-              <p style={{ margin: 0 }}><strong>{t('scanflow.scan.food')}</strong> {recognizedFood?.name || recognizedFood?.foodName}</p>
+              <p style={{ margin: 0 }}><strong>{t('scanflow.scan.food')}</strong> {recognizedFood?.name}</p>
               <p style={{ margin: '8px 0 0' }}><strong>{t('scanflow.scan.model')}</strong> {selectedModel ? t(`model.${selectedModel.id}`) : ''}</p>
             </div>
 
@@ -361,10 +318,17 @@ export default function ScanFlowScreen() {
                 </button>
               </div>
             )}
+
+            {loading && (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <Loader2 size={32} color={SWITCH_COLORS.gold} style={{ animation: 'spin 1s linear infinite' }} />
+                <p style={{ color: '#666', marginTop: '8px' }}>{language === 'it' ? 'Analisi in corso...' : 'Analyzing...'}</p>
+              </div>
+            )}
           </>
         );
 
-      case 3:
+      case 2:
         return (
           <>
             <div style={{
@@ -387,13 +351,14 @@ export default function ScanFlowScreen() {
               background: SWITCH_COLORS.lightBg,
               borderRadius: '12px'
             }}>
-              {photo && <img src={photo} alt="Food" style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover' }} />}
+              {productImage && <img src={productImage} alt="Food" style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover' }} />}
               <div>
-                <strong style={{ color: SWITCH_COLORS.darkBlue }}>{recognizedFood?.name || recognizedFood?.foodName}</strong>
+                <strong style={{ color: SWITCH_COLORS.darkBlue }}>{recognizedFood?.name}</strong>
                 <div style={{ fontSize: '0.85rem', color: '#666' }}>{selectedModel ? t(`model.${selectedModel.id}`) : ''}</div>
               </div>
             </div>
 
+            {/* Preview dati scansione */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               {scanData?.value && (
                 <div style={{
@@ -409,57 +374,10 @@ export default function ScanFlowScreen() {
                   </div>
                 </div>
               )}
-              
-              {scanData?.confidence && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: SWITCH_COLORS.lightBg, borderRadius: '8px' }}>
-                  <span style={{ color: '#666' }}>{t('scanflow.results.confidence')}</span>
-                  <strong style={{ color: SWITCH_COLORS.darkBlue }}>{(scanData.confidence * 100).toFixed(0)}%</strong>
-                </div>
-              )}
-
-              {scanData?.water && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: SWITCH_COLORS.lightBg, borderRadius: '8px' }}>
-                  <span style={{ color: '#666' }}>{t('scanflow.results.water')}</span>
-                  <strong style={{ color: SWITCH_COLORS.darkBlue }}>{scanData.water} g/100g</strong>
-                </div>
-              )}
-
-              {scanData?.carbs && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: SWITCH_COLORS.lightBg, borderRadius: '8px' }}>
-                  <span style={{ color: '#666' }}>{t('scanflow.results.carbs')}</span>
-                  <strong style={{ color: SWITCH_COLORS.darkBlue }}>{scanData.carbs} g/100g</strong>
-                </div>
-              )}
-
-              {scanData?.sugar && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: SWITCH_COLORS.lightBg, borderRadius: '8px' }}>
-                  <span style={{ color: '#666' }}>{t('scanflow.results.sugar')}</span>
-                  <strong style={{ color: SWITCH_COLORS.darkBlue }}>{scanData.sugar} g/100g</strong>
-                </div>
-              )}
-
-              {scanData?.calories && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: SWITCH_COLORS.lightBg, borderRadius: '8px' }}>
-                  <span style={{ color: '#666' }}>{t('scanflow.results.calories')}</span>
-                  <strong style={{ color: SWITCH_COLORS.darkBlue }}>{scanData.calories} kcal</strong>
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: '20px', fontSize: '0.85rem', color: '#666' }}>
-              <span>📅 {new Date().toLocaleDateString()}</span>
-              <span>🔬 {scanMethod === 'direct' ? t('scanflow.results.scanDirect') : t('scanflow.results.scanScreenshot')}</span>
             </div>
 
             <button
-              onClick={() => {
-                setCurrentStep(0);
-                setPhoto(null);
-                setRecognizedFood(null);
-                setSelectedModel(null);
-                setScanData(null);
-                setScanMethod(null);
-              }}
+              onClick={handleContinueToResults}
               style={{
                 width: '100%',
                 padding: '16px',
@@ -469,10 +387,16 @@ export default function ScanFlowScreen() {
                 borderRadius: '12px',
                 cursor: 'pointer',
                 fontWeight: '600',
-                fontSize: '1rem'
+                fontSize: '1.1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: `0 4px 12px ${SWITCH_COLORS.green}50`
               }}
             >
-              {t('scanflow.results.newScan')}
+              📊 {language === 'it' ? 'Confronta i risultati' : 'Compare results'}
+              <ChevronRight size={20} />
             </button>
           </>
         );
@@ -484,11 +408,13 @@ export default function ScanFlowScreen() {
 
   return (
     <SwitchLayout
-      title={getStepTitle()}
+      title={`🔬 ${getStepTitle()}`}
       subtitle={`${language === 'it' ? 'Passo' : 'Step'} ${currentStep + 1}/${STEPS.length}`}
       compact={true}
     >
-      {/* Progress bar */}
+      <GlobalProgress currentStep="scan" language={language} />
+
+      {/* Progress bar interna */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
         {STEPS.map((step, index) => (
           <div 
@@ -528,6 +454,8 @@ export default function ScanFlowScreen() {
 
       {/* Step content */}
       {renderStepContent()}
+      
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </SwitchLayout>
   );
 }

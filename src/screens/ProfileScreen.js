@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
+import GlobalProgress from '../components/GlobalProgress';
 
 function ProfileScreen() {
   const { t, i18n } = useTranslation();
@@ -83,6 +84,8 @@ function ProfileScreen() {
       subtitle={language === 'it' ? 'Raccontaci di te' : 'Tell us about yourself'}
       compact={true}
     >
+      <GlobalProgress currentStep="profile" language={language} />
+      
       <form onSubmit={handleSubmit}>
         {/* Age */}
         <div style={{ marginBottom: '20px' }}>

@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
+import GlobalProgress from '../components/GlobalProgress';
 
 // Product name translations
 const productNames = {
@@ -164,13 +165,9 @@ function RecognizeScreen() {
     }
   };
 
-  const handleScanChoice = (method) => {
-    sessionStorage.setItem('scanMethod', method);
-    if (method === 'screenshot') {
-      navigate('/scan');
-    } else {
-      navigate('/scan-spectrometer');
-    }
+  // Nuovo flusso: dopo riconoscimento → quiz
+  const handleContinueToQuiz = () => {
+    navigate('/quiz');
   };
 
   return (
@@ -179,6 +176,8 @@ function RecognizeScreen() {
       subtitle={language === 'it' ? 'Fotografa il tuo prodotto' : 'Take a photo of your product'}
       compact={true}
     >
+      <GlobalProgress currentStep="recognize" language={language} />
+
       <p style={{ color: '#666', marginBottom: '20px', textAlign: 'center' }}>
         {t('recognize.instructions')}
       </p>
@@ -358,53 +357,28 @@ function RecognizeScreen() {
             🔄 {t('recognize.wrongProduct')}
           </button>
 
-          <p style={{ textAlign: 'center', color: '#666', marginBottom: '16px' }}>
-            {t('recognize.chooseMethod')}
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <button 
-              onClick={() => handleScanChoice('screenshot')}
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                gap: '8px',
-                width: '100%',
-                padding: '16px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: 'white',
-                background: SWITCH_COLORS.green,
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              📱 {t('recognize.uploadScreenshot')}
-            </button>
-            
-            <button 
-              onClick={() => handleScanChoice('spectrometer')}
-              style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                gap: '8px',
-                width: '100%',
-                padding: '16px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                background: '#fff',
-                border: `2px solid ${SWITCH_COLORS.green}`,
-                color: SWITCH_COLORS.green,
-                borderRadius: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              🔬 {t('recognize.startScan')}
-            </button>
-          </div>
+          {/* Nuovo: pulsante singolo per andare al quiz */}
+          <button 
+            onClick={handleContinueToQuiz}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '8px',
+              width: '100%',
+              padding: '16px',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              color: 'white',
+              background: SWITCH_COLORS.green,
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              boxShadow: `0 4px 12px ${SWITCH_COLORS.green}50`
+            }}
+          >
+            🧠 {language === 'it' ? 'Continua con il Quiz' : 'Continue to Quiz'} →
+          </button>
         </div>
       )}
     </SwitchLayout>

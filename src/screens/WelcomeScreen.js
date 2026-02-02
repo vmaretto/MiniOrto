@@ -13,6 +13,23 @@ function WelcomeScreen() {
     navigate('/profile');
   };
 
+  // Nuovo flusso a 6 step
+  const steps = language === 'it' ? [
+    { icon: '👤', text: 'Compila il tuo profilo' },
+    { icon: '📸', text: 'Fotografa il prodotto' },
+    { icon: '🧠', text: 'Stima i valori nel quiz' },
+    { icon: '🔬', text: 'Scansiona con SCIO' },
+    { icon: '📊', text: 'Confronta percezione vs realtà' },
+    { icon: '⭐', text: 'Dai il tuo feedback' }
+  ] : [
+    { icon: '👤', text: 'Complete your profile' },
+    { icon: '📸', text: 'Take a product photo' },
+    { icon: '🧠', text: 'Estimate values in quiz' },
+    { icon: '🔬', text: 'Scan with SCIO' },
+    { icon: '📊', text: 'Compare perception vs reality' },
+    { icon: '⭐', text: 'Give your feedback' }
+  ];
+
   return (
     <SwitchLayout 
       title={`🥬 ${t('welcome.title')}`}
@@ -26,35 +43,45 @@ function WelcomeScreen() {
         {t('welcome.howItWorks')}
       </h3>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {[
-          { icon: '📱', text: t('welcome.step1') },
-          { icon: '📸', text: t('welcome.step2') },
-          { icon: '🧠', text: language === 'it' ? 'Rispondi al quiz sulla conoscenza' : 'Answer the knowledge quiz' },
-          { icon: '📊', text: t('welcome.step4') }
-        ].map((step, idx) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {steps.map((step, idx) => (
           <div key={idx} style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '16px',
-            padding: '12px',
+            gap: '14px',
+            padding: '10px 12px',
             background: SWITCH_COLORS.lightBg,
             borderRadius: '12px'
           }}>
             <div style={{
-              width: '40px',
-              height: '40px',
+              width: '36px',
+              height: '36px',
               background: SWITCH_COLORS.gold,
               borderRadius: '10px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '1.3rem',
+              fontSize: '1.1rem',
               flexShrink: 0
             }}>
               {step.icon}
             </div>
-            <span style={{ color: SWITCH_COLORS.darkBlue, flex: 1 }}>{step.text}</span>
+            <div style={{ flex: 1 }}>
+              <span style={{ 
+                color: '#999', 
+                fontSize: '0.75rem',
+                display: 'block',
+                marginBottom: '2px'
+              }}>
+                {language === 'it' ? `Passo ${idx + 1}` : `Step ${idx + 1}`}
+              </span>
+              <span style={{ 
+                color: SWITCH_COLORS.darkBlue,
+                fontSize: '0.9rem'
+              }}>
+                {step.text}
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -62,8 +89,8 @@ function WelcomeScreen() {
       <p style={{ 
         fontSize: '0.8rem', 
         color: '#888', 
-        marginTop: '24px',
-        marginBottom: '24px',
+        marginTop: '20px',
+        marginBottom: '20px',
         lineHeight: '1.5',
         textAlign: 'center'
       }}>

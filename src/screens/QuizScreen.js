@@ -1,29 +1,134 @@
-// src/screens/QuizScreen.js - Quiz sulla conoscenza del prodotto
+// src/screens/QuizScreen.js - Quiz standalone sulla conoscenza del prodotto
 import React, { useState, useEffect } from 'react';
-import { Brain, Droplets, Flame, Leaf, ChevronRight, Trophy, Target, Zap, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Brain, Droplets, Flame, Leaf, ChevronRight, Info } from 'lucide-react';
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
+import GlobalProgress from '../components/GlobalProgress';
 
-const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
+// Dati SWITCH per prodotti comuni (fallback se API non disponibile)
+const SWITCH_FALLBACK_DATA = {
+  'pomodoro': { calories: 18, water: 94.5, co2: 0.7, waterFootprint: 214 },
+  'tomato': { calories: 18, water: 94.5, co2: 0.7, waterFootprint: 214 },
+  'mela': { calories: 52, water: 85.6, co2: 0.4, waterFootprint: 822 },
+  'apple': { calories: 52, water: 85.6, co2: 0.4, waterFootprint: 822 },
+  'arancia': { calories: 47, water: 86.8, co2: 0.5, waterFootprint: 560 },
+  'orange': { calories: 47, water: 86.8, co2: 0.5, waterFootprint: 560 },
+  'banana': { calories: 89, water: 74.9, co2: 0.9, waterFootprint: 790 },
+  'fragola': { calories: 32, water: 91.0, co2: 0.4, waterFootprint: 276 },
+  'strawberry': { calories: 32, water: 91.0, co2: 0.4, waterFootprint: 276 },
+  'uva': { calories: 69, water: 80.5, co2: 0.5, waterFootprint: 608 },
+  'grape': { calories: 69, water: 80.5, co2: 0.5, waterFootprint: 608 },
+  'carota': { calories: 41, water: 88.3, co2: 0.3, waterFootprint: 195 },
+  'carrot': { calories: 41, water: 88.3, co2: 0.3, waterFootprint: 195 },
+  'zucchina': { calories: 17, water: 94.8, co2: 0.4, waterFootprint: 353 },
+  'zucchini': { calories: 17, water: 94.8, co2: 0.4, waterFootprint: 353 },
+  'peperone': { calories: 31, water: 92.2, co2: 0.5, waterFootprint: 379 },
+  'pepper': { calories: 31, water: 92.2, co2: 0.5, waterFootprint: 379 },
+  'lattuga': { calories: 15, water: 94.6, co2: 0.3, waterFootprint: 237 },
+  'lettuce': { calories: 15, water: 94.6, co2: 0.3, waterFootprint: 237 },
+  'avocado': { calories: 160, water: 73.2, co2: 2.5, waterFootprint: 1981 },
+  'anguria': { calories: 30, water: 91.5, co2: 0.2, waterFootprint: 235 },
+  'watermelon': { calories: 30, water: 91.5, co2: 0.2, waterFootprint: 235 },
+  'default': { calories: 35, water: 85, co2: 0.5, waterFootprint: 400 }
+};
+
+export default function QuizScreen() {
+  const { i18n } = useTranslation();
+  const navigate = useNavigate();
+  const language = i18n.language || 'it';
+  
+  const [product, setProduct] = useState(null);
+  const [switchData, setSwitchData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(-1);
   const [answers, setAnswers] = useState({});
-  const [showProductSheet, setShowProductSheet] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(null);
 
-  // Scroll to top when question changes
+  // Carica prodotto e dati SWITCH
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentQuestion, showResult]);
+    
+    const storedProduct = sessionStorage.getItem('recognizedProduct');
+    if (!storedProduct) {
+      navigate('/recognize');
+      return;
+    }
+    
+    const productData = JSON.parse(storedProduct);
+    setProduct(productData);
+    
+    // Fetch SWITCH data
+    const fetchSwitchData = async () => {
+      try {
+        const searchTerm = productData.nameEn || productData.name;
+        const response = await fetch('/api/switch-lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nameEn: searchTerm })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setSwitchData(data);
+        } else {
+          // Usa fallback
+          const key = (productData.name || '').toLowerCase();
+          setSwitchData({ nutrition: SWITCH_FALLBACK_DATA[key] || SWITCH_FALLBACK_DATA.default });
+        }
+      } catch (error) {
+        console.error('Error fetching SWITCH data:', error);
+        const key = (productData.name || '').toLowerCase();
+        setSwitchData({ nutrition: SWITCH_FALLBACK_DATA[key] || SWITCH_FALLBACK_DATA.default });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSwitchData();
+  }, [navigate]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentQuestion]);
+
+  if (loading || !product) {
+    return (
+      <SwitchLayout 
+        title={language === 'it' ? 'Preparando il quiz...' : 'Preparing quiz...'}
+        subtitle={language === 'it' ? 'Caricamento dati prodotto' : 'Loading product data'}
+      >
+        <GlobalProgress currentStep="quiz" language={language} />
+        <div style={{ textAlign: 'center', padding: '60px 0' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🧠</div>
+          <div style={{
+            width: '50px',
+            height: '50px',
+            margin: '0 auto',
+            border: '4px solid #e0e0e0',
+            borderTopColor: SWITCH_COLORS.gold,
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </SwitchLayout>
+    );
+  }
+
+  // Valori reali dal database SWITCH
   const getRealValues = () => {
     const nutrition = switchData?.nutrition || {};
     const environmental = switchData?.environmental || {};
     
+    // Usa fallback se non ci sono dati
+    const productKey = (product.name || '').toLowerCase();
+    const fallback = SWITCH_FALLBACK_DATA[productKey] || SWITCH_FALLBACK_DATA.default;
+    
     return {
-      calories: nutrition.calories || nutrition.energy || 30,
-      water: nutrition.water || 85,
-      co2: environmental.co2 || environmental.carbonFootprint || 0.5,
-      waterFootprint: environmental.water || environmental.waterUsage || 50
+      calories: nutrition.calories || nutrition.energy || fallback.calories,
+      water: nutrition.water || fallback.water,
+      co2: environmental.co2 || environmental.carbonFootprint || fallback.co2,
+      waterFootprint: environmental.water || environmental.waterUsage || fallback.waterFootprint
     };
   };
 
@@ -38,9 +143,9 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
         : `How many calories do you think 100g of ${product.name} contains?`,
       unit: 'kcal/100g',
       min: 5,
-      max: 100,
+      max: 150,
       step: 5,
-      default: 30,
+      default: 40,
       realValue: realValues.calories,
       color: '#FF6B6B'
     },
@@ -79,10 +184,10 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
         ? `Quanti litri d'acqua servono per produrre 1kg di ${product.name}?`
         : `How many liters of water are needed to produce 1kg of ${product.name}?`,
       unit: 'L/kg',
-      min: 10,
-      max: 500,
-      step: 10,
-      default: 100,
+      min: 50,
+      max: 2000,
+      step: 50,
+      default: 300,
       realValue: realValues.waterFootprint,
       color: SWITCH_COLORS.darkBlue
     }
@@ -98,345 +203,61 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
     }));
   };
 
-  const calculateScore = () => {
-    let totalScore = 0;
-    let details = [];
-
-    questions.forEach(q => {
-      const userAnswer = answers[q.id] || q.default;
-      const realValue = q.realValue;
-      
-      const percentError = Math.abs((userAnswer - realValue) / realValue) * 100;
-      
-      let questionScore;
-      if (percentError <= 10) {
-        questionScore = 90 + (10 - percentError);
-      } else if (percentError <= 25) {
-        questionScore = 70 + ((25 - percentError) / 15) * 20;
-      } else if (percentError <= 50) {
-        questionScore = 40 + ((50 - percentError) / 25) * 30;
-      } else {
-        questionScore = Math.max(0, 40 - (percentError - 50) * 0.4);
-      }
-
-      questionScore = Math.round(questionScore);
-      totalScore += questionScore;
-
-      details.push({
-        id: q.id,
-        question: q.question,
-        userAnswer,
-        realValue,
-        unit: q.unit,
-        percentError: Math.round(percentError),
-        score: questionScore,
-        icon: q.icon,
-        color: q.color
-      });
-    });
-
-    return {
-      total: Math.round(totalScore / questions.length),
-      maxPossible: 100,
-      details,
-      badge: getBadge(totalScore / questions.length)
-    };
-  };
-
-  const getBadge = (avgScore) => {
-    if (avgScore >= 90) return { name: language === 'it' ? '🏆 Esperto Assoluto' : '🏆 Absolute Expert', color: SWITCH_COLORS.gold };
-    if (avgScore >= 75) return { name: language === 'it' ? '🥇 Grande Conoscitore' : '🥇 Great Connoisseur', color: '#C0C0C0' };
-    if (avgScore >= 60) return { name: language === 'it' ? '🥈 Buon Osservatore' : '🥈 Good Observer', color: '#CD7F32' };
-    if (avgScore >= 40) return { name: language === 'it' ? '🌱 In Crescita' : '🌱 Growing', color: SWITCH_COLORS.green };
-    return { name: language === 'it' ? '🔍 Curioso' : '🔍 Curious', color: SWITCH_COLORS.darkBlue };
-  };
-
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     } else {
-      const finalScore = calculateScore();
-      setScore(finalScore);
-      setShowProductSheet(true); // Prima mostra scheda prodotto
+      // Quiz completato, salva e vai a scan-flow
+      const quizData = {
+        answers: { ...answers, [currentQ.id]: answers[currentQ.id] || currentQ.default },
+        realValues,
+        productName: product.name,
+        timestamp: new Date().toISOString()
+      };
+      sessionStorage.setItem('quizAnswers', JSON.stringify(quizData));
+      navigate('/scan-flow');
     }
   };
 
-  const handleShowResults = () => {
-    setShowProductSheet(false);
-    setShowResult(true);
-  };
-
-  const handleComplete = () => {
-    onComplete({
-      answers,
-      score,
+  const handleSkip = () => {
+    sessionStorage.setItem('quizAnswers', JSON.stringify({
+      answers: {},
+      skipped: true,
+      realValues,
+      productName: product.name,
       timestamp: new Date().toISOString()
-    });
+    }));
+    navigate('/scan-flow');
   };
-
-  // Product Sheet - mostra i valori reali PRIMA dei risultati
-  if (showProductSheet && score) {
-    return (
-      <SwitchLayout
-        title={language === 'it' ? '📊 Scheda Prodotto' : '📊 Product Sheet'}
-        subtitle={`${product.emoji} ${product.name}`}
-        compact={true}
-      >
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '20px',
-          padding: '20px',
-          background: `linear-gradient(135deg, ${SWITCH_COLORS.gold}20 0%, ${SWITCH_COLORS.gold}10 100%)`,
-          borderRadius: '16px'
-        }}>
-          <div style={{ fontSize: '4rem', marginBottom: '10px' }}>{product.emoji}</div>
-          <h2 style={{ color: SWITCH_COLORS.darkBlue, margin: 0 }}>{product.name}</h2>
-          <p style={{ color: '#666', marginTop: '8px' }}>
-            {language === 'it' ? 'Valori nutrizionali e ambientali reali' : 'Real nutritional and environmental values'}
-          </p>
-        </div>
-
-        <h3 style={{ color: SWITCH_COLORS.darkBlue, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Info size={20} />
-          {language === 'it' ? 'Valori Reali per 100g' : 'Real Values per 100g'}
-        </h3>
-
-        {score.details.map((detail, idx) => (
-          <div key={detail.id} style={{
-            padding: '16px',
-            background: SWITCH_COLORS.lightBg,
-            borderRadius: '12px',
-            marginBottom: '12px',
-            borderLeft: `4px solid ${detail.color}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {detail.icon}
-              <span style={{ fontWeight: '600', color: SWITCH_COLORS.darkBlue }}>
-                {detail.id === 'calories' && (language === 'it' ? 'Calorie' : 'Calories')}
-                {detail.id === 'water' && (language === 'it' ? 'Contenuto acqua' : 'Water Content')}
-                {detail.id === 'co2' && (language === 'it' ? 'Impronta CO₂' : 'CO₂ Footprint')}
-                {detail.id === 'waterFootprint' && (language === 'it' ? 'Impronta idrica' : 'Water Footprint')}
-              </span>
-            </div>
-            <div style={{ 
-              fontSize: '1.3rem', 
-              fontWeight: 'bold', 
-              color: detail.color 
-            }}>
-              {detail.realValue} {detail.unit}
-            </div>
-          </div>
-        ))}
-
-        <button
-          onClick={handleShowResults}
-          style={{
-            width: '100%',
-            padding: '18px',
-            fontSize: '1.1rem',
-            fontWeight: '600',
-            color: 'white',
-            background: SWITCH_COLORS.green,
-            border: 'none',
-            borderRadius: '16px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            boxShadow: `0 4px 15px ${SWITCH_COLORS.green}50`,
-            marginTop: '20px'
-          }}
-        >
-          {language === 'it' ? 'Vedi i tuoi risultati' : 'See your results'}
-          <ChevronRight size={20} />
-        </button>
-      </SwitchLayout>
-    );
-  }
-
-  // Result screen
-  if (showResult && score) {
-    return (
-      <SwitchLayout
-        title={language === 'it' ? 'Risultati Quiz' : 'Quiz Results'}
-        subtitle={`${product.emoji} ${product.name}`}
-        compact={true}
-      >
-        {/* Total Score */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '24px',
-          padding: '20px',
-          background: `linear-gradient(135deg, ${score.badge.color}20 0%, ${score.badge.color}10 100%)`,
-          borderRadius: '16px'
-        }}>
-          <Trophy size={48} color={SWITCH_COLORS.gold} style={{ marginBottom: '12px' }} />
-          <div style={{
-            fontSize: '4rem',
-            fontWeight: 'bold',
-            color: SWITCH_COLORS.darkBlue,
-            lineHeight: 1
-          }}>
-            {score.total}
-          </div>
-          <div style={{ color: '#666', marginBottom: '8px' }}>
-            {language === 'it' ? 'punti su 100' : 'points out of 100'}
-          </div>
-          <div style={{
-            fontSize: '1.2rem',
-            fontWeight: '600',
-            color: score.badge.color
-          }}>
-            {score.badge.name}
-          </div>
-        </div>
-
-        {/* Details */}
-        <h3 style={{ 
-          color: SWITCH_COLORS.darkBlue, 
-          marginBottom: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px'
-        }}>
-          <Target size={20} />
-          {language === 'it' ? 'Dettaglio risposte' : 'Answer Details'}
-        </h3>
-
-        {score.details.map((detail, idx) => (
-          <div key={detail.id} style={{
-            padding: '16px',
-            background: SWITCH_COLORS.lightBg,
-            borderRadius: '12px',
-            marginBottom: '12px',
-            borderLeft: `4px solid ${detail.color}`
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              marginBottom: '8px'
-            }}>
-              {detail.icon}
-              <span style={{ fontWeight: '600', color: SWITCH_COLORS.darkBlue }}>
-                {detail.id === 'calories' && (language === 'it' ? 'Calorie' : 'Calories')}
-                {detail.id === 'water' && (language === 'it' ? 'Contenuto acqua' : 'Water Content')}
-                {detail.id === 'co2' && (language === 'it' ? 'Impronta CO₂' : 'CO₂ Footprint')}
-                {detail.id === 'waterFootprint' && (language === 'it' ? 'Impronta idrica' : 'Water Footprint')}
-              </span>
-              <span style={{
-                marginLeft: 'auto',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                background: detail.score >= 70 ? '#d4edda' : detail.score >= 40 ? '#fff3cd' : '#f8d7da',
-                color: detail.score >= 70 ? '#155724' : detail.score >= 40 ? '#856404' : '#721c24',
-                fontWeight: '600',
-                fontSize: '0.9rem'
-              }}>
-                {detail.score} pt
-              </span>
-            </div>
-            
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '8px',
-              fontSize: '0.9rem'
-            }}>
-              <div>
-                <span style={{ color: '#666' }}>
-                  {language === 'it' ? 'Tua stima: ' : 'Your estimate: '}
-                </span>
-                <strong>{detail.userAnswer} {detail.unit}</strong>
-              </div>
-              <div>
-                <span style={{ color: '#666' }}>
-                  {language === 'it' ? 'Valore reale: ' : 'Real value: '}
-                </span>
-                <strong style={{ color: detail.color }}>{detail.realValue} {detail.unit}</strong>
-              </div>
-            </div>
-            
-            {detail.percentError <= 15 && (
-              <div style={{
-                marginTop: '8px',
-                color: SWITCH_COLORS.green,
-                fontSize: '0.85rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <Zap size={14} />
-                {language === 'it' ? 'Ottima stima!' : 'Great estimate!'}
-              </div>
-            )}
-          </div>
-        ))}
-
-        {/* Continue Button */}
-        <button
-          onClick={handleComplete}
-          style={{
-            width: '100%',
-            padding: '18px',
-            fontSize: '1.1rem',
-            fontWeight: '600',
-            color: 'white',
-            background: SWITCH_COLORS.green,
-            border: 'none',
-            borderRadius: '16px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            boxShadow: `0 4px 15px ${SWITCH_COLORS.green}50`,
-            marginTop: '20px'
-          }}
-        >
-          {language === 'it' ? 'Vedi scheda prodotto' : 'View Product Details'}
-          <ChevronRight size={20} />
-        </button>
-      </SwitchLayout>
-    );
-  }
 
   // Intro screen
   if (currentQuestion === -1) {
     return (
       <SwitchLayout
         title={language === 'it' ? '🧠 Quiz Conoscenza' : '🧠 Knowledge Quiz'}
-        subtitle={`${product.emoji} ${product.name}`}
+        subtitle={`${product.emoji || '🥬'} ${product.name}`}
       >
+        <GlobalProgress currentStep="quiz" language={language} />
+
+        <div style={{
+          background: `linear-gradient(135deg, ${SWITCH_COLORS.gold}20 0%, ${SWITCH_COLORS.gold}10 100%)`,
+          borderRadius: '16px',
+          padding: '20px',
+          marginBottom: '20px',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '4rem', marginBottom: '10px' }}>{product.emoji || '🥬'}</div>
+          <p style={{ color: '#666', margin: 0 }}>
+            {language === 'it' 
+              ? 'Prima di scansionare, metti alla prova le tue conoscenze!'
+              : 'Before scanning, test your knowledge!'}
+          </p>
+        </div>
+
         <h3 style={{ color: SWITCH_COLORS.darkBlue, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Info size={20} />
-          {language === 'it' ? 'Come funziona il punteggio' : 'How scoring works'}
+          {language === 'it' ? 'Come funziona' : 'How it works'}
         </h3>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-          <div style={{ padding: '12px', background: '#d4edda', borderRadius: '10px', borderLeft: `4px solid ${SWITCH_COLORS.green}` }}>
-            <strong style={{ color: '#155724' }}>90-100 {language === 'it' ? 'punti' : 'points'}</strong>
-            <div style={{ fontSize: '0.85rem', color: '#155724' }}>
-              {language === 'it' ? 'Stima entro il 10% del valore reale' : 'Estimate within 10% of real value'}
-            </div>
-          </div>
-          <div style={{ padding: '12px', background: '#fff3cd', borderRadius: '10px', borderLeft: `4px solid ${SWITCH_COLORS.gold}` }}>
-            <strong style={{ color: '#856404' }}>70-89 {language === 'it' ? 'punti' : 'points'}</strong>
-            <div style={{ fontSize: '0.85rem', color: '#856404' }}>
-              {language === 'it' ? 'Stima entro il 25% del valore reale' : 'Estimate within 25% of real value'}
-            </div>
-          </div>
-          <div style={{ padding: '12px', background: '#f8d7da', borderRadius: '10px', borderLeft: '4px solid #dc3545' }}>
-            <strong style={{ color: '#721c24' }}>40-69 {language === 'it' ? 'punti' : 'points'}</strong>
-            <div style={{ fontSize: '0.85rem', color: '#721c24' }}>
-              {language === 'it' ? 'Stima entro il 50% del valore reale' : 'Estimate within 50% of real value'}
-            </div>
-          </div>
-        </div>
 
         <div style={{ 
           padding: '16px', 
@@ -446,13 +267,22 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
           fontSize: '0.9rem',
           color: '#666'
         }}>
-          <strong>{language === 'it' ? '4 domande:' : '4 questions:'}</strong>
-          <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
+          <p style={{ margin: '0 0 12px 0' }}>
+            {language === 'it' 
+              ? 'Ti chiederemo di stimare 4 valori per questo prodotto:'
+              : 'We\'ll ask you to estimate 4 values for this product:'}
+          </p>
+          <ul style={{ margin: '0', paddingLeft: '20px' }}>
             <li>🔥 {language === 'it' ? 'Calorie' : 'Calories'}</li>
             <li>💧 {language === 'it' ? 'Contenuto acqua' : 'Water content'}</li>
             <li>🌱 {language === 'it' ? 'Impronta CO₂' : 'CO₂ footprint'}</li>
             <li>💦 {language === 'it' ? 'Impronta idrica' : 'Water footprint'}</li>
           </ul>
+          <p style={{ margin: '12px 0 0 0', fontWeight: '500', color: SWITCH_COLORS.darkBlue }}>
+            {language === 'it' 
+              ? '→ Dopo lo scan SCIO confronteremo le tue stime con i dati reali!'
+              : '→ After SCIO scan we\'ll compare your estimates with real data!'}
+          </p>
         </div>
 
         <button
@@ -479,7 +309,7 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
         </button>
 
         <button
-          onClick={() => onComplete(null)}
+          onClick={handleSkip}
           style={{
             width: '100%',
             marginTop: '12px',
@@ -501,9 +331,11 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
   return (
     <SwitchLayout
       title={`${language === 'it' ? 'Domanda' : 'Question'} ${currentQuestion + 1}/${questions.length}`}
-      subtitle={`${product.emoji} ${product.name}`}
+      subtitle={`${product.emoji || '🥬'} ${product.name}`}
       compact={true}
     >
+      <GlobalProgress currentStep="quiz" language={language} />
+
       {/* Progress */}
       <div style={{
         height: '6px',
@@ -555,7 +387,7 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
           marginBottom: '8px',
           textAlign: 'center'
         }}>
-          {answers[currentQ.id] || currentQ.default}
+          {answers[currentQ.id] !== undefined ? answers[currentQ.id] : currentQ.default}
           <span style={{ fontSize: '1.2rem', fontWeight: 'normal', color: '#666' }}>
             {' '}{currentQ.unit}
           </span>
@@ -566,7 +398,7 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
           min={currentQ.min}
           max={currentQ.max}
           step={currentQ.step}
-          value={answers[currentQ.id] || currentQ.default}
+          value={answers[currentQ.id] !== undefined ? answers[currentQ.id] : currentQ.default}
           onChange={(e) => handleAnswer(e.target.value)}
           style={{
             width: '100%',
@@ -625,14 +457,14 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
       >
         {currentQuestion < questions.length - 1 
           ? (language === 'it' ? 'Prossima domanda' : 'Next question')
-          : (language === 'it' ? 'Vedi risultati' : 'See results')
+          : (language === 'it' ? 'Vai alla scansione' : 'Go to scan')
         }
         <ChevronRight size={20} />
       </button>
 
       {/* Skip option */}
       <button
-        onClick={handleComplete}
+        onClick={handleSkip}
         style={{
           marginTop: '16px',
           width: '100%',
@@ -648,6 +480,4 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
       </button>
     </SwitchLayout>
   );
-};
-
-export default QuizScreen;
+}
