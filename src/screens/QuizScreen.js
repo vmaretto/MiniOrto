@@ -6,6 +6,7 @@ import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
 const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
   const [currentQuestion, setCurrentQuestion] = useState(-1);
   const [answers, setAnswers] = useState({});
+  const [showProductSheet, setShowProductSheet] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(null);
 
@@ -156,8 +157,13 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
     } else {
       const finalScore = calculateScore();
       setScore(finalScore);
-      setShowResult(true);
+      setShowProductSheet(true); // Prima mostra scheda prodotto
     }
+  };
+
+  const handleShowResults = () => {
+    setShowProductSheet(false);
+    setShowResult(true);
   };
 
   const handleComplete = () => {
@@ -167,6 +173,90 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
       timestamp: new Date().toISOString()
     });
   };
+
+  // Product Sheet - mostra i valori reali PRIMA dei risultati
+  if (showProductSheet && score) {
+    return (
+      <SwitchLayout
+        title={language === 'it' ? '📊 Scheda Prodotto' : '📊 Product Sheet'}
+        subtitle={`${product.emoji} ${product.name}`}
+        compact={true}
+      >
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '20px',
+          padding: '20px',
+          background: `linear-gradient(135deg, ${SWITCH_COLORS.gold}20 0%, ${SWITCH_COLORS.gold}10 100%)`,
+          borderRadius: '16px'
+        }}>
+          <div style={{ fontSize: '4rem', marginBottom: '10px' }}>{product.emoji}</div>
+          <h2 style={{ color: SWITCH_COLORS.darkBlue, margin: 0 }}>{product.name}</h2>
+          <p style={{ color: '#666', marginTop: '8px' }}>
+            {language === 'it' ? 'Valori nutrizionali e ambientali reali' : 'Real nutritional and environmental values'}
+          </p>
+        </div>
+
+        <h3 style={{ color: SWITCH_COLORS.darkBlue, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Info size={20} />
+          {language === 'it' ? 'Valori Reali per 100g' : 'Real Values per 100g'}
+        </h3>
+
+        {score.details.map((detail, idx) => (
+          <div key={detail.id} style={{
+            padding: '16px',
+            background: SWITCH_COLORS.lightBg,
+            borderRadius: '12px',
+            marginBottom: '12px',
+            borderLeft: `4px solid ${detail.color}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {detail.icon}
+              <span style={{ fontWeight: '600', color: SWITCH_COLORS.darkBlue }}>
+                {detail.id === 'calories' && (language === 'it' ? 'Calorie' : 'Calories')}
+                {detail.id === 'water' && (language === 'it' ? 'Contenuto acqua' : 'Water Content')}
+                {detail.id === 'co2' && (language === 'it' ? 'Impronta CO₂' : 'CO₂ Footprint')}
+                {detail.id === 'waterFootprint' && (language === 'it' ? 'Impronta idrica' : 'Water Footprint')}
+              </span>
+            </div>
+            <div style={{ 
+              fontSize: '1.3rem', 
+              fontWeight: 'bold', 
+              color: detail.color 
+            }}>
+              {detail.realValue} {detail.unit}
+            </div>
+          </div>
+        ))}
+
+        <button
+          onClick={handleShowResults}
+          style={{
+            width: '100%',
+            padding: '18px',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: 'white',
+            background: SWITCH_COLORS.green,
+            border: 'none',
+            borderRadius: '16px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            boxShadow: `0 4px 15px ${SWITCH_COLORS.green}50`,
+            marginTop: '20px'
+          }}
+        >
+          {language === 'it' ? 'Vedi i tuoi risultati' : 'See your results'}
+          <ChevronRight size={20} />
+        </button>
+      </SwitchLayout>
+    );
+  }
 
   // Result screen
   if (showResult && score) {

@@ -51,9 +51,14 @@ function FeedbackScreen() {
       const profileData = JSON.parse(sessionStorage.getItem('profileData') || '{}');
       const quizResults = JSON.parse(sessionStorage.getItem('quizResults') || 'null');
 
+      // Timeout di 10 secondi per l'invio
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch('/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           type: 'complete_session',
           timestamp: new Date().toISOString(),
@@ -68,6 +73,8 @@ function FeedbackScreen() {
           }
         })
       });
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const result = await response.json();
@@ -102,6 +109,13 @@ function FeedbackScreen() {
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
+      // Anche in caso di errore, mostra il messaggio di successo
+      // per non bloccare l'utente
+      setSubmitted(true);
+      setTimeout(() => {
+        sessionStorage.clear();
+        navigate('/');
+      }, 3000);
     } finally {
       setSubmitting(false);
     }
