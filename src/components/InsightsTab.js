@@ -225,18 +225,28 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
     }
   };
 
+  // Helper to get nested data (handles data.data structure)
+  const getParticipantData = (p) => {
+    const rawData = p.data || {};
+    return rawData.data || rawData;
+  };
+
   const extractDemographics = (participants) => {
     const demographics = {
       ageGroups: {},
       genders: {},
       professions: {},
       consumption: {},
+      purchaseChannels: {},
+      sustainability: {},
+      labelReading: {},
       timePatterns: {},
       dayPatterns: {}
     };
     
     participants.forEach(p => {
-      const profile = p.data?.profile || {};
+      const data = getParticipantData(p);
+      const profile = data.profile || {};
       const timestamp = new Date(p.timestamp);
       
       // Age groups
@@ -258,12 +268,21 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       // Consumption habits
       demographics.consumption[profile.consumption || 'unknown'] = (demographics.consumption[profile.consumption || 'unknown'] || 0) + 1;
       
+      // Purchase channels
+      demographics.purchaseChannels[profile.purchaseChannel || 'unknown'] = (demographics.purchaseChannels[profile.purchaseChannel || 'unknown'] || 0) + 1;
+      
+      // Sustainability interest
+      demographics.sustainability[profile.sustainability || 'unknown'] = (demographics.sustainability[profile.sustainability || 'unknown'] || 0) + 1;
+      
+      // Label reading habits
+      demographics.labelReading[profile.labelReading || 'unknown'] = (demographics.labelReading[profile.labelReading || 'unknown'] || 0) + 1;
+      
       // Time patterns
       const hour = timestamp.getHours();
       const timeSlot = hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
       demographics.timePatterns[timeSlot] = (demographics.timePatterns[timeSlot] || 0) + 1;
       
-      // Day patterns (Thursday already filtered out)
+      // Day patterns
       const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][timestamp.getDay()];
       demographics.dayPatterns[dayOfWeek] = (demographics.dayPatterns[dayOfWeek] || 0) + 1;
     });
@@ -273,116 +292,292 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
 
   const extractPatterns = (participants) => {
     const patterns = {
-      avgAccuracyByAge: {},
-      avgAccuracyByProfession: {},
-      avgAccuracyByConsumption: {},
-      avgAccuracyByTimeOfDay: {},
-      avgAccuracyByDayOfWeek: {},
-      mostUnderestimatedFoods: {},
-      mostOverestimatedFoods: {},
-      confidenceVsAccuracy: [],
-      speedVsAccuracy: []
+      // Product analysis
+      productsByCategory: {},
+      productsAnalyzed: {},
+      productRatings: {},
+      
+      // SCIO data patterns
+      avgCaloriesByCategory: {},
+      avgWaterByCategory: {},
+      avgCarbsByCategory: {},
+      scioDataDistribution: { withData: 0, withoutData: 0 },
+      
+      // Feedback patterns
+      differencesFound: { yes: 0, no: 0, somewhat: 0 },
+      spectrometerUsefulByCategory: {},
+      ratingsByCategory: {},
+      avgRatingByProfession: {},
+      avgRatingByAge: {},
+      
+      // Scan method patterns
+      scanMethodByCategory: {},
+      scanMethodSuccess: { direct: [], screenshot: [] },
+      
+      // Comments analysis
+      commentsKeywords: {},
+      differenceExplanations: [],
+      
+      // Temporal patterns
+      ratingsByTimeOfDay: {},
+      ratingsByDayOfWeek: {}
     };
     
     participants.forEach(p => {
-      const profile = p.data?.profile || {};
-      const measurements = p.data?.measurements || {};
-      const part2 = p.data?.part2 || {};
-      const awareness = p.data?.part4_awareness || {};
+      const data = getParticipantData(p);
+      const profile = data.profile || {};
+      const product = data.product || {};
+      const scio = data.scioResults || {};
+      const feedback = data.feedback || {};
+      const scanMethod = data.scanMethod || 'unknown';
       const timestamp = new Date(p.timestamp);
       
-      // Calculate accuracy for this participant
-      let totalError = 0;
-      let count = 0;
+      const category = product.category || 'unknown';
+      const productName = product.name || 'unknown';
       
-      Object.keys(measurements).forEach(foodId => {
-        const measured = measurements[foodId]?.brix;
-        const perceived = part2[foodId] || part2.responses?.[foodId];
+      // Product tracking
+      patterns.productsByCategory[category] = (patterns.productsByCategory[category] || 0) + 1;
+      patterns.productsAnalyzed[productName] = (patterns.productsAnalyzed[productName] || 0) + 1;
+      
+      // SCIO data analysis
+      if (scio.calories || scio.carbs || scio.water) {
+        patterns.scioDataDistribution.withData++;
         
-        if (measured && perceived) {
-          const error = Math.abs((perceived * 4) - parseFloat(measured));
-          totalError += error;
-          count++;
-          
-          // Track over/underestimation
-          if (perceived * 4 < parseFloat(measured)) {
-            patterns.mostUnderestimatedFoods[foodId] = (patterns.mostUnderestimatedFoods[foodId] || 0) + 1;
-          } else if (perceived * 4 > parseFloat(measured)) {
-            patterns.mostOverestimatedFoods[foodId] = (patterns.mostOverestimatedFoods[foodId] || 0) + 1;
-          }
+        if (scio.calories) {
+          if (!patterns.avgCaloriesByCategory[category]) patterns.avgCaloriesByCategory[category] = [];
+          patterns.avgCaloriesByCategory[category].push(parseFloat(scio.calories));
         }
-      });
-      
-      const accuracy = count > 0 ? (100 - (totalError / count * 5)) : 0;
-      
-      // Group accuracy by various factors
-      const ageGroup = getAgeGroup(profile.age);
-      if (!patterns.avgAccuracyByAge[ageGroup]) {
-        patterns.avgAccuracyByAge[ageGroup] = [];
+        if (scio.water) {
+          if (!patterns.avgWaterByCategory[category]) patterns.avgWaterByCategory[category] = [];
+          patterns.avgWaterByCategory[category].push(parseFloat(scio.water));
+        }
+        if (scio.carbs) {
+          if (!patterns.avgCarbsByCategory[category]) patterns.avgCarbsByCategory[category] = [];
+          patterns.avgCarbsByCategory[category].push(parseFloat(scio.carbs));
+        }
+      } else {
+        patterns.scioDataDistribution.withoutData++;
       }
-      patterns.avgAccuracyByAge[ageGroup].push(accuracy);
       
-      // By profession
-      if (!patterns.avgAccuracyByProfession[profile.profession]) {
-        patterns.avgAccuracyByProfession[profile.profession] = [];
+      // Feedback analysis
+      if (feedback.foundDifferences) {
+        patterns.differencesFound[feedback.foundDifferences] = 
+          (patterns.differencesFound[feedback.foundDifferences] || 0) + 1;
       }
-      patterns.avgAccuracyByProfession[profile.profession].push(accuracy);
       
-      // By consumption
-      if (!patterns.avgAccuracyByConsumption[profile.consumption]) {
-        patterns.avgAccuracyByConsumption[profile.consumption] = [];
+      // Spectrometer usefulness by category
+      if (feedback.spectrometerUseful) {
+        if (!patterns.spectrometerUsefulByCategory[category]) {
+          patterns.spectrometerUsefulByCategory[category] = [];
+        }
+        patterns.spectrometerUsefulByCategory[category].push(parseInt(feedback.spectrometerUseful));
       }
-      patterns.avgAccuracyByConsumption[profile.consumption].push(accuracy);
       
-      // Time of day patterns
-      const hour = timestamp.getHours();
-      const timeSlot = hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
-      if (!patterns.avgAccuracyByTimeOfDay[timeSlot]) {
-        patterns.avgAccuracyByTimeOfDay[timeSlot] = [];
+      // Ratings by category
+      if (feedback.overallRating) {
+        const rating = parseInt(feedback.overallRating);
+        
+        if (!patterns.ratingsByCategory[category]) patterns.ratingsByCategory[category] = [];
+        patterns.ratingsByCategory[category].push(rating);
+        
+        if (!patterns.productRatings[productName]) patterns.productRatings[productName] = [];
+        patterns.productRatings[productName].push(rating);
+        
+        // By profession
+        const profession = profile.profession || 'unknown';
+        if (!patterns.avgRatingByProfession[profession]) patterns.avgRatingByProfession[profession] = [];
+        patterns.avgRatingByProfession[profession].push(rating);
+        
+        // By age
+        const ageGroup = getAgeGroup(profile.age);
+        if (!patterns.avgRatingByAge[ageGroup]) patterns.avgRatingByAge[ageGroup] = [];
+        patterns.avgRatingByAge[ageGroup].push(rating);
+        
+        // Time patterns
+        const hour = timestamp.getHours();
+        const timeSlot = hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+        if (!patterns.ratingsByTimeOfDay[timeSlot]) patterns.ratingsByTimeOfDay[timeSlot] = [];
+        patterns.ratingsByTimeOfDay[timeSlot].push(rating);
+        
+        const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][timestamp.getDay()];
+        if (!patterns.ratingsByDayOfWeek[dayOfWeek]) patterns.ratingsByDayOfWeek[dayOfWeek] = [];
+        patterns.ratingsByDayOfWeek[dayOfWeek].push(rating);
       }
-      patterns.avgAccuracyByTimeOfDay[timeSlot].push(accuracy);
       
-      // Day of week patterns
-      const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][timestamp.getDay()];
-      if (!patterns.avgAccuracyByDayOfWeek[dayOfWeek]) {
-        patterns.avgAccuracyByDayOfWeek[dayOfWeek] = [];
+      // Scan method tracking
+      if (!patterns.scanMethodByCategory[category]) {
+        patterns.scanMethodByCategory[category] = { direct: 0, screenshot: 0 };
       }
-      patterns.avgAccuracyByDayOfWeek[dayOfWeek].push(accuracy);
+      patterns.scanMethodByCategory[category][scanMethod] = 
+        (patterns.scanMethodByCategory[category][scanMethod] || 0) + 1;
       
-      // Confidence vs accuracy
-      if (awareness.knowledge) {
-        patterns.confidenceVsAccuracy.push({
-          confidence: awareness.knowledge,
-          accuracy: accuracy
+      if (feedback.overallRating) {
+        patterns.scanMethodSuccess[scanMethod]?.push(parseInt(feedback.overallRating));
+      }
+      
+      // Comments keyword extraction
+      if (feedback.comments) {
+        const words = feedback.comments.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+          if (word.length > 3) {
+            patterns.commentsKeywords[word] = (patterns.commentsKeywords[word] || 0) + 1;
+          }
+        });
+      }
+      
+      // Difference explanations
+      if (feedback.differenceExplanation) {
+        patterns.differenceExplanations.push({
+          product: productName,
+          category,
+          explanation: feedback.differenceExplanation
         });
       }
     });
     
-    // Calculate averages for all grouped data
-    Object.keys(patterns).forEach(key => {
-      if (key.startsWith('avgAccuracy')) {
-        Object.keys(patterns[key]).forEach(subKey => {
-          const values = patterns[key][subKey];
-          if (Array.isArray(values) && values.length > 0) {
-            patterns[key][subKey] = values.reduce((a, b) => a + b, 0) / values.length;
-          }
-        });
+    // Calculate averages
+    ['avgCaloriesByCategory', 'avgWaterByCategory', 'avgCarbsByCategory', 
+     'spectrometerUsefulByCategory', 'ratingsByCategory', 'productRatings',
+     'avgRatingByProfession', 'avgRatingByAge', 'ratingsByTimeOfDay', 'ratingsByDayOfWeek'].forEach(key => {
+      Object.keys(patterns[key]).forEach(subKey => {
+        const values = patterns[key][subKey];
+        if (Array.isArray(values) && values.length > 0) {
+          patterns[key][subKey] = {
+            avg: (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1),
+            count: values.length,
+            min: Math.min(...values),
+            max: Math.max(...values)
+          };
+        }
+      });
+    });
+    
+    // Scan method success rates
+    ['direct', 'screenshot'].forEach(method => {
+      const vals = patterns.scanMethodSuccess[method];
+      if (vals && vals.length > 0) {
+        patterns.scanMethodSuccess[method] = {
+          avgRating: (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1),
+          count: vals.length
+        };
       }
     });
+    
+    // Top keywords
+    patterns.topKeywords = Object.entries(patterns.commentsKeywords)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20);
     
     return patterns;
   };
 
   const extractCorrelations = (participants) => {
+    // Calculate real correlations for MiniOrto data
+    const data = participants.map(p => {
+      const d = getParticipantData(p);
+      return {
+        age: parseInt(d.profile?.age) || 0,
+        rating: parseInt(d.feedback?.overallRating) || 0,
+        spectrometerUseful: parseInt(d.feedback?.spectrometerUseful) || 0,
+        foundDifferences: d.feedback?.foundDifferences === 'yes' ? 1 : 0,
+        sustainability: d.profile?.sustainability === 'very' ? 3 : d.profile?.sustainability === 'somewhat' ? 2 : 1,
+        labelReading: d.profile?.labelReading === 'always' ? 3 : d.profile?.labelReading === 'often' ? 2 : 1,
+        category: d.product?.category || 'unknown',
+        scanMethod: d.scanMethod
+      };
+    });
+    
     const correlations = {
-      ageVsConfidence: calculateCorrelation(participants, 'age', 'confidence'),
-      consumptionVsAccuracy: calculateCorrelation(participants, 'consumption', 'accuracy'),
-      timeOfDayVsError: calculateCorrelation(participants, 'hour', 'error'),
-      genderPatterns: calculateGenderPatterns(participants),
-      professionClusters: calculateProfessionClusters(participants)
+      // Age vs satisfaction
+      ageVsRating: calculateSimpleCorrelation(data.map(d => d.age), data.map(d => d.rating)),
+      
+      // Sustainability interest vs spectrometer appreciation
+      sustainabilityVsSpectrometerUseful: calculateSimpleCorrelation(
+        data.map(d => d.sustainability), 
+        data.map(d => d.spectrometerUseful)
+      ),
+      
+      // Label reading habits vs finding differences
+      labelReadingVsDifferences: calculateSimpleCorrelation(
+        data.map(d => d.labelReading),
+        data.map(d => d.foundDifferences)
+      ),
+      
+      // Category preferences by demographic
+      categoryByAge: groupByAndCount(data, 'age', 'category'),
+      categoryByMethod: groupByAndCount(data, 'scanMethod', 'category'),
+      
+      // Insights
+      insights: generateCorrelationInsights(data)
     };
     
     return correlations;
+  };
+  
+  const calculateSimpleCorrelation = (x, y) => {
+    if (x.length !== y.length || x.length < 2) return 0;
+    
+    const n = x.length;
+    const sumX = x.reduce((a, b) => a + b, 0);
+    const sumY = y.reduce((a, b) => a + b, 0);
+    const sumXY = x.reduce((acc, xi, i) => acc + xi * y[i], 0);
+    const sumX2 = x.reduce((acc, xi) => acc + xi * xi, 0);
+    const sumY2 = y.reduce((acc, yi) => acc + yi * yi, 0);
+    
+    const numerator = n * sumXY - sumX * sumY;
+    const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+    
+    return denominator === 0 ? 0 : (numerator / denominator).toFixed(2);
+  };
+  
+  const groupByAndCount = (data, groupKey, countKey) => {
+    const result = {};
+    data.forEach(d => {
+      const group = d[groupKey] || 'unknown';
+      const value = d[countKey] || 'unknown';
+      if (!result[group]) result[group] = {};
+      result[group][value] = (result[group][value] || 0) + 1;
+    });
+    return result;
+  };
+  
+  const generateCorrelationInsights = (data) => {
+    const insights = [];
+    
+    // Check if people who find differences rate spectrometer higher
+    const withDiff = data.filter(d => d.foundDifferences === 1);
+    const withoutDiff = data.filter(d => d.foundDifferences === 0);
+    
+    if (withDiff.length > 0 && withoutDiff.length > 0) {
+      const avgWithDiff = withDiff.reduce((a, d) => a + d.spectrometerUseful, 0) / withDiff.length;
+      const avgWithoutDiff = withoutDiff.reduce((a, d) => a + d.spectrometerUseful, 0) / withoutDiff.length;
+      
+      if (avgWithDiff > avgWithoutDiff + 0.5) {
+        insights.push({
+          type: 'correlation',
+          text: `Chi trova differenze SCIO/SWITCH valuta lo spettrometro più utile (${avgWithDiff.toFixed(1)} vs ${avgWithoutDiff.toFixed(1)})`
+        });
+      }
+    }
+    
+    // Check scan method satisfaction
+    const direct = data.filter(d => d.scanMethod === 'direct');
+    const screenshot = data.filter(d => d.scanMethod === 'screenshot');
+    
+    if (direct.length > 2 && screenshot.length > 2) {
+      const avgDirect = direct.reduce((a, d) => a + d.rating, 0) / direct.length;
+      const avgScreenshot = screenshot.reduce((a, d) => a + d.rating, 0) / screenshot.length;
+      
+      if (Math.abs(avgDirect - avgScreenshot) > 0.5) {
+        const better = avgDirect > avgScreenshot ? 'scansione diretta' : 'screenshot';
+        insights.push({
+          type: 'method',
+          text: `La ${better} produce rating mediamente più alti`
+        });
+      }
+    }
+    
+    return insights;
   };
 
   const calculateCorrelation = (participants, var1, var2) => {
