@@ -115,9 +115,9 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
         width: '100%'
       }}>
         <img 
-          src="https://switchdiet.eu/wp-content/uploads/2022/12/logo-white-1.svg" 
+          src="https://switchdiet.eu/wp-content/uploads/2023/03/H-white-logo_switch.png" 
           alt="Switch Diet"
-          style={{ height: '28px', marginBottom: '8px' }}
+          style={{ height: '32px', marginBottom: '8px' }}
           onError={(e) => e.target.style.display = 'none'}
         />
         <nav style={{ 
@@ -176,19 +176,14 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center',
-          gap: '12px',
           marginBottom: '8px'
         }}>
           <img 
-            src="https://switchdiet.eu/wp-content/uploads/2022/12/EU-flag.png"
-            alt="EU Funded"
-            style={{ height: '24px' }}
+            src="https://switchdiet.eu/wp-content/uploads/2023/03/EN-Funded-by-the-EU-WHITE-Outline-1024x215.png"
+            alt="Funded by the European Union"
+            style={{ height: '40px' }}
             onError={(e) => e.target.style.display = 'none'}
           />
-          <div style={{ fontSize: '0.6rem', color: 'white', opacity: 0.7, textAlign: 'left' }}>
-            SWITCH – Project 101060483<br/>
-            Horizon Europe - FARM2FORK
-          </div>
         </div>
 
         <p style={{ 
