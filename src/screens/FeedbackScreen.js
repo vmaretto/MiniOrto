@@ -32,8 +32,10 @@ function FeedbackScreen() {
   };
 
   const handleSubmit = async () => {
+    console.log('handleSubmit called, rating:', feedback.overallRating);
+    
     if (feedback.overallRating === 0) {
-      alert(t('feedback.pleaseRate'));
+      alert(language === 'it' ? 'Per favore dai una valutazione' : 'Please rate your experience');
       return;
     }
 
@@ -77,8 +79,11 @@ function FeedbackScreen() {
       
       clearTimeout(timeoutId);
 
+      console.log('API response status:', response.status);
+      
       if (response.ok) {
         const result = await response.json();
+        console.log('API result:', result);
         
         try {
           const rankingResponse = await fetch('/api/participants');
@@ -107,6 +112,14 @@ function FeedbackScreen() {
           sessionStorage.clear();
           navigate('/');
         }, 5000);
+      } else {
+        // Response not OK - still show success to not block user
+        console.error('API response not OK:', response.status);
+        setSubmitted(true);
+        setTimeout(() => {
+          sessionStorage.clear();
+          navigate('/');
+        }, 3000);
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
