@@ -170,48 +170,31 @@ export const calculateAwarenessScore = (participantData) => {
  */
 export const generateRanking = (participants) => {
   const ranked = participants.map(participant => {
-    // Estrai i dati dalla struttura corretta del database
-    const data = participant.data || {};
+    // Handle nested data structure (data.data for MiniOrto)
+    const rawData = participant.data || {};
+    const data = rawData.data || rawData;
     
-    // Debug log per vedere la struttura
-    console.log('Participant data structure:', {
-      id: participant.id,
-      hasData: !!participant.data,
-      hasPart2: !!data.part2,
-      hasMeasurements: !!data.measurements,
-      hasFoods: !!data.foods
-    });
+    // Pass the whole participant to calculateTotalScore (it handles both formats)
+    const scores = calculateTotalScore(participant);
     
-    // Prepara i dati nel formato atteso da calculateTotalScore
-    const formattedData = {
-      part2_data: data.part2,
-      part3_data: data.part3, 
-      part4_awareness: data.part4_awareness || data.part4 || data.awarenessData,
-      measurements: data.measurements,
-      foods: data.foods,
-      pairs: data.comparison_pairs || []
-    };
-    
-    const scores = calculateTotalScore(formattedData);
-    
-    // Debug log per vedere i punteggi
-    console.log('Calculated scores for participant', participant.id, ':', scores);
+    // Get profile from correct location
+    const profile = data.profile || rawData.profile || {};
     
     return {
       id: participant.id,
       timestamp: participant.timestamp,
-      profile: data.profile,
+      profile: profile,
       language: participant.language,
-      data: participant.data, // Mantieni i dati originali
+      data: participant.data,
       ...scores,
-      participant // Keep original data
+      participant
     };
   });
   
-  // Ordina per totalScore decrescente
+  // Sort by totalScore descending
   ranked.sort((a, b) => b.totalScore - a.totalScore);
   
-  // Aggiungi posizione
+  // Add rank position
   ranked.forEach((item, index) => {
     item.rank = index + 1;
   });

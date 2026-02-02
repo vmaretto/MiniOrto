@@ -18,6 +18,7 @@ function FeedbackScreen() {
   
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [ranking, setRanking] = useState(null);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -71,12 +72,38 @@ function FeedbackScreen() {
       });
 
       if (response.ok) {
+        const result = await response.json();
+        
+        // Fetch ranking to show position
+        try {
+          const rankingResponse = await fetch('/api/participants');
+          if (rankingResponse.ok) {
+            const allParticipants = await rankingResponse.json();
+            // Find user's position by their ID
+            const userScore = quizResults?.score?.total || 0;
+            const sortedByScore = allParticipants
+              .map(p => {
+                const d = p.data?.data || p.data || {};
+                return {
+                  id: p.id,
+                  score: d.quizResults?.score?.total || 0
+                };
+              })
+              .sort((a, b) => b.score - a.score);
+            
+            const position = sortedByScore.findIndex(p => p.id === result.id) + 1;
+            setRanking({ position, total: allParticipants.length, score: userScore });
+          }
+        } catch (e) {
+          console.error('Error fetching ranking:', e);
+        }
+        
         setSubmitted(true);
-        // Clear session data
+        // Clear session data after showing result
         setTimeout(() => {
           sessionStorage.clear();
           navigate('/');
-        }, 3000);
+        }, 5000);
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -86,6 +113,7 @@ function FeedbackScreen() {
   };
 
   if (submitted) {
+    const language = localStorage.getItem('language') || 'it';
     return (
       <div className="screen">
         <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
@@ -93,9 +121,60 @@ function FeedbackScreen() {
           <h2 style={{ color: '#4CAF50', marginBottom: '16px' }}>
             {t('feedback.thankYou')}
           </h2>
+          
+          {/* Show ranking position */}
+          {ranking && ranking.position > 0 && (
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '16px',
+              padding: '20px',
+              margin: '20px 0',
+              color: 'white'
+            }}>
+              <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '8px' }}>
+                {language === 'it' ? '🏆 La tua posizione in classifica' : '🏆 Your leaderboard position'}
+              </div>
+              <div style={{ fontSize: '3rem', fontWeight: 'bold' }}>
+                #{ranking.position}
+              </div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>
+                {language === 'it' 
+                  ? `su ${ranking.total} partecipanti` 
+                  : `out of ${ranking.total} participants`}
+              </div>
+              {ranking.score > 0 && (
+                <div style={{ 
+                  marginTop: '12px', 
+                  padding: '8px 16px',
+                  background: 'rgba(255,255,255,0.2)',
+                  borderRadius: '20px',
+                  display: 'inline-block'
+                }}>
+                  {ranking.score} {language === 'it' ? 'punti' : 'points'}
+                </div>
+              )}
+            </div>
+          )}
+          
           <p style={{ color: '#666' }}>
             {t('feedback.thankYouMessage')}
           </p>
+          
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              marginTop: '20px',
+              padding: '12px 24px',
+              background: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            {language === 'it' ? '📊 Vedi Classifica Completa' : '📊 View Full Leaderboard'}
+          </button>
         </div>
       </div>
     );
