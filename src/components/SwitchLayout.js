@@ -92,7 +92,7 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
       {/* Main Content */}
       <main style={{
         flex: 1,
-        margin: subtitle ? '10px 16px 20px' : '-20px 16px 20px',
+        margin: subtitle ? '16px 16px 20px' : '0 16px 20px',
         background: 'white',
         borderRadius: '20px',
         padding: '20px',
