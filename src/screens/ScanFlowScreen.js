@@ -22,7 +22,7 @@ export default function ScanFlowScreen() {
   const navigate = useNavigate();
   const language = i18n.language || 'it';
   
-  const [currentStep, setCurrentStep] = useState(0); // 0: select model, 1: scan, 2: done
+  const [currentStep, setCurrentStep] = useState(1); // Skip model selection, go directly to scan
   const [recognizedFood, setRecognizedFood] = useState(null);
   const [productImage, setProductImage] = useState(null);
   const [selectedModel, setSelectedModel] = useState(null);
@@ -49,15 +49,13 @@ export default function ScanFlowScreen() {
     setRecognizedFood(JSON.parse(storedProduct));
     if (storedImage) setProductImage(storedImage);
     
-    // Auto-select best model based on product name
+    // Auto-select best model based on product name (or default to first model)
     const product = JSON.parse(storedProduct);
     const productName = (product.name || '').toLowerCase();
     const matchedModel = SCIO_MODELS.find(m => 
       m.match.some(keyword => productName.includes(keyword))
     );
-    if (matchedModel) {
-      setSelectedModel(matchedModel);
-    }
+    setSelectedModel(matchedModel || SCIO_MODELS[0]); // Always select a model
   }, [navigate]);
 
   useEffect(() => {
