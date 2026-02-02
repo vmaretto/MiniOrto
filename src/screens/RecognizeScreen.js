@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
 
 // Product name translations
 const productNames = {
@@ -42,8 +43,8 @@ const categoryNames = {
 function RecognizeScreen() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const language = i18n.language || 'it';
   
-  // Helper to translate product name
   const translateProductName = (name) => {
     if (!name) return '';
     const key = name.toLowerCase().trim();
@@ -51,10 +52,9 @@ function RecognizeScreen() {
     if (translation) {
       return i18n.language === 'en' ? translation.en : translation.it;
     }
-    return name; // Return original if not found
+    return name;
   };
   
-  // Helper to translate category
   const translateCategory = (category) => {
     if (!category) return '';
     const key = category.toLowerCase().trim();
@@ -65,7 +65,6 @@ function RecognizeScreen() {
     return category;
   };
   
-  // Helper to translate confidence
   const translateConfidence = (confidence) => {
     if (!confidence) return '';
     const key = confidence.toLowerCase().trim();
@@ -74,8 +73,8 @@ function RecognizeScreen() {
     if (key === 'bassa' || key === 'low') return t('recognize.confidence.low');
     return confidence;
   };
+  
   const fileInputRef = useRef(null);
-  const uploadAreaRef = useRef(null);
   
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -83,7 +82,6 @@ function RecognizeScreen() {
   const [error, setError] = useState(null);
   const [recognized, setRecognized] = useState(null);
 
-  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -107,7 +105,6 @@ function RecognizeScreen() {
     fileInputRef.current.click();
   };
 
-  // Compress image to reduce size
   const compressImage = (file, maxWidth = 800) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -138,7 +135,6 @@ function RecognizeScreen() {
     setError(null);
 
     try {
-      // Compress image before sending
       const base64Image = await compressImage(image, 800);
         
       const response = await fetch('/api/recognize-product', {
@@ -157,7 +153,6 @@ function RecognizeScreen() {
       const data = await response.json();
       setRecognized(data);
       
-      // Store recognized product
       sessionStorage.setItem('recognizedProduct', JSON.stringify(data));
       sessionStorage.setItem('productImage', base64Image);
       
@@ -174,58 +169,176 @@ function RecognizeScreen() {
     if (method === 'screenshot') {
       navigate('/scan');
     } else {
-      // For spectrometer, we could integrate with SCIO app or show instructions
       navigate('/scan-spectrometer');
     }
   };
 
   return (
-    <div className="screen">
-      <div className="card">
-        <h2>📸 {t('recognize.title')}</h2>
-        <p style={{ color: '#666', marginBottom: '20px' }}>
-          {t('recognize.instructions')}
-        </p>
+    <SwitchLayout 
+      title={`📸 ${t('recognize.title')}`}
+      subtitle={language === 'it' ? 'Fotografa il tuo prodotto' : 'Take a photo of your product'}
+      compact={true}
+    >
+      <p style={{ color: '#666', marginBottom: '20px', textAlign: 'center' }}>
+        {t('recognize.instructions')}
+      </p>
 
-        {/* Camera/Upload Area */}
-        <div 
-          ref={uploadAreaRef}
+      {/* Camera/Upload Area */}
+      <div 
+        onClick={handleCameraClick}
+        style={{
+          border: `3px dashed ${SWITCH_COLORS.gold}`,
+          borderRadius: '16px',
+          padding: '40px 20px',
+          textAlign: 'center',
+          cursor: 'pointer',
+          marginBottom: imagePreview ? '10px' : '20px',
+          backgroundColor: imagePreview ? 'transparent' : SWITCH_COLORS.lightBg,
+          transition: 'all 0.3s ease'
+        }}
+      >
+        {imagePreview ? (
+          <img 
+            src={imagePreview} 
+            alt="Product" 
+            style={{
+              maxWidth: '100%',
+              maxHeight: '250px',
+              borderRadius: '8px'
+            }}
+          />
+        ) : (
+          <>
+            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📷</div>
+            <p style={{ color: SWITCH_COLORS.darkBlue, margin: 0, fontWeight: '500' }}>
+              {t('recognize.tapToPhoto')}
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* Change Photo Button */}
+      {imagePreview && !recognized && (
+        <button
           onClick={handleCameraClick}
           style={{
-            border: '3px dashed #4CAF50',
-            borderRadius: '16px',
-            padding: '40px 20px',
-            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            width: '100%',
+            padding: '10px',
+            marginBottom: '20px',
+            background: '#fff',
+            border: `2px solid ${SWITCH_COLORS.gold}`,
+            borderRadius: '8px',
+            color: SWITCH_COLORS.darkBlue,
             cursor: 'pointer',
-            marginBottom: imagePreview ? '10px' : '20px',
-            backgroundColor: imagePreview ? 'transparent' : '#f5f5f5',
-            transition: 'all 0.3s ease'
+            fontSize: '0.95rem',
+            fontWeight: '500'
           }}
         >
-          {imagePreview ? (
-            <img 
-              src={imagePreview} 
-              alt="Product" 
-              style={{
-                maxWidth: '100%',
-                maxHeight: '250px',
-                borderRadius: '8px'
-              }}
-            />
-          ) : (
-            <>
-              <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📷</div>
-              <p style={{ color: '#666', margin: 0 }}>
-                {t('recognize.tapToPhoto')}
-              </p>
-            </>
-          )}
-        </div>
+          🔄 {t('recognize.changePhoto')}
+        </button>
+      )}
 
-        {/* Change Photo Button */}
-        {imagePreview && !recognized && (
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageSelect}
+        accept="image/*"
+        style={{ display: 'none' }}
+      />
+
+      {error && (
+        <div style={{
+          background: '#ffebee',
+          color: '#c62828',
+          padding: '12px',
+          borderRadius: '8px',
+          marginBottom: '20px'
+        }}>
+          {error}
+        </div>
+      )}
+
+      {!recognized && (
+        <button 
+          onClick={handleRecognize}
+          disabled={!image || loading}
+          style={{ 
+            width: '100%',
+            padding: '16px',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: 'white',
+            background: (!image || loading) ? '#ccc' : SWITCH_COLORS.green,
+            border: 'none',
+            borderRadius: '12px',
+            cursor: (!image || loading) ? 'not-allowed' : 'pointer',
+            boxShadow: (!image || loading) ? 'none' : `0 4px 12px ${SWITCH_COLORS.green}50`
+          }}
+        >
+          {loading ? t('recognize.analyzing') : t('recognize.recognize')}
+        </button>
+      )}
+
+      {loading && (
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            margin: '0 auto',
+            border: '4px solid #e0e0e0',
+            borderTopColor: SWITCH_COLORS.gold,
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <p style={{ color: '#666', marginTop: '10px' }}>
+            {t('recognize.processing')}
+          </p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+
+      {/* Recognition Result */}
+      {recognized && (
+        <div style={{ marginTop: '20px' }}>
+          <div style={{
+            background: `linear-gradient(135deg, ${SWITCH_COLORS.gold}20 0%, ${SWITCH_COLORS.gold}10 100%)`,
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '20px',
+            textAlign: 'center',
+            border: `2px solid ${SWITCH_COLORS.gold}`
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>
+              {recognized.emoji || '🥬'}
+            </div>
+            <h3 style={{ margin: '0 0 8px 0', color: SWITCH_COLORS.darkBlue }}>
+              {translateProductName(recognized.name) || t('recognize.recognized')}
+            </h3>
+            {recognized.confidence && (
+              <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
+                {t('recognize.confidence')}: {translateConfidence(recognized.confidence)}
+              </p>
+            )}
+            {recognized.category && (
+              <p style={{ margin: '8px 0 0 0', color: '#888', fontSize: '0.85rem' }}>
+                {t('recognize.category')}: {translateCategory(recognized.category)}
+              </p>
+            )}
+          </div>
+
+          {/* Retry button if wrong recognition */}
           <button
-            onClick={handleCameraClick}
+            onClick={() => {
+              setRecognized(null);
+              setImage(null);
+              setImagePreview(null);
+              sessionStorage.removeItem('recognizedProduct');
+              sessionStorage.removeItem('productImage');
+            }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -233,149 +346,68 @@ function RecognizeScreen() {
               gap: '8px',
               width: '100%',
               padding: '10px',
-              marginBottom: '20px',
+              marginBottom: '16px',
               background: '#fff',
-              border: '2px solid #ff9800',
+              border: `2px solid ${SWITCH_COLORS.gold}`,
               borderRadius: '8px',
-              color: '#ff9800',
+              color: SWITCH_COLORS.darkBlue,
               cursor: 'pointer',
-              fontSize: '0.95rem',
-              fontWeight: '500'
+              fontSize: '0.9rem'
             }}
           >
-            🔄 {t('recognize.changePhoto')}
+            🔄 {t('recognize.wrongProduct')}
           </button>
-        )}
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleImageSelect}
-          accept="image/*"
-          style={{ display: 'none' }}
-        />
+          <p style={{ textAlign: 'center', color: '#666', marginBottom: '16px' }}>
+            {t('recognize.chooseMethod')}
+          </p>
 
-        {error && (
-          <div style={{
-            background: '#ffebee',
-            color: '#c62828',
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '20px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        {!recognized && (
-          <button 
-            className="btn btn-primary" 
-            onClick={handleRecognize}
-            disabled={!image || loading}
-            style={{ opacity: (!image || loading) ? 0.6 : 1 }}
-          >
-            {loading ? t('recognize.analyzing') : t('recognize.recognize')}
-          </button>
-        )}
-
-        {loading && (
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <div className="spinner"></div>
-            <p style={{ color: '#666', marginTop: '10px' }}>
-              {t('recognize.processing')}
-            </p>
-          </div>
-        )}
-
-        {/* Recognition Result */}
-        {recognized && (
-          <div style={{ marginTop: '20px' }}>
-            <div style={{
-              background: '#e8f5e9',
-              borderRadius: '12px',
-              padding: '20px',
-              marginBottom: '20px',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '3rem', marginBottom: '10px' }}>
-                {recognized.emoji || '🥬'}
-              </div>
-              <h3 style={{ margin: '0 0 8px 0', color: '#2e7d32' }}>
-                {translateProductName(recognized.name) || t('recognize.recognized')}
-              </h3>
-              {recognized.confidence && (
-                <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
-                  {t('recognize.confidence')}: {translateConfidence(recognized.confidence)}
-                </p>
-              )}
-              {recognized.category && (
-                <p style={{ margin: '8px 0 0 0', color: '#888', fontSize: '0.85rem' }}>
-                  {t('recognize.category')}: {translateCategory(recognized.category)}
-                </p>
-              )}
-            </div>
-
-            {/* Retry button if wrong recognition */}
-            <button
-              onClick={() => {
-                setRecognized(null);
-                setImage(null);
-                setImagePreview(null);
-                sessionStorage.removeItem('recognizedProduct');
-                sessionStorage.removeItem('productImage');
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button 
+              onClick={() => handleScanChoice('screenshot')}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
                 gap: '8px',
                 width: '100%',
-                padding: '10px',
-                marginBottom: '16px',
-                background: '#fff',
-                border: '2px solid #ff9800',
-                borderRadius: '8px',
-                color: '#ff9800',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
+                padding: '16px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                color: 'white',
+                background: SWITCH_COLORS.green,
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer'
               }}
             >
-              🔄 {t('recognize.wrongProduct')}
+              📱 {t('recognize.uploadScreenshot')}
             </button>
-
-            <p style={{ textAlign: 'center', color: '#666', marginBottom: '16px' }}>
-              {t('recognize.chooseMethod')}
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button 
-                className="btn btn-primary"
-                onClick={() => handleScanChoice('screenshot')}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-              >
-                📱 {t('recognize.uploadScreenshot')}
-              </button>
-              
-              <button 
-                className="btn btn-secondary"
-                onClick={() => handleScanChoice('spectrometer')}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  gap: '8px',
-                  background: '#fff',
-                  border: '2px solid #4CAF50',
-                  color: '#4CAF50'
-                }}
-              >
-                🔬 {t('recognize.startScan')}
-              </button>
-            </div>
+            
+            <button 
+              onClick={() => handleScanChoice('spectrometer')}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '8px',
+                width: '100%',
+                padding: '16px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                background: '#fff',
+                border: `2px solid ${SWITCH_COLORS.green}`,
+                color: SWITCH_COLORS.green,
+                borderRadius: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              🔬 {t('recognize.startScan')}
+            </button>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </SwitchLayout>
   );
 }
 

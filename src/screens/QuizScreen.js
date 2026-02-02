@@ -184,7 +184,7 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: `linear-gradient(180deg, ${COLORS.gold} 0%, ${COLORS.gold} 30%, white 30%)`,
         padding: '20px',
         display: 'flex',
         flexDirection: 'column',
@@ -193,14 +193,15 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
         {/* Header */}
         <div style={{
           textAlign: 'center',
-          color: 'white',
-          marginBottom: '24px'
+          color: COLORS.darkBlue,
+          marginBottom: '24px',
+          paddingTop: '10px'
         }}>
-          <Trophy size={48} style={{ marginBottom: '12px' }} />
-          <h1 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>
+          <Trophy size={48} style={{ marginBottom: '12px', color: COLORS.darkBlue }} />
+          <h1 style={{ fontSize: '1.8rem', marginBottom: '8px', color: COLORS.darkBlue }}>
             {language === 'it' ? 'Risultati Quiz' : 'Quiz Results'}
           </h1>
-          <p style={{ opacity: 0.9 }}>
+          <p style={{ opacity: 0.9, color: COLORS.darkBlue }}>
             {product.emoji} {product.name}
           </p>
         </div>
@@ -469,13 +470,17 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
     <div style={{
       minHeight: '100vh',
       background: `linear-gradient(180deg, ${COLORS.darkBlue} 0%, ${COLORS.darkBlue} 40%, ${COLORS.lightBg} 40%)`,
-      padding: '0'
+      padding: '20px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
     }}>
       {/* Progress */}
       <div style={{
         width: '100%',
         maxWidth: '500px',
-        marginBottom: '20px'
+        marginBottom: '20px',
+        margin: '0 auto 20px'
       }}>
         <div style={{
           display: 'flex',
