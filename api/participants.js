@@ -42,9 +42,9 @@ export default async function handler(req, res) {
       
       console.log('Language:', language);
       
-      // Insert nel database - il timestamp si genera automaticamente
+      // Insert nel database con timestamp esplicito
       const result = await pool.query(
-        'INSERT INTO participants (language, data) VALUES ($1, $2) RETURNING *',
+        'INSERT INTO participants (timestamp, language, data) VALUES (NOW(), $1, $2) RETURNING *',
         [language, dataWithoutTimestamp]
       );
 
