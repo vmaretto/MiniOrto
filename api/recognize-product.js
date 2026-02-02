@@ -28,8 +28,19 @@ module.exports = async (req, res) => {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
     const mediaType = image.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/jpeg';
 
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('ANTHROPIC_API_KEY not configured');
+      return res.status(500).json({ 
+        error: 'API key not configured',
+        name: 'Configurazione mancante',
+        emoji: '⚠️',
+        confidence: 'bassa'
+      });
+    }
+
     const client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
+      timeout: 25000, // 25 second timeout
     });
 
     const response = await client.messages.create({
@@ -125,9 +136,17 @@ Return ONLY the JSON object, no other text.`
 
   } catch (error) {
     console.error('Error recognizing product:', error);
-    return res.status(500).json({ 
-      error: 'Failed to recognize product',
-      details: error.message 
+    
+    // Restituisci un oggetto compatibile anche in caso di errore
+    return res.status(200).json({ 
+      name: 'Errore di riconoscimento',
+      nameEn: 'Recognition error',
+      category: 'altro',
+      emoji: '⚠️',
+      confidence: 'bassa',
+      description: error.message || 'Si è verificato un errore durante il riconoscimento',
+      error: true,
+      errorType: error.name || 'UnknownError'
     });
   }
 };
