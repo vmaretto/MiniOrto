@@ -127,10 +127,10 @@ const StatsTab = ({ participants }) => {
 
   return (
     <div style={{ padding: '16px' }}>
-      {/* Summary Cards */}
+      {/* Summary Cards - always 4 columns on desktop, 2 on mobile */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
+        gridTemplateColumns: 'repeat(4, 1fr)', 
         gap: '12px',
         marginBottom: '24px'
       }}>
@@ -156,8 +156,8 @@ const StatsTab = ({ participants }) => {
         />
       </div>
 
-      {/* Charts Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+      {/* Charts Grid - always 2 columns for symmetry */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
         
         {/* Differences Found - Pie Chart */}
         {differencesData.length > 0 && (
