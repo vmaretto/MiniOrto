@@ -204,12 +204,17 @@ export default function QuizScreen() {
   };
 
   const handleNext = () => {
+    // Salva sempre il valore corrente (modificato o default)
+    const currentValue = answers[currentQ.id] !== undefined ? answers[currentQ.id] : currentQ.default;
+    const updatedAnswers = { ...answers, [currentQ.id]: currentValue };
+    setAnswers(updatedAnswers);
+    
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     } else {
       // Quiz completato, salva e vai a scan-flow
       const quizData = {
-        answers: { ...answers, [currentQ.id]: answers[currentQ.id] || currentQ.default },
+        answers: updatedAnswers,
         realValues,
         productName: product.name,
         timestamp: new Date().toISOString()
