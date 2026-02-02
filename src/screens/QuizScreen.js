@@ -272,7 +272,7 @@ export default function QuizScreen() {
               ? 'Ti chiederemo di stimare 4 valori per questo prodotto:'
               : 'We\'ll ask you to estimate 4 values for this product:'}
           </p>
-          <ul style={{ margin: '0', paddingLeft: '20px' }}>
+          <ul style={{ margin: '0', paddingLeft: '20px', lineHeight: '2' }}>
             <li>🔥 {language === 'it' ? 'Calorie' : 'Calories'}</li>
             <li>💧 {language === 'it' ? 'Contenuto acqua' : 'Water content'}</li>
             <li>🌱 {language === 'it' ? 'Impronta CO₂' : 'CO₂ footprint'}</li>
