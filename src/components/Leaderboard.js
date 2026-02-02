@@ -1,8 +1,10 @@
 // src/components/Leaderboard.js
-import React from 'react';
-import { Trophy, Medal, Award } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trophy, Medal, Award, ChevronDown, ChevronUp, User, Leaf, BarChart2, MessageSquare } from 'lucide-react';
 
 const Leaderboard = ({ ranking, language = 'it' }) => {
+  const [expandedId, setExpandedId] = useState(null);
+
   const getRankIcon = (rank) => {
     if (rank === 1) return <Trophy size={24} color="#FFD700" />;
     if (rank === 2) return <Medal size={24} color="#C0C0C0" />;
@@ -28,23 +30,64 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
     });
   };
 
+  const getParticipantData = (participant) => {
+    // Handle nested data structure
+    const rawData = participant.participant?.data || participant.data || {};
+    return rawData.data || rawData;
+  };
+
   const getProfile = (participant) => {
-    if (typeof participant.profile === 'string') {
-      return JSON.parse(participant.profile);
+    const data = getParticipantData(participant);
+    if (typeof data.profile === 'string') {
+      return JSON.parse(data.profile);
     }
-    return participant.profile || {};
+    return data.profile || participant.profile || {};
   };
 
   const getDisplayName = (participant) => {
-    // Priority: nickname > "Partecipante #ID"
-    const data = participant.participant?.data || participant.data || {};
-    
+    const data = getParticipantData(participant);
     if (data.nickname && data.nickname.trim()) {
       return data.nickname.trim();
     }
-    
     return `${language === 'it' ? 'Partecipante' : 'Participant'} #${participant.id}`;
   };
+
+  const toggleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
+  const DetailSection = ({ icon, title, children }) => (
+    <div style={{ marginBottom: '16px' }}>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '8px', 
+        marginBottom: '8px',
+        color: '#667eea',
+        fontWeight: '600'
+      }}>
+        {icon}
+        <span>{title}</span>
+      </div>
+      <div style={{ 
+        background: '#f9fafb', 
+        borderRadius: '8px', 
+        padding: '12px',
+        fontSize: '0.9rem'
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+
+  const DataRow = ({ label, value }) => (
+    value ? (
+      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #e5e7eb' }}>
+        <span style={{ color: '#6b7280' }}>{label}</span>
+        <span style={{ fontWeight: '500' }}>{value}</span>
+      </div>
+    ) : null
+  );
 
   return (
     <div style={{
@@ -81,112 +124,177 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
           {ranking.map((participant, index) => {
             const profile = getProfile(participant);
             const displayName = getDisplayName(participant);
+            const data = getParticipantData(participant);
+            const isExpanded = expandedId === participant.id;
             
             return (
-              <div
-                key={participant.id}
-                style={{
-                  padding: '1.5rem',
-                  background: index < 3 
-                    ? `linear-gradient(135deg, ${getRankColor(participant.rank)}15 0%, ${getRankColor(participant.rank)}05 100%)`
-                    : '#f9fafb',
-                  border: index < 3 ? `2px solid ${getRankColor(participant.rank)}` : '2px solid #e5e7eb',
-                  borderRadius: '15px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  transition: 'transform 0.2s',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                {/* Rank */}
-                <div style={{
-                  minWidth: '60px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '0.25rem'
-                }}>
-                  {getRankIcon(participant.rank)}
-                  <span style={{
-                    fontSize: '1.25rem',
-                    fontWeight: 'bold',
-                    color: getRankColor(participant.rank)
-                  }}>
-                    #{participant.rank}
-                  </span>
-                </div>
-
-                {/* Info */}
-                <div style={{ flex: 1 }}>
+              <div key={participant.id}>
+                {/* Main Row */}
+                <div
+                  onClick={() => toggleExpand(participant.id)}
+                  style={{
+                    padding: '1.5rem',
+                    background: index < 3 
+                      ? `linear-gradient(135deg, ${getRankColor(participant.rank)}15 0%, ${getRankColor(participant.rank)}05 100%)`
+                      : '#f9fafb',
+                    border: index < 3 ? `2px solid ${getRankColor(participant.rank)}` : '2px solid #e5e7eb',
+                    borderRadius: isExpanded ? '15px 15px 0 0' : '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    transition: 'all 0.2s',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {/* Rank */}
                   <div style={{
-                    fontSize: '1.125rem',
-                    fontWeight: '600',
-                    color: '#1f2937',
-                    marginBottom: '0.25rem'
+                    minWidth: '60px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.25rem'
                   }}>
-                    {displayName}
-                  </div>
-                  <div style={{
-                    fontSize: '0.875rem',
-                    color: '#6b7280'
-                  }}>
-                    {profile.age && `${profile.age} ${language === 'it' ? 'anni' : 'years old'}`}
-                    {profile.profession && ` • ${profile.profession}`}
-                  </div>
-                  <div style={{
-                    fontSize: '0.75rem',
-                    color: '#9ca3af',
-                    marginTop: '0.25rem'
-                  }}>
-                    {formatDate(participant.timestamp)}
-                  </div>
-                </div>
-
-                {/* Scores */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '0.75rem',
-                  minWidth: '200px'
-                }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                      fontSize: '1.5rem',
+                    {getRankIcon(participant.rank)}
+                    <span style={{
+                      fontSize: '1.25rem',
                       fontWeight: 'bold',
-                      color: '#667eea'
+                      color: getRankColor(participant.rank)
                     }}>
-                      {participant.totalScore}
+                      #{participant.rank}
+                    </span>
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      fontSize: '1.125rem',
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      marginBottom: '0.25rem'
+                    }}>
+                      {displayName}
+                    </div>
+                    <div style={{
+                      fontSize: '0.875rem',
+                      color: '#6b7280'
+                    }}>
+                      {profile.age && `${profile.age} ${language === 'it' ? 'anni' : 'years old'}`}
+                      {profile.profession && ` • ${profile.profession}`}
                     </div>
                     <div style={{
                       fontSize: '0.75rem',
-                      color: '#6b7280'
+                      color: '#9ca3af',
+                      marginTop: '0.25rem'
                     }}>
-                      {language === 'it' ? 'Totale' : 'Total'}
+                      {formatDate(participant.timestamp)}
                     </div>
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                      fontSize: '1rem',
-                      fontWeight: '600',
-                      color: '#10b981'
-                    }}>
-                      {participant.knowledgeScore}
+
+                  {/* Scores */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '0.75rem',
+                    minWidth: '200px'
+                  }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        color: '#667eea'
+                      }}>
+                        {participant.totalScore}
+                      </div>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        color: '#6b7280'
+                      }}>
+                        {language === 'it' ? 'Totale' : 'Total'}
+                      </div>
                     </div>
-                    <div style={{
-                      fontSize: '0.75rem',
-                      color: '#6b7280'
-                    }}>
-                      {language === 'it' ? 'Conoscenza' : 'Knowledge'}
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{
+                        fontSize: '1rem',
+                        fontWeight: '600',
+                        color: '#10b981'
+                      }}>
+                        {participant.knowledgeScore}
+                      </div>
+                      <div style={{
+                        fontSize: '0.75rem',
+                        color: '#6b7280'
+                      }}>
+                        {language === 'it' ? 'Conoscenza' : 'Knowledge'}
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Expand Icon */}
+                  <div style={{ marginLeft: '8px' }}>
+                    {isExpanded ? <ChevronUp size={24} color="#667eea" /> : <ChevronDown size={24} color="#9ca3af" />}
                   </div>
                 </div>
+
+                {/* Expanded Details */}
+                {isExpanded && (
+                  <div style={{
+                    padding: '1.5rem',
+                    background: '#fff',
+                    border: '2px solid #e5e7eb',
+                    borderTop: 'none',
+                    borderRadius: '0 0 15px 15px'
+                  }}>
+                    {/* Profile */}
+                    <DetailSection icon={<User size={18} />} title={language === 'it' ? 'Profilo' : 'Profile'}>
+                      <DataRow label={language === 'it' ? 'Età' : 'Age'} value={profile.age} />
+                      <DataRow label={language === 'it' ? 'Genere' : 'Gender'} value={profile.gender} />
+                      <DataRow label={language === 'it' ? 'Professione' : 'Profession'} value={profile.profession} />
+                      <DataRow label={language === 'it' ? 'Consumo F&V' : 'F&V Consumption'} value={profile.consumption} />
+                      <DataRow label={language === 'it' ? 'Canale acquisto' : 'Purchase Channel'} value={profile.purchaseChannel} />
+                      <DataRow label={language === 'it' ? 'Sostenibilità' : 'Sustainability'} value={profile.sustainability} />
+                      <DataRow label={language === 'it' ? 'Lettura etichette' : 'Label Reading'} value={profile.labelReading} />
+                    </DetailSection>
+
+                    {/* Product */}
+                    {data.product && (
+                      <DetailSection icon={<Leaf size={18} />} title={language === 'it' ? 'Prodotto Analizzato' : 'Analyzed Product'}>
+                        <DataRow label={language === 'it' ? 'Nome' : 'Name'} value={data.product.name} />
+                        <DataRow label={language === 'it' ? 'Categoria' : 'Category'} value={data.product.category} />
+                        <DataRow label="Emoji" value={data.product.emoji} />
+                        <DataRow label={language === 'it' ? 'Confidenza' : 'Confidence'} value={data.product.confidence} />
+                      </DetailSection>
+                    )}
+
+                    {/* SCIO Results */}
+                    {data.scioResults && (
+                      <DetailSection icon={<BarChart2 size={18} />} title={language === 'it' ? 'Risultati SCIO' : 'SCIO Results'}>
+                        <DataRow label="Brix" value={data.scioResults.brix} />
+                        <DataRow label={language === 'it' ? 'Calorie' : 'Calories'} value={data.scioResults.calories ? `${data.scioResults.calories} kcal` : null} />
+                        <DataRow label={language === 'it' ? 'Carboidrati' : 'Carbs'} value={data.scioResults.carbs ? `${data.scioResults.carbs}g` : null} />
+                        <DataRow label={language === 'it' ? 'Zuccheri' : 'Sugar'} value={data.scioResults.sugar ? `${data.scioResults.sugar}g` : null} />
+                        <DataRow label={language === 'it' ? 'Acqua' : 'Water'} value={data.scioResults.water ? `${data.scioResults.water}%` : null} />
+                        <DataRow label={language === 'it' ? 'Proteine' : 'Protein'} value={data.scioResults.protein ? `${data.scioResults.protein}g` : null} />
+                        <DataRow label={language === 'it' ? 'Fibre' : 'Fiber'} value={data.scioResults.fiber ? `${data.scioResults.fiber}g` : null} />
+                        <DataRow label={language === 'it' ? 'Metodo' : 'Method'} value={data.scanMethod} />
+                      </DetailSection>
+                    )}
+
+                    {/* Feedback */}
+                    {data.feedback && (
+                      <DetailSection icon={<MessageSquare size={18} />} title="Feedback">
+                        <DataRow label={language === 'it' ? 'Differenze trovate' : 'Found Differences'} value={data.feedback.foundDifferences} />
+                        <DataRow label={language === 'it' ? 'Spiegazione' : 'Explanation'} value={data.feedback.differenceExplanation} />
+                        <DataRow label={language === 'it' ? 'Utilità spettrometro' : 'Spectrometer Useful'} value={data.feedback.spectrometerUseful ? `${data.feedback.spectrometerUseful}/5` : null} />
+                        <DataRow label={language === 'it' ? 'Rating' : 'Rating'} value={data.feedback.overallRating ? `${'⭐'.repeat(data.feedback.overallRating)}` : null} />
+                        {data.feedback.comments && (
+                          <div style={{ marginTop: '8px', fontStyle: 'italic', color: '#4b5563' }}>
+                            "{data.feedback.comments}"
+                          </div>
+                        )}
+                      </DetailSection>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
