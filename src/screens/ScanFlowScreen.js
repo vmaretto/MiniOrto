@@ -31,6 +31,7 @@ export default function ScanFlowScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [waitingForScan, setWaitingForScan] = useState(false);
+  const [uploadedScreenshot, setUploadedScreenshot] = useState(null); // Preview before analysis
   
   const pollIntervalRef = useRef(null);
 
@@ -77,7 +78,6 @@ export default function ScanFlowScreen() {
     const file = e.target.files[0];
     if (!file) return;
 
-    setLoading(true);
     setScanMethod('screenshot');
 
     try {
@@ -87,10 +87,23 @@ export default function ScanFlowScreen() {
         reader.readAsDataURL(file);
       });
 
+      // Show preview instead of analyzing immediately
+      setUploadedScreenshot(base64);
+    } catch (err) {
+      setError(t('scanflow.error.screenshot') + ' ' + err.message);
+    }
+  };
+
+  const handleAnalyzeScreenshot = async () => {
+    if (!uploadedScreenshot) return;
+
+    setLoading(true);
+
+    try {
       const response = await fetch('/api/analyze-scio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64 }),
+        body: JSON.stringify({ image: uploadedScreenshot }),
       });
 
       const data = await response.json();
@@ -98,7 +111,7 @@ export default function ScanFlowScreen() {
       
       // Salva i dati SCIO in sessionStorage
       sessionStorage.setItem('scioResults', JSON.stringify(data));
-      sessionStorage.setItem('scioImage', base64);
+      sessionStorage.setItem('scioImage', uploadedScreenshot);
       sessionStorage.setItem('scanMethod', 'screenshot');
       
       setCurrentStep(2);
@@ -107,6 +120,11 @@ export default function ScanFlowScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCancelScreenshot = () => {
+    setUploadedScreenshot(null);
+    setScanMethod(null);
   };
 
   const startWaitingForScan = () => {
@@ -241,7 +259,70 @@ export default function ScanFlowScreen() {
               <p style={{ margin: 0 }}><strong>{t('scanflow.scan.food')}</strong> {recognizedFood?.name}</p>
             </div>
 
-            {!waitingForScan ? (
+            {/* Screenshot preview mode */}
+            {uploadedScreenshot ? (
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: SWITCH_COLORS.darkBlue, fontWeight: '600', marginBottom: '12px' }}>
+                  {language === 'it' ? 'Immagine caricata:' : 'Uploaded image:'}
+                </p>
+                <img 
+                  src={uploadedScreenshot} 
+                  alt="Screenshot preview" 
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '300px',
+                    borderRadius: '12px',
+                    border: `2px solid ${SWITCH_COLORS.gold}`,
+                    marginBottom: '20px',
+                    objectFit: 'contain'
+                  }}
+                />
+                
+                {loading ? (
+                  <div style={{ padding: '20px 0' }}>
+                    <Loader2 size={32} color={SWITCH_COLORS.gold} style={{ animation: 'spin 1s linear infinite' }} />
+                    <p style={{ color: '#666', marginTop: '8px' }}>{language === 'it' ? 'Analisi in corso...' : 'Analyzing...'}</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={handleCancelScreenshot}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        background: 'white',
+                        color: '#666',
+                        border: '2px solid #e0e0e0',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontWeight: '600'
+                      }}
+                    >
+                      {language === 'it' ? 'Cambia' : 'Change'}
+                    </button>
+                    <button
+                      onClick={handleAnalyzeScreenshot}
+                      style={{
+                        flex: 2,
+                        padding: '14px',
+                        background: SWITCH_COLORS.green,
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <Scan size={20} /> {language === 'it' ? 'Analizza' : 'Analyze'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : !waitingForScan ? (
               <>
                 <button
                   onClick={startWaitingForScan}
@@ -313,13 +394,6 @@ export default function ScanFlowScreen() {
                 >
                   {t('scanflow.scan.cancel')}
                 </button>
-              </div>
-            )}
-
-            {loading && (
-              <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                <Loader2 size={32} color={SWITCH_COLORS.gold} style={{ animation: 'spin 1s linear infinite' }} />
-                <p style={{ color: '#666', marginTop: '8px' }}>{language === 'it' ? 'Analisi in corso...' : 'Analyzing...'}</p>
               </div>
             )}
           </>
