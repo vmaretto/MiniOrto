@@ -358,7 +358,7 @@ function ProductCard({ productName, measuredValue, productImage, switchData }) {
           {/* Source indicator */}
           {switchData?.found && (
             <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#999', textAlign: 'center' }}>
-              📊 {t('productCard.dataSource', 'Fonte')}: SWITCH Food Explorer Database
+              📊 {t('productCard.nutritionSource', 'Dati calcolati per 1 kg di prodotto. Fonte: SWITCH Food Explorer Database.')}
             </div>
           )}
         </div>
