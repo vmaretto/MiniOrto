@@ -6,7 +6,7 @@ const resources = {
   it: {
     translation: {
       // Welcome Screen
-      "welcome.title": "MINI-ORTO",
+      "welcome.title": "MyFreshFood",
       "welcome.subtitle": "Analizza i valori nutrizionali con lo spettrometro SCIO",
       "welcome.howItWorks": "Come funziona",
       "welcome.step1": "Misura l'alimento con SCIO",
@@ -88,7 +88,7 @@ const resources = {
       "results.confidence.high": "Alta affidabilità",
       "results.confidence.medium": "Media affidabilità",
       "results.confidence.low": "Bassa affidabilità - verifica i dati",
-      "results.sendToMiniOrto": "Invia a Mini-Orto",
+      "results.sendToMiniOrto": "Invia a MyFreshFood",
       "results.sending": "Invio in corso...",
       "results.sentSuccess": "Dati inviati con successo!",
       "results.sendError": "Errore durante l'invio. Riprova.",
@@ -282,7 +282,7 @@ const resources = {
   en: {
     translation: {
       // Welcome Screen
-      "welcome.title": "MINI-ORTO",
+      "welcome.title": "MyFreshFood",
       "welcome.subtitle": "Analyze nutritional values with the SCIO spectrometer",
       "welcome.howItWorks": "How it works",
       "welcome.step1": "Measure the food with SCIO",
@@ -364,7 +364,7 @@ const resources = {
       "results.confidence.high": "High confidence",
       "results.confidence.medium": "Medium confidence",
       "results.confidence.low": "Low confidence - please verify",
-      "results.sendToMiniOrto": "Send to Mini-Orto",
+      "results.sendToMiniOrto": "Send to MyFreshFood",
       "results.sending": "Sending...",
       "results.sentSuccess": "Data sent successfully!",
       "results.sendError": "Error sending data. Please try again.",
