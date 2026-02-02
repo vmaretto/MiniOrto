@@ -4,8 +4,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import './config/i18n';
 import './App.css';
 
-import FooterSwitch from './components/FooterSwitch';
-
 // Import screens
 import WelcomeScreen from './screens/WelcomeScreen';
 import ProfileScreen from './screens/ProfileScreen';
@@ -24,10 +22,9 @@ import { initGA, trackPageView } from './utils/analytics';
 // Initialize analytics on app load
 initGA();
 
-// Wrapper to conditionally show footer and track page views
+// Wrapper to track page views (footer now in SwitchLayout)
 function AppContent({ children }) {
   const location = useLocation();
-  const isEmbed = location.pathname.startsWith('/embed');
   
   // Track page views
   React.useEffect(() => {
@@ -39,7 +36,6 @@ function AppContent({ children }) {
       <main className="App__content">
         {children}
       </main>
-      {!isEmbed && <FooterSwitch />}
     </div>
   );
 }

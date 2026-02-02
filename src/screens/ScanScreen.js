@@ -2,8 +2,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
 
-// Product name translations (same as RecognizeScreen)
+// Product name translations
 const productNames = {
   'pomodoro': { it: 'Pomodoro', en: 'Tomato' },
   'pomodoro ciliegino': { it: 'Pomodoro ciliegino', en: 'Cherry tomato' },
@@ -36,8 +37,8 @@ const productNames = {
 function ScanScreen() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const language = i18n.language || 'it';
   
-  // Helper to translate product name
   const translateProductName = (name) => {
     if (!name) return '';
     const key = name.toLowerCase().trim();
@@ -47,8 +48,8 @@ function ScanScreen() {
     }
     return name;
   };
+  
   const fileInputRef = useRef(null);
-  const uploadAreaRef = useRef(null);
   
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -56,7 +57,6 @@ function ScanScreen() {
   const [error, setError] = useState(null);
   const [recognizedProduct, setRecognizedProduct] = useState(null);
 
-  // Scroll to top and load recognized product on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const storedProduct = sessionStorage.getItem('recognizedProduct');
@@ -71,7 +71,6 @@ function ScanScreen() {
       setImage(file);
       setError(null);
       
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -93,14 +92,12 @@ function ScanScreen() {
     setLoading(true);
     setError(null);
 
-    // Convert image to base64
     const reader = new FileReader();
     reader.readAsDataURL(image);
     reader.onloadend = async () => {
       try {
         const base64Image = reader.result;
         
-        // Call Vision API to extract values
         const response = await fetch('/api/analyze-scio', {
           method: 'POST',
           headers: {
@@ -116,7 +113,6 @@ function ScanScreen() {
 
         const data = await response.json();
         
-        // Store results and navigate
         sessionStorage.setItem('scioResults', JSON.stringify(data));
         sessionStorage.setItem('scioImage', base64Image);
         navigate('/results');
@@ -134,146 +130,168 @@ function ScanScreen() {
   };
 
   return (
-    <div className="screen">
-      <div className="card">
-        <h2>{t('scan.title')}</h2>
-        
-        {/* Show recognized product if available */}
-        {recognizedProduct && (
-          <div style={{
-            background: '#e8f5e9',
-            borderRadius: '10px',
-            padding: '12px 16px',
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px'
-          }}>
-            <span style={{ fontSize: '2rem' }}>{recognizedProduct.emoji || '🥬'}</span>
-            <div>
-              <div style={{ fontWeight: 'bold', color: '#2e7d32' }}>
-                {translateProductName(recognizedProduct.name)}
-              </div>
-              <div style={{ fontSize: '0.8rem', color: '#666' }}>
-                {t('scan.uploadScioFor')}
-              </div>
+    <SwitchLayout 
+      title={t('scan.title')}
+      subtitle={language === 'it' ? 'Carica lo screenshot SCIO' : 'Upload SCIO screenshot'}
+      compact={true}
+    >
+      {/* Show recognized product if available */}
+      {recognizedProduct && (
+        <div style={{
+          background: `linear-gradient(135deg, ${SWITCH_COLORS.gold}20 0%, ${SWITCH_COLORS.gold}10 100%)`,
+          borderRadius: '10px',
+          padding: '12px 16px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          border: `2px solid ${SWITCH_COLORS.gold}`
+        }}>
+          <span style={{ fontSize: '2rem' }}>{recognizedProduct.emoji || '🥬'}</span>
+          <div>
+            <div style={{ fontWeight: 'bold', color: SWITCH_COLORS.darkBlue }}>
+              {translateProductName(recognizedProduct.name)}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#666' }}>
+              {t('scan.uploadScioFor')}
             </div>
           </div>
-        )}
-
-        <p style={{ color: '#666', marginBottom: '20px' }}>
-          {t('scan.instructions')}
-        </p>
-
-        {/* Upload Area */}
-        <div 
-          ref={uploadAreaRef}
-          onClick={handleUploadClick}
-          style={{
-            border: '3px dashed #4CAF50',
-            borderRadius: '16px',
-            padding: '40px 20px',
-            textAlign: 'center',
-            cursor: 'pointer',
-            marginBottom: imagePreview ? '10px' : '20px',
-            backgroundColor: imagePreview ? 'transparent' : '#f5f5f5',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          {imagePreview ? (
-            <img 
-              src={imagePreview} 
-              alt="SCIO screenshot" 
-              style={{
-                maxWidth: '100%',
-                maxHeight: '300px',
-                borderRadius: '8px'
-              }}
-            />
-          ) : (
-            <>
-              <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📷</div>
-              <p style={{ color: '#666', margin: 0 }}>{t('scan.tapToUpload')}</p>
-            </>
-          )}
         </div>
+      )}
 
-        {/* Change Photo Button - visible when image is loaded */}
-        {imagePreview && (
-          <button
-            onClick={handleUploadClick}
+      <p style={{ color: '#666', marginBottom: '20px', textAlign: 'center' }}>
+        {t('scan.instructions')}
+      </p>
+
+      {/* Upload Area */}
+      <div 
+        onClick={handleUploadClick}
+        style={{
+          border: `3px dashed ${SWITCH_COLORS.gold}`,
+          borderRadius: '16px',
+          padding: '40px 20px',
+          textAlign: 'center',
+          cursor: 'pointer',
+          marginBottom: imagePreview ? '10px' : '20px',
+          backgroundColor: imagePreview ? 'transparent' : SWITCH_COLORS.lightBg,
+          transition: 'all 0.3s ease'
+        }}
+      >
+        {imagePreview ? (
+          <img 
+            src={imagePreview} 
+            alt="SCIO screenshot" 
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '20px',
-              background: '#fff',
-              border: '2px solid #ff9800',
-              borderRadius: '8px',
-              color: '#ff9800',
-              cursor: 'pointer',
-              fontSize: '0.95rem',
-              fontWeight: '500'
+              maxWidth: '100%',
+              maxHeight: '300px',
+              borderRadius: '8px'
             }}
-          >
-            🔄 {t('scan.changePhoto')}
-          </button>
-        )}
-
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleImageSelect}
-          accept="image/*"
-          style={{ display: 'none' }}
-        />
-
-        {/* Example image hint */}
-        <div style={{
-          background: '#fff3e0',
-          borderRadius: '8px',
-          padding: '12px',
-          marginBottom: '20px',
-          fontSize: '0.85rem'
-        }}>
-          <strong>💡 {t('scan.hint')}</strong>
-          <p style={{ margin: '8px 0 0 0', color: '#666' }}>
-            {t('scan.hintText')}
-          </p>
-        </div>
-
-        {error && (
-          <div style={{
-            background: '#ffebee',
-            color: '#c62828',
-            padding: '12px',
-            borderRadius: '8px',
-            marginBottom: '20px'
-          }}>
-            {error}
-          </div>
-        )}
-
-        <button 
-          className="btn btn-primary" 
-          onClick={handleAnalyze}
-          disabled={!image || loading}
-          style={{ opacity: (!image || loading) ? 0.6 : 1 }}
-        >
-          {loading ? t('scan.analyzing') : t('scan.analyze')}
-        </button>
-
-        {loading && (
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <div className="spinner"></div>
-            <p style={{ color: '#666', marginTop: '10px' }}>{t('scan.processing')}</p>
-          </div>
+          />
+        ) : (
+          <>
+            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>📷</div>
+            <p style={{ color: SWITCH_COLORS.darkBlue, margin: 0, fontWeight: '500' }}>
+              {t('scan.tapToUpload')}
+            </p>
+          </>
         )}
       </div>
-    </div>
+
+      {/* Change Photo Button */}
+      {imagePreview && (
+        <button
+          onClick={handleUploadClick}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            width: '100%',
+            padding: '10px',
+            marginBottom: '20px',
+            background: '#fff',
+            border: `2px solid ${SWITCH_COLORS.gold}`,
+            borderRadius: '8px',
+            color: SWITCH_COLORS.darkBlue,
+            cursor: 'pointer',
+            fontSize: '0.95rem',
+            fontWeight: '500'
+          }}
+        >
+          🔄 {t('scan.changePhoto')}
+        </button>
+      )}
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageSelect}
+        accept="image/*"
+        style={{ display: 'none' }}
+      />
+
+      {/* Example image hint */}
+      <div style={{
+        background: `${SWITCH_COLORS.gold}15`,
+        borderRadius: '8px',
+        padding: '12px',
+        marginBottom: '20px',
+        fontSize: '0.85rem',
+        border: `1px solid ${SWITCH_COLORS.gold}50`
+      }}>
+        <strong>💡 {t('scan.hint')}</strong>
+        <p style={{ margin: '8px 0 0 0', color: '#666' }}>
+          {t('scan.hintText')}
+        </p>
+      </div>
+
+      {error && (
+        <div style={{
+          background: '#ffebee',
+          color: '#c62828',
+          padding: '12px',
+          borderRadius: '8px',
+          marginBottom: '20px'
+        }}>
+          {error}
+        </div>
+      )}
+
+      <button 
+        onClick={handleAnalyze}
+        disabled={!image || loading}
+        style={{ 
+          width: '100%',
+          padding: '16px',
+          fontSize: '1.1rem',
+          fontWeight: '600',
+          color: 'white',
+          background: (!image || loading) ? '#ccc' : SWITCH_COLORS.green,
+          border: 'none',
+          borderRadius: '12px',
+          cursor: (!image || loading) ? 'not-allowed' : 'pointer',
+          boxShadow: (!image || loading) ? 'none' : `0 4px 12px ${SWITCH_COLORS.green}50`
+        }}
+      >
+        {loading ? t('scan.analyzing') : t('scan.analyze')}
+      </button>
+
+      {loading && (
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            margin: '0 auto',
+            border: '4px solid #e0e0e0',
+            borderTopColor: SWITCH_COLORS.gold,
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <p style={{ color: '#666', marginTop: '10px' }}>{t('scan.processing')}</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+    </SwitchLayout>
   );
 }
 
