@@ -239,7 +239,6 @@ export default function ScanFlowScreen() {
               marginBottom: '20px'
             }}>
               <p style={{ margin: 0 }}><strong>{t('scanflow.scan.food')}</strong> {recognizedFood?.name}</p>
-              <p style={{ margin: '8px 0 0' }}><strong>{t('scanflow.scan.model')}</strong> {selectedModel ? t(`model.${selectedModel.id}`) : ''}</p>
             </div>
 
             {!waitingForScan ? (
@@ -352,7 +351,6 @@ export default function ScanFlowScreen() {
               {productImage && <img src={productImage} alt="Food" style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover' }} />}
               <div>
                 <strong style={{ color: SWITCH_COLORS.darkBlue }}>{recognizedFood?.name}</strong>
-                <div style={{ fontSize: '0.85rem', color: '#666' }}>{selectedModel ? t(`model.${selectedModel.id}`) : ''}</div>
               </div>
             </div>
 
