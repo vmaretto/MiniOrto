@@ -44,16 +44,26 @@ function FeedbackScreen() {
         overall_rating: feedback.overallRating
       });
 
-      // Save feedback to API
+      // Gather all session data
+      const results = JSON.parse(sessionStorage.getItem('scioResults') || '{}');
+      const recognizedProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
+      const scanMethod = sessionStorage.getItem('scanMethod') || 'unknown';
+      const profileData = JSON.parse(sessionStorage.getItem('profileData') || '{}');
+
+      // Save complete participant data to API
       const response = await fetch('/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'feedback',
+          type: 'complete_session',
+          timestamp: new Date().toISOString(),
+          language: localStorage.getItem('language') || 'it',
           data: {
-            ...feedback,
-            timestamp: new Date().toISOString(),
-            sessionId: sessionStorage.getItem('sessionId')
+            profile: profileData,
+            product: recognizedProduct,
+            scioResults: results,
+            scanMethod: scanMethod,
+            feedback: feedback
           }
         })
       });
