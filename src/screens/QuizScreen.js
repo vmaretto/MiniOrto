@@ -1,9 +1,17 @@
 // src/screens/QuizScreen.js - Quiz sulla conoscenza del prodotto
 import React, { useState } from 'react';
-import { Brain, Droplets, Flame, Leaf, ChevronRight, Trophy, Target, Zap } from 'lucide-react';
+import { Brain, Droplets, Flame, Leaf, ChevronRight, Trophy, Target, Zap, Info } from 'lucide-react';
+
+// SWITCH brand colors
+const COLORS = {
+  gold: '#FFC300',
+  darkBlue: '#1E3A5F',
+  green: '#28A745',
+  lightBg: '#F8F9FA'
+};
 
 const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(-1); // -1 = intro screen
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(null);
@@ -83,9 +91,10 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
     }
   ];
 
-  const currentQ = questions[currentQuestion];
+  const currentQ = currentQuestion >= 0 ? questions[currentQuestion] : null;
 
   const handleAnswer = (value) => {
+    if (!currentQ) return;
     setAnswers(prev => ({
       ...prev,
       [currentQ.id]: parseFloat(value)
@@ -345,15 +354,122 @@ const QuizScreen = ({ product, switchData, onComplete, language = 'it' }) => {
     );
   }
 
+  // Intro screen explaining scoring
+  if (currentQuestion === -1) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: `linear-gradient(180deg, ${COLORS.gold} 0%, ${COLORS.gold} 35%, white 35%)`,
+        padding: '0'
+      }}>
+        <div style={{ background: COLORS.gold, padding: '30px 20px', textAlign: 'center' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '10px' }}>🧠</div>
+          <h1 style={{ color: COLORS.darkBlue, fontSize: '1.8rem', marginBottom: '8px' }}>
+            {language === 'it' ? 'Quiz Conoscenza' : 'Knowledge Quiz'}
+          </h1>
+          <p style={{ color: COLORS.darkBlue, opacity: 0.8 }}>
+            {product.emoji} {product.name}
+          </p>
+        </div>
+
+        <div style={{
+          margin: '-20px 16px 20px',
+          background: 'white',
+          borderRadius: '20px',
+          padding: '24px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+        }}>
+          <h3 style={{ color: COLORS.darkBlue, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Info size={20} />
+            {language === 'it' ? 'Come funziona il punteggio' : 'How scoring works'}
+          </h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ padding: '12px', background: '#d4edda', borderRadius: '10px', borderLeft: '4px solid #28a745' }}>
+              <strong style={{ color: '#155724' }}>90-100 {language === 'it' ? 'punti' : 'points'}</strong>
+              <div style={{ fontSize: '0.85rem', color: '#155724' }}>
+                {language === 'it' ? 'Stima entro il 10% del valore reale' : 'Estimate within 10% of real value'}
+              </div>
+            </div>
+            <div style={{ padding: '12px', background: '#fff3cd', borderRadius: '10px', borderLeft: '4px solid #ffc107' }}>
+              <strong style={{ color: '#856404' }}>70-89 {language === 'it' ? 'punti' : 'points'}</strong>
+              <div style={{ fontSize: '0.85rem', color: '#856404' }}>
+                {language === 'it' ? 'Stima entro il 25% del valore reale' : 'Estimate within 25% of real value'}
+              </div>
+            </div>
+            <div style={{ padding: '12px', background: '#f8d7da', borderRadius: '10px', borderLeft: '4px solid #dc3545' }}>
+              <strong style={{ color: '#721c24' }}>40-69 {language === 'it' ? 'punti' : 'points'}</strong>
+              <div style={{ fontSize: '0.85rem', color: '#721c24' }}>
+                {language === 'it' ? 'Stima entro il 50% del valore reale' : 'Estimate within 50% of real value'}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ 
+            padding: '16px', 
+            background: COLORS.lightBg, 
+            borderRadius: '12px',
+            marginBottom: '24px',
+            fontSize: '0.9rem',
+            color: '#666'
+          }}>
+            <strong>{language === 'it' ? '4 domande:' : '4 questions:'}</strong>
+            <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
+              <li>🔥 {language === 'it' ? 'Calorie' : 'Calories'}</li>
+              <li>💧 {language === 'it' ? 'Contenuto acqua' : 'Water content'}</li>
+              <li>🌱 {language === 'it' ? 'Impronta CO₂' : 'CO₂ footprint'}</li>
+              <li>💦 {language === 'it' ? 'Impronta idrica' : 'Water footprint'}</li>
+            </ul>
+          </div>
+
+          <button
+            onClick={() => setCurrentQuestion(0)}
+            style={{
+              width: '100%',
+              padding: '16px',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              color: 'white',
+              background: COLORS.green,
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+          >
+            {language === 'it' ? 'Inizia il Quiz' : 'Start Quiz'}
+            <ChevronRight size={20} />
+          </button>
+
+          <button
+            onClick={() => onComplete(null)}
+            style={{
+              width: '100%',
+              marginTop: '12px',
+              padding: '12px',
+              background: 'transparent',
+              border: 'none',
+              color: '#888',
+              cursor: 'pointer',
+              fontSize: '0.9rem'
+            }}
+          >
+            {language === 'it' ? 'Salta il quiz' : 'Skip quiz'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Quiz questions screen
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '20px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center'
+      background: `linear-gradient(180deg, ${COLORS.darkBlue} 0%, ${COLORS.darkBlue} 40%, ${COLORS.lightBg} 40%)`,
+      padding: '0'
     }}>
       {/* Progress */}
       <div style={{
