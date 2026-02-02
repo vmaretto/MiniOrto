@@ -24,15 +24,18 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
   return (
     <div style={{
       minHeight: '100vh',
+      width: '100%',
       background: `linear-gradient(180deg, ${SWITCH_COLORS.gold} 0%, ${SWITCH_COLORS.gold} ${compact ? '15%' : '25%'}, white ${compact ? '15%' : '25%'})`,
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      position: 'relative'
     }}>
       {/* Header */}
       <header style={{
         background: SWITCH_COLORS.gold,
         padding: compact ? '12px 20px' : '20px',
-        textAlign: 'center'
+        textAlign: 'center',
+        width: '100%'
       }}>
         {showLangToggle && (
           <div style={{ textAlign: 'right', marginBottom: compact ? '4px' : '10px' }}>
@@ -95,7 +98,10 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
         padding: '20px',
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
         position: 'relative',
-        zIndex: 1
+        zIndex: 1,
+        maxWidth: '600px',
+        width: 'calc(100% - 32px)',
+        alignSelf: 'center'
       }}>
         {children}
       </main>
@@ -105,7 +111,8 @@ function SwitchLayout({ children, title, subtitle, showLangToggle = true, compac
         background: SWITCH_COLORS.darkBlue,
         padding: '20px',
         textAlign: 'center',
-        marginTop: 'auto'
+        marginTop: 'auto',
+        width: '100%'
       }}>
         <img 
           src="https://switchdiet.eu/wp-content/uploads/2022/12/logo-white-1.svg" 
