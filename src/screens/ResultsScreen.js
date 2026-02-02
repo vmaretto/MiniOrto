@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 import ProductCard from '../components/ProductCard';
 import EnvironmentalCard from '../components/EnvironmentalCard';
+import QuizScreen from './QuizScreen';
 
 function ResultsScreen() {
   const { t } = useTranslation();
@@ -15,6 +17,9 @@ function ResultsScreen() {
   const [productImage, setProductImage] = useState(null);
   const [switchData, setSwitchData] = useState(null);
   const [switchLoading, setSwitchLoading] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(true);
+  const [quizResults, setQuizResults] = useState(null);
+  const language = i18n?.language || 'it';
 
   // Scroll to top on mount
   useEffect(() => {
@@ -101,6 +106,15 @@ function ResultsScreen() {
     navigate('/');
   };
 
+  const handleQuizComplete = (quizData) => {
+    setQuizResults(quizData);
+    setShowQuiz(false);
+    // Save quiz results to session storage for later use
+    if (quizData) {
+      sessionStorage.setItem('quizResults', JSON.stringify(quizData));
+    }
+  };
+
   const NutrientRow = ({ label, value, unit }) => {
     if (value === null || value === undefined) return null;
     return (
@@ -129,9 +143,83 @@ function ResultsScreen() {
     );
   }
 
+  // Show quiz before results (only if we have switch data and haven't completed quiz)
+  if (showQuiz && recognizedProduct && switchData && !switchLoading) {
+    return (
+      <QuizScreen
+        product={recognizedProduct}
+        switchData={switchData}
+        onComplete={handleQuizComplete}
+        language={language}
+      />
+    );
+  }
+
+  // Show loading while fetching SWITCH data for quiz
+  if (showQuiz && recognizedProduct && switchLoading) {
+    return (
+      <div className="screen" style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        minHeight: '80vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      }}>
+        <div style={{
+          background: 'white',
+          padding: '40px',
+          borderRadius: '20px',
+          textAlign: 'center',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+        }}>
+          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🧠</div>
+          <h2 style={{ color: '#667eea', marginBottom: '8px' }}>
+            {language === 'it' ? 'Preparando il quiz...' : 'Preparing quiz...'}
+          </h2>
+          <p style={{ color: '#666' }}>
+            {language === 'it' ? 'Caricamento dati prodotto' : 'Loading product data'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="screen">
       <div className="card">
+        {/* Quiz Score Banner (if quiz was completed) */}
+        {quizResults?.score && (
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '16px',
+            padding: '16px 20px',
+            marginBottom: '20px',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>
+                {language === 'it' ? 'Il tuo punteggio quiz' : 'Your quiz score'}
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+                {quizResults.score.badge.name}
+              </div>
+            </div>
+            <div style={{
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              background: 'rgba(255,255,255,0.2)',
+              borderRadius: '12px',
+              padding: '8px 16px'
+            }}>
+              {quizResults.score.total}
+            </div>
+          </div>
+        )}
+        
         <h2>📊 {t('results.title')}</h2>
 
         {/* Recognized Product Card - shows the product identified earlier */}

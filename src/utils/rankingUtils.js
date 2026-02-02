@@ -1,16 +1,49 @@
-// src/utils/rankingUtils.js - Algoritmo di ranking CORRETTO
+// src/utils/rankingUtils.js - Algoritmo di ranking per MiniOrto
 
 import { comparePerceptionVsReality } from './sugarUtils';
 
 /**
  * Calcola il punteggio totale di un partecipante
- * Basato su 2 componenti:
- * 1. Knowledge Score (0-100): Precisione delle stime
- * 2. Awareness Score (0-100): Consapevolezza dei propri errori
  * 
- * Formula finale: (Knowledge * 0.7) + (Awareness * 0.3)
+ * Per MiniOrto (con quiz):
+ * - Quiz Score (0-100): Precisione delle stime su nutrizione/sostenibilità
+ * - Feedback Bonus: +5 punti se ha dato feedback dettagliato
+ * 
+ * Per Sugar Detective (legacy):
+ * - Knowledge Score (0-100): Precisione delle stime
+ * - Awareness Score (0-100): Consapevolezza dei propri errori
  */
 export const calculateTotalScore = (participantData) => {
+  // Check for MiniOrto quiz results (new format)
+  const data = participantData.data?.data || participantData.data || participantData;
+  const quizResults = data.quizResults;
+  
+  if (quizResults?.score) {
+    // MiniOrto mode - use quiz score
+    let totalScore = quizResults.score.total || 0;
+    
+    // Bonus for detailed feedback
+    const feedback = data.feedback || {};
+    if (feedback.comments && feedback.comments.length > 10) {
+      totalScore += 5;
+    }
+    if (feedback.differenceExplanation && feedback.differenceExplanation.length > 10) {
+      totalScore += 5;
+    }
+    
+    // Cap at 100
+    totalScore = Math.min(totalScore, 100);
+    
+    return {
+      totalScore: parseFloat(totalScore.toFixed(1)),
+      knowledgeScore: parseFloat((quizResults.score.total || 0).toFixed(1)),
+      awarenessScore: 0, // Not used in MiniOrto
+      quizBadge: quizResults.score.badge,
+      isQuizBased: true
+    };
+  }
+  
+  // Legacy Sugar Detective mode
   // Calcolo punteggio stime (0-100)
   const knowledgeScore = calculateEstimatesScore(participantData);
   
@@ -23,7 +56,8 @@ export const calculateTotalScore = (participantData) => {
   return {
     totalScore: parseFloat(totalScore.toFixed(1)),
     knowledgeScore: parseFloat(knowledgeScore.toFixed(1)),
-    awarenessScore: parseFloat(awarenessScore.toFixed(1))
+    awarenessScore: parseFloat(awarenessScore.toFixed(1)),
+    isQuizBased: false
   };
 };
 

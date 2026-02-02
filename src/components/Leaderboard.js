@@ -192,14 +192,15 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
 
                   {/* Scores */}
                   <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '0.75rem',
-                    minWidth: '200px'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    gap: '4px',
+                    minWidth: '150px'
                   }}>
                     <div style={{ textAlign: 'center' }}>
                       <div style={{
-                        fontSize: '1.5rem',
+                        fontSize: '1.8rem',
                         fontWeight: 'bold',
                         color: '#667eea'
                       }}>
@@ -209,24 +210,21 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
                         fontSize: '0.75rem',
                         color: '#6b7280'
                       }}>
-                        {language === 'it' ? 'Totale' : 'Total'}
+                        {language === 'it' ? 'punti' : 'points'}
                       </div>
                     </div>
-                    <div style={{ textAlign: 'center' }}>
+                    {participant.quizBadge && (
                       <div style={{
-                        fontSize: '1rem',
-                        fontWeight: '600',
-                        color: '#10b981'
+                        fontSize: '0.85rem',
+                        padding: '4px 10px',
+                        borderRadius: '12px',
+                        background: `${participant.quizBadge.color}20`,
+                        color: participant.quizBadge.color,
+                        fontWeight: '500'
                       }}>
-                        {participant.knowledgeScore}
+                        {participant.quizBadge.name}
                       </div>
-                      <div style={{
-                        fontSize: '0.75rem',
-                        color: '#6b7280'
-                      }}>
-                        {language === 'it' ? 'Conoscenza' : 'Knowledge'}
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Expand Icon */}

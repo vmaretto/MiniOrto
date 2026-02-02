@@ -49,6 +49,7 @@ function FeedbackScreen() {
       const recognizedProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
       const scanMethod = sessionStorage.getItem('scanMethod') || 'unknown';
       const profileData = JSON.parse(sessionStorage.getItem('profileData') || '{}');
+      const quizResults = JSON.parse(sessionStorage.getItem('quizResults') || 'null');
 
       // Save complete participant data to API
       const response = await fetch('/api/participants', {
@@ -63,7 +64,8 @@ function FeedbackScreen() {
             product: recognizedProduct,
             scioResults: results,
             scanMethod: scanMethod,
-            feedback: feedback
+            feedback: feedback,
+            quizResults: quizResults
           }
         })
       });
