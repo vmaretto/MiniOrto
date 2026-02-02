@@ -39,7 +39,9 @@ const StatsTab = ({ participants }) => {
     let ratingCount = 0;
 
     participants.forEach(p => {
-      const data = p.data || {};
+      const rawData = p.data || {};
+      // Handle nested data structure (data.data.feedback or data.feedback)
+      const data = rawData.data || rawData;
       const feedback = data.feedback || {};
       
       // Count completed feedback

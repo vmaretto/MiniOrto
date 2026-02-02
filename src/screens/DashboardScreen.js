@@ -332,7 +332,7 @@ const DashboardScreen = () => {
                 color: '#667eea',
                 marginBottom: '0.5rem'
               }}>
-                📊 Sugar Detective Dashboard
+                📊 MiniOrto Dashboard
               </h1>
               <p style={{ color: '#666', fontSize: '1rem' }}>
                 {participants.length} {i18n.language === 'it' ? 'partecipanti totali' : 'total participants'}
