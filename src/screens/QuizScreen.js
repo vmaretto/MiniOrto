@@ -6,40 +6,8 @@ import { Brain, Droplets, Flame, Leaf, ChevronRight, Info } from 'lucide-react';
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
 import GlobalProgress from '../components/GlobalProgress';
 
-// Dati SWITCH per prodotti comuni (fallback se API non disponibile)
-// NOTA: Usare SEMPRE l'API quando possibile, questi sono solo backup
-const SWITCH_FALLBACK_DATA = {
-  'pomodoro': { calories: 18, water: 94.5, co2: 0.47, waterFootprint: 68.8 },
-  'tomato': { calories: 18, water: 94.5, co2: 0.47, waterFootprint: 68.8 },
-  'mela': { calories: 52, water: 85.6, co2: 0.4, waterFootprint: 822 },
-  'apple': { calories: 52, water: 85.6, co2: 0.4, waterFootprint: 822 },
-  'arancia': { calories: 47, water: 86.8, co2: 0.5, waterFootprint: 560 },
-  'orange': { calories: 47, water: 86.8, co2: 0.5, waterFootprint: 560 },
-  'banana': { calories: 89, water: 74.9, co2: 0.9, waterFootprint: 790 },
-  'fragola': { calories: 32, water: 91.0, co2: 0.4, waterFootprint: 276 },
-  'strawberry': { calories: 32, water: 91.0, co2: 0.4, waterFootprint: 276 },
-  'uva': { calories: 69, water: 80.5, co2: 0.5, waterFootprint: 608 },
-  'grape': { calories: 69, water: 80.5, co2: 0.5, waterFootprint: 608 },
-  'carota': { calories: 41, water: 88.3, co2: 0.3, waterFootprint: 195 },
-  'carrot': { calories: 41, water: 88.3, co2: 0.3, waterFootprint: 195 },
-  'zucchina': { calories: 17, water: 94.8, co2: 0.4, waterFootprint: 353 },
-  'zucchini': { calories: 17, water: 94.8, co2: 0.4, waterFootprint: 353 },
-  'peperone': { calories: 31, water: 92.2, co2: 0.5, waterFootprint: 379 },
-  'pepper': { calories: 31, water: 92.2, co2: 0.5, waterFootprint: 379 },
-  'lattuga': { calories: 15, water: 94.6, co2: 0.3, waterFootprint: 237 },
-  'lettuce': { calories: 15, water: 94.6, co2: 0.3, waterFootprint: 237 },
-  'avocado': { calories: 160, water: 73.2, co2: 2.5, waterFootprint: 1981 },
-  'anguria': { calories: 30, water: 91.5, co2: 0.2, waterFootprint: 235 },
-  'watermelon': { calories: 30, water: 91.5, co2: 0.2, waterFootprint: 235 },
-  // Latticini
-  'yogurt': { calories: 59, water: 87, co2: 2.44, waterFootprint: 1390 },
-  'yogurt bianco': { calories: 59, water: 87, co2: 2.44, waterFootprint: 1390 },
-  'latte': { calories: 42, water: 88, co2: 1.39, waterFootprint: 1020 },
-  'milk': { calories: 42, water: 88, co2: 1.39, waterFootprint: 1020 },
-  'formaggio': { calories: 350, water: 37, co2: 8.5, waterFootprint: 5060 },
-  'cheese': { calories: 350, water: 37, co2: 8.5, waterFootprint: 5060 },
-  'default': { calories: 50, water: 80, co2: 1.0, waterFootprint: 500 }
-};
+// NESSUN FALLBACK - Tutti i dati DEVONO venire dall'API SWITCH
+// Se l'API non trova il prodotto, mostriamo un messaggio invece di dati inventati
 
 export default function QuizScreen() {
   const { i18n } = useTranslation();
@@ -91,14 +59,14 @@ export default function QuizScreen() {
           const data = await response.json();
           setSwitchData(data);
         } else {
-          // Usa fallback
-          const key = (productData.name || '').toLowerCase();
-          setSwitchData({ nutrition: SWITCH_FALLBACK_DATA[key] || SWITCH_FALLBACK_DATA.default });
+          // Nessun fallback - segnala che non ha trovato dati
+          console.warn('SWITCH API returned error, no fallback data will be used');
+          setSwitchData({ found: false });
         }
       } catch (error) {
         console.error('Error fetching SWITCH data:', error);
-        const key = (productData.name || '').toLowerCase();
-        setSwitchData({ nutrition: SWITCH_FALLBACK_DATA[key] || SWITCH_FALLBACK_DATA.default });
+        // Nessun fallback - segnala che non ha trovato dati
+        setSwitchData({ found: false, error: error.message });
       } finally {
         setLoading(false);
       }
@@ -136,35 +104,54 @@ export default function QuizScreen() {
   }
 
   // Valori reali: SCIO per nutrienti (se disponibili), SWITCH per impatto ambientale
+  // NESSUN FALLBACK - se non ci sono dati, restituisce null
   const getRealValues = () => {
     const switchNutrition = switchData?.nutrition || {};
     const environmental = switchData?.environmental || {};
+    const hasSwitchData = switchData?.found !== false;
     
-    // Usa fallback se non ci sono dati
-    const productKey = (product.name || '').toLowerCase();
-    const fallback = SWITCH_FALLBACK_DATA[productKey] || SWITCH_FALLBACK_DATA.default;
-    
-    // PRIORITÀ per nutrienti: SCIO > SWITCH > fallback
+    // PRIORITÀ per nutrienti: SCIO > SWITCH (no fallback)
     // I dati SCIO sono misurati sul prodotto specifico, quindi sono i "veri" valori reali
     const getCalories = () => {
       if (scioData?.calories) return scioData.calories;
-      return switchNutrition.calories || switchNutrition.energy || fallback.calories;
+      if (hasSwitchData && (switchNutrition.calories || switchNutrition.energy)) {
+        return switchNutrition.calories || switchNutrition.energy;
+      }
+      return null; // Nessun dato disponibile
     };
     
     const getWater = () => {
       if (scioData?.water) return scioData.water;
-      return switchNutrition.water || fallback.water;
+      if (hasSwitchData && switchNutrition.water) {
+        return switchNutrition.water;
+      }
+      return null; // Nessun dato disponibile
     };
     
-    // Impatto ambientale: solo da SWITCH (SCIO non lo misura)
+    // Impatto ambientale: solo da SWITCH (SCIO non lo misura) - NO FALLBACK
+    const getCO2 = () => {
+      if (hasSwitchData && (environmental.carbonFootprint || environmental.co2)) {
+        return parseFloat(environmental.carbonFootprint || environmental.co2);
+      }
+      return null;
+    };
+    
+    const getWaterFootprint = () => {
+      if (hasSwitchData && (environmental.waterFootprint || environmental.water)) {
+        return parseFloat(environmental.waterFootprint || environmental.water);
+      }
+      return null;
+    };
+    
     return {
       calories: getCalories(),
       water: getWater(),
-      co2: environmental.co2 || environmental.carbonFootprint || fallback.co2,
-      waterFootprint: environmental.water || environmental.waterUsage || fallback.waterFootprint,
+      co2: getCO2(),
+      waterFootprint: getWaterFootprint(),
       // Flag per indicare la fonte dei dati
-      caloriesSource: scioData?.calories ? 'scio' : 'switch',
-      waterSource: scioData?.water ? 'scio' : 'switch'
+      caloriesSource: scioData?.calories ? 'scio' : (hasSwitchData ? 'switch' : null),
+      waterSource: scioData?.water ? 'scio' : (hasSwitchData ? 'switch' : null),
+      hasSwitchData
     };
   };
 
