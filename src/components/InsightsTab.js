@@ -750,27 +750,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         : "Every participation contributes to the research"
     };
     
-    // Ensure we have at least 8 insights (duplicate if necessary)
-    while (insights.curiosities.length < 8 && insights.curiosities.length > 0) {
-      const randomIndex = Math.floor(Math.random() * insights.curiosities.length);
-      insights.curiosities.push({
-        ...insights.curiosities[randomIndex],
-        title: insights.curiosities[randomIndex].title + " (2)",
-        strength: Math.max(1, insights.curiosities[randomIndex].strength - 1)
-      });
-    }
-    
-    // If still not enough, add placeholder
-    while (insights.curiosities.length < 8) {
-      insights.curiosities.push({
-        title: language === 'it' ? "In analisi" : "Analyzing",
-        insight: language === 'it' ? "Dati in elaborazione..." : "Processing data...",
-        emoji: "📊",
-        type: "correlation",
-        strength: 2,
-        evidence: ""
-      });
-    }
+    // Don't duplicate - just use what we have (no "(2)" suffixes)
     
     return insights;
   };
@@ -1538,35 +1518,22 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
             marginBottom: '2rem'
           }}>
             {(() => {
-              // Ensure we always have exactly 9 curiosities for 3x3 grid
+              // Show only real curiosities - no duplicates
               let displayCuriosities = insights.curiosities || [];
               
-              // If we have less than 9, duplicate some insights with variations
-              while (displayCuriosities.length < 9 && displayCuriosities.length > 0) {
-                const randomIndex = Math.floor(Math.random() * displayCuriosities.length);
-                const baseCuriosity = displayCuriosities[randomIndex];
-                displayCuriosities.push({
-                  ...baseCuriosity,
-                  title: baseCuriosity.title + " (bis)",
-                  strength: Math.max(1, baseCuriosity.strength - 1)
-                });
-              }
-              
-              // If still no insights, add real placeholder
+              // If no insights, show placeholder
               if (displayCuriosities.length === 0) {
-                for (let i = 0; i < 9; i++) {
-                  displayCuriosities.push({
-                    title: language === 'it' ? 'Analisi in corso' : 'Analyzing',
-                    insight: language === 'it' ? 'Stiamo elaborando i dati...' : 'Processing data...',
-                    emoji: '📊',
-                    type: 'correlation',
-                    strength: 3,
-                    evidence: ''
-                  });
-                }
+                displayCuriosities = [{
+                  title: language === 'it' ? 'Analisi in corso' : 'Analyzing',
+                  insight: language === 'it' ? 'Stiamo elaborando i dati...' : 'Processing data...',
+                  emoji: '📊',
+                  type: 'correlation',
+                  strength: 3,
+                  evidence: ''
+                }];
               }
               
-              // Take exactly 9
+              // Show what we have (max 9)
               displayCuriosities = displayCuriosities.slice(0, 9);
               
               return displayCuriosities.map((curiosity, index) => (

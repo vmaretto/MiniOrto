@@ -29,3 +29,5 @@ firebase-debug.log
 firestore-debug.log
 .vercel
 .env*.local
+.env
+test-api.js
