@@ -47,6 +47,18 @@ const ComparisonRow = ({ label, icon, userEstimate, measured, dbSwitch, unit, la
     return 'far';
   };
   
+  // Calcola punteggio per questa metrica (stessa logica del quiz)
+  const getMetricScore = () => {
+    if (absDeviation === null) return null;
+    if (absDeviation <= 10) return 100;
+    if (absDeviation <= 20) return 80;
+    if (absDeviation <= 35) return 60;
+    if (absDeviation <= 50) return 40;
+    return 20;
+  };
+  
+  const metricScore = getMetricScore();
+  
   const status = getStatus();
   
   const statusConfig = {
@@ -84,7 +96,21 @@ const ComparisonRow = ({ label, icon, userEstimate, measured, dbSwitch, unit, la
           <span style={{ fontSize: '1.2rem' }}>{icon}</span>
           <span style={{ fontWeight: '600', color: SWITCH_COLORS.darkBlue }}>{label}</span>
         </div>
-        <div style={{ color: config.color }}>{config.icon}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {metricScore !== null && (
+            <span style={{ 
+              fontSize: '0.85rem', 
+              fontWeight: 'bold',
+              color: config.color,
+              background: config.bg,
+              padding: '2px 8px',
+              borderRadius: '12px'
+            }}>
+              {metricScore} pt
+            </span>
+          )}
+          <div style={{ color: config.color }}>{config.icon}</div>
+        </div>
       </div>
       
       {/* 3 colonne */}
