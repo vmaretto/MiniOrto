@@ -412,17 +412,18 @@ export default function ComparisonScreen() {
         style={{ 
           marginBottom: '10px',
           width: '100%',
-          padding: '14px',
-          fontSize: '1rem',
+          padding: '16px',
+          fontSize: '1.1rem',
           fontWeight: '600',
-          background: '#fff',
-          border: `2px solid ${SWITCH_COLORS.darkBlue}`,
-          color: SWITCH_COLORS.darkBlue,
+          color: 'white',
+          background: SWITCH_COLORS.darkBlue,
+          border: 'none',
           borderRadius: '12px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          boxShadow: `0 4px 12px ${SWITCH_COLORS.darkBlue}50`
         }}
       >
-        ← {language === 'it' ? 'Torna alla Scheda' : 'Back to Product'}
+        🍽️ {language === 'it' ? 'Vai alla Scheda Prodotto' : 'Go to Product Card'}
       </button>
 
       <button 

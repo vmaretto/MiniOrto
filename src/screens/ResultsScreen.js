@@ -323,25 +323,24 @@ function ResultsScreen() {
         </div>
       )}
 
-      {/* Bottone per vedere il Confronto */}
+      {/* Bottone per tornare al Confronto */}
       {quizAnswers && !quizAnswers.skipped && (
         <button 
           onClick={() => navigate('/comparison')}
           style={{ 
             marginBottom: '10px',
             width: '100%',
-            padding: '16px',
-            fontSize: '1.1rem',
+            padding: '14px',
+            fontSize: '1rem',
             fontWeight: '600',
-            color: 'white',
-            background: SWITCH_COLORS.green,
-            border: 'none',
+            background: '#fff',
+            border: `2px solid ${SWITCH_COLORS.darkBlue}`,
+            color: SWITCH_COLORS.darkBlue,
             borderRadius: '12px',
-            cursor: 'pointer',
-            boxShadow: `0 4px 12px ${SWITCH_COLORS.green}50`
+            cursor: 'pointer'
           }}
         >
-          📊 {language === 'it' ? 'Vedi Confronto Stime vs Realtà' : 'See Your Estimates vs Reality'}
+          ← {language === 'it' ? 'Torna al Confronto' : 'Back to Comparison'}
         </button>
       )}
 

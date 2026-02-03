@@ -171,7 +171,7 @@ export default function ScanFlowScreen() {
   };
 
   const handleContinueToResults = () => {
-    navigate('/results');
+    navigate('/comparison');
   };
 
   const getStepTitle = () => {
