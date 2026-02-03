@@ -2,18 +2,22 @@
 // Scheda prodotto embeddabile - esempio per mostrare a Daniele
 import React from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
-// Database prodotti di esempio
+// Database prodotti di esempio con traduzioni
 const products = {
   'pomodoro-ciliegino': {
     id: 'pomodoro-ciliegino',
-    name: 'Pomodoro Ciliegino',
-    category: 'Ortaggio',
+    name: { it: 'Pomodoro Ciliegino', en: 'Cherry Tomato' },
+    category: { it: 'Ortaggio', en: 'Vegetable' },
     emoji: '🍅',
     image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400',
-    description: 'Il pomodoro ciliegino è una varietà di pomodoro caratterizzata da frutti piccoli e dolci, molto apprezzata per il suo sapore intenso.',
-    origin: 'Sicilia, Italia',
-    seasonality: ['Giu', 'Lug', 'Ago', 'Set'],
+    description: {
+      it: 'Il pomodoro ciliegino è una varietà di pomodoro caratterizzata da frutti piccoli e dolci, molto apprezzata per il suo sapore intenso.',
+      en: 'The cherry tomato is a variety of tomato characterized by small, sweet fruits, highly appreciated for its intense flavor.'
+    },
+    origin: { it: 'Sicilia, Italia', en: 'Sicily, Italy' },
+    seasonality: { it: ['Giu', 'Lug', 'Ago', 'Set'], en: ['Jun', 'Jul', 'Aug', 'Sep'] },
     nutrition: {
       calories: { value: 18, unit: 'kcal/100g' },
       sugar: { value: 3.9, min: 3, max: 6, unit: '%' },
@@ -22,23 +26,37 @@ const products = {
       vitaminC: { value: 21, unit: 'mg' },
       lycopene: { value: 2.5, unit: 'mg' }
     },
-    tips: [
-      '🌡️ Conservare a temperatura ambiente per massimo sapore',
-      '🚫 Evitare il frigorifero se possibile',
-      '🥗 Ottimo crudo in insalate o come snack',
-      '🍳 Perfetto per sughi veloci'
-    ],
-    curiosity: 'Il licopene, responsabile del colore rosso, è un potente antiossidante che aumenta con la cottura!'
+    tips: {
+      it: [
+        '🌡️ Conservare a temperatura ambiente per massimo sapore',
+        '🚫 Evitare il frigorifero se possibile',
+        '🥗 Ottimo crudo in insalate o come snack',
+        '🍳 Perfetto per sughi veloci'
+      ],
+      en: [
+        '🌡️ Store at room temperature for best flavor',
+        '🚫 Avoid refrigerator if possible',
+        '🥗 Great raw in salads or as a snack',
+        '🍳 Perfect for quick sauces'
+      ]
+    },
+    curiosity: {
+      it: 'Il licopene, responsabile del colore rosso, è un potente antiossidante che aumenta con la cottura!',
+      en: 'Lycopene, responsible for the red color, is a powerful antioxidant that increases with cooking!'
+    }
   },
   'mela': {
     id: 'mela',
-    name: 'Mela Golden',
-    category: 'Frutta',
+    name: { it: 'Mela Golden', en: 'Golden Apple' },
+    category: { it: 'Frutta', en: 'Fruit' },
     emoji: '🍎',
     image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400',
-    description: 'La mela Golden è una delle varietà più diffuse, dal sapore dolce e leggermente acidulo.',
-    origin: 'Trentino Alto Adige',
-    seasonality: ['Set', 'Ott', 'Nov', 'Dic', 'Gen', 'Feb'],
+    description: {
+      it: 'La mela Golden è una delle varietà più diffuse, dal sapore dolce e leggermente acidulo.',
+      en: 'The Golden apple is one of the most widespread varieties, with a sweet and slightly tart flavor.'
+    },
+    origin: { it: 'Trentino Alto Adige', en: 'Trentino Alto Adige, Italy' },
+    seasonality: { it: ['Set', 'Ott', 'Nov', 'Dic', 'Gen', 'Feb'], en: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'] },
     nutrition: {
       calories: { value: 52, unit: 'kcal/100g' },
       sugar: { value: 10.4, min: 9, max: 12, unit: '%' },
@@ -46,22 +64,53 @@ const products = {
       fiber: { value: 2.4, unit: 'g' },
       vitaminC: { value: 4.6, unit: 'mg' }
     },
-    tips: [
-      '❄️ Conservare in frigorifero per mantenerla croccante',
-      '🍯 Ottima con miele e noci',
-      '🥧 Perfetta per torte e dolci'
-    ],
-    curiosity: 'Una mela al giorno toglie il medico di torno: contiene pectina che aiuta la digestione!'
+    tips: {
+      it: [
+        '❄️ Conservare in frigorifero per mantenerla croccante',
+        '🍯 Ottima con miele e noci',
+        '🥧 Perfetta per torte e dolci'
+      ],
+      en: [
+        '❄️ Store in refrigerator to keep it crispy',
+        '🍯 Great with honey and walnuts',
+        '🥧 Perfect for pies and desserts'
+      ]
+    },
+    curiosity: {
+      it: 'Una mela al giorno toglie il medico di torno: contiene pectina che aiuta la digestione!',
+      en: 'An apple a day keeps the doctor away: it contains pectin that aids digestion!'
+    }
   }
 };
 
 function EmbedProductScreen() {
   const { productId } = useParams();
   const [searchParams] = useSearchParams();
+  const { i18n } = useTranslation();
+  const language = i18n.language || 'it';
   
   const measuredSugar = searchParams.get('sugar');
   const customImage = searchParams.get('image');
-  const product = products[productId] || products['pomodoro-ciliegino'];
+  const rawProduct = products[productId] || products['pomodoro-ciliegino'];
+  
+  // Helper per testo localizzato
+  const getText = (field) => {
+    if (!field) return null;
+    if (typeof field === 'string') return field;
+    return field[language] || field.it || field;
+  };
+  
+  // Prodotto con campi localizzati
+  const product = {
+    ...rawProduct,
+    name: getText(rawProduct.name),
+    category: getText(rawProduct.category),
+    description: getText(rawProduct.description),
+    origin: getText(rawProduct.origin),
+    seasonality: getText(rawProduct.seasonality),
+    tips: getText(rawProduct.tips),
+    curiosity: getText(rawProduct.curiosity)
+  };
   
   // Use custom image if provided, otherwise use default
   const displayImage = customImage || product.image;
@@ -70,14 +119,14 @@ function EmbedProductScreen() {
   const getQualityIndicator = () => {
     if (!measuredSugar) return null;
     const measured = parseFloat(measuredSugar);
-    const expected = product.nutrition.sugar;
+    const expected = rawProduct.nutrition.sugar;
     
     if (measured >= expected.min && measured <= expected.max) {
-      return { status: 'optimal', label: 'Ottimale', color: '#4CAF50', icon: '✅' };
+      return { status: 'optimal', label: language === 'en' ? 'Optimal' : 'Ottimale', color: '#4CAF50', icon: '✅' };
     } else if (measured < expected.min) {
-      return { status: 'low', label: 'Sotto la media', color: '#FF9800', icon: '📉' };
+      return { status: 'low', label: language === 'en' ? 'Below average' : 'Sotto la media', color: '#FF9800', icon: '📉' };
     } else {
-      return { status: 'high', label: 'Sopra la media', color: '#FF5722', icon: '📈' };
+      return { status: 'high', label: language === 'en' ? 'Above average' : 'Sopra la media', color: '#FF5722', icon: '📈' };
     }
   };
   
@@ -167,7 +216,7 @@ function EmbedProductScreen() {
         boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
       }}>
         <h3 style={{ margin: '0 0 15px', color: '#333', fontSize: '1.1rem' }}>
-          📊 Valori Nutrizionali
+          📊 {language === 'en' ? 'Nutritional Values' : 'Valori Nutrizionali'}
         </h3>
         
         {/* Sugar comparison bar */}
@@ -179,7 +228,7 @@ function EmbedProductScreen() {
               marginBottom: '8px',
               fontSize: '0.9rem'
             }}>
-              <span>Zuccheri</span>
+              <span>{language === 'en' ? 'Sugar' : 'Zuccheri'}</span>
               <span style={{ color: '#666' }}>
                 {product.nutrition.sugar.min}-{product.nutrition.sugar.max}%
               </span>
@@ -220,10 +269,10 @@ function EmbedProductScreen() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <NutrientBox label="Calorie" value={product.nutrition.calories.value} unit={product.nutrition.calories.unit} icon="🔥" />
-          <NutrientBox label="Acqua" value={product.nutrition.water.value} unit={product.nutrition.water.unit} icon="💧" />
-          <NutrientBox label="Fibre" value={product.nutrition.fiber.value} unit={product.nutrition.fiber.unit} icon="🌾" />
-          <NutrientBox label="Vitamina C" value={product.nutrition.vitaminC.value} unit={product.nutrition.vitaminC.unit} icon="🍊" />
+          <NutrientBox label={language === 'en' ? 'Calories' : 'Calorie'} value={product.nutrition.calories.value} unit={product.nutrition.calories.unit} icon="🔥" />
+          <NutrientBox label={language === 'en' ? 'Water' : 'Acqua'} value={product.nutrition.water.value} unit={product.nutrition.water.unit} icon="💧" />
+          <NutrientBox label={language === 'en' ? 'Fiber' : 'Fibre'} value={product.nutrition.fiber.value} unit={product.nutrition.fiber.unit} icon="🌾" />
+          <NutrientBox label={language === 'en' ? 'Vitamin C' : 'Vitamina C'} value={product.nutrition.vitaminC.value} unit={product.nutrition.vitaminC.unit} icon="🍊" />
         </div>
       </div>
 
@@ -236,24 +285,35 @@ function EmbedProductScreen() {
         boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
       }}>
         <h3 style={{ margin: '0 0 15px', color: '#333', fontSize: '1.1rem' }}>
-          📅 Stagionalità
+          📅 {language === 'en' ? 'Seasonality' : 'Stagionalità'}
         </h3>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'].map(month => (
-            <div 
-              key={month}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '20px',
-                fontSize: '0.8rem',
-                fontWeight: '500',
-                background: product.seasonality.includes(month) ? '#4CAF50' : '#f0f0f0',
-                color: product.seasonality.includes(month) ? 'white' : '#999'
-              }}
-            >
-              {month}
-            </div>
-          ))}
+          {(language === 'en' 
+            ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            : ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']
+          ).map((month, idx) => {
+            const seasonMonths = product.seasonality || [];
+            const isInSeason = seasonMonths.includes(month) || seasonMonths.includes(
+              language === 'en' 
+                ? ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'][idx]
+                : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][idx]
+            );
+            return (
+              <div 
+                key={month}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  fontSize: '0.8rem',
+                  fontWeight: '500',
+                  background: isInSeason ? '#4CAF50' : '#f0f0f0',
+                  color: isInSeason ? 'white' : '#999'
+                }}
+              >
+                {month}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -266,7 +326,7 @@ function EmbedProductScreen() {
         boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
       }}>
         <h3 style={{ margin: '0 0 15px', color: '#333', fontSize: '1.1rem' }}>
-          💡 Consigli
+          💡 {language === 'en' ? 'Tips' : 'Consigli'}
         </h3>
         {product.tips.map((tip, i) => (
           <div key={i} style={{ 
@@ -288,7 +348,7 @@ function EmbedProductScreen() {
         marginBottom: '20px'
       }}>
         <h3 style={{ margin: '0 0 10px', color: '#f57f17', fontSize: '1rem' }}>
-          🤓 Lo sapevi?
+          🤓 {language === 'en' ? 'Did you know?' : 'Lo sapevi?'}
         </h3>
         <p style={{ margin: 0, color: '#666', fontSize: '0.9rem', lineHeight: 1.5 }}>
           {product.curiosity}

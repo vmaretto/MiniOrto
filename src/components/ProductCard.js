@@ -39,15 +39,15 @@ const categoryTranslations = {
   'ortaggio': { it: 'Ortaggio', en: 'Vegetable' },
 };
 
-// Database prodotti locali (fallback)
+// Database prodotti locali (fallback) - con traduzioni IT/EN
 const localProducts = {
   'pomodoro': {
     id: 'pomodoro',
-    name: 'Pomodoro',
-    category: 'Ortaggio',
+    name: { it: 'Pomodoro', en: 'Tomato' },
+    category: { it: 'Ortaggio', en: 'Vegetable' },
     emoji: '🍅',
     image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400',
-    origin: 'Sicilia, Italia',
+    origin: { it: 'Sicilia, Italia', en: 'Sicily, Italy' },
     seasonality: [6, 7, 8, 9],
     nutrition: {
       calories: 18,
@@ -56,21 +56,32 @@ const localProducts = {
       fiber: 1.2,
       vitaminC: 21,
     },
-    tips: [
-      '🌡️ Conservare a temperatura ambiente per massimo sapore',
-      '🚫 Evitare il frigorifero se possibile',
-      '🥗 Ottimo crudo in insalate o come snack',
-      '🍳 Perfetto per sughi veloci'
-    ],
-    curiosity: 'Il licopene, responsabile del colore rosso, è un potente antiossidante che aumenta con la cottura!'
+    tips: {
+      it: [
+        '🌡️ Conservare a temperatura ambiente per massimo sapore',
+        '🚫 Evitare il frigorifero se possibile',
+        '🥗 Ottimo crudo in insalate o come snack',
+        '🍳 Perfetto per sughi veloci'
+      ],
+      en: [
+        '🌡️ Store at room temperature for best flavor',
+        '🚫 Avoid refrigerator if possible',
+        '🥗 Great raw in salads or as a snack',
+        '🍳 Perfect for quick sauces'
+      ]
+    },
+    curiosity: {
+      it: 'Il licopene, responsabile del colore rosso, è un potente antiossidante che aumenta con la cottura!',
+      en: 'Lycopene, responsible for the red color, is a powerful antioxidant that increases with cooking!'
+    }
   },
   'pomodoro ciliegino': {
     id: 'pomodoro-ciliegino',
-    name: 'Pomodoro Ciliegino',
-    category: 'Ortaggio',
+    name: { it: 'Pomodoro Ciliegino', en: 'Cherry Tomato' },
+    category: { it: 'Ortaggio', en: 'Vegetable' },
     emoji: '🍅',
     image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400',
-    origin: 'Sicilia, Italia',
+    origin: { it: 'Sicilia, Italia', en: 'Sicily, Italy' },
     seasonality: [6, 7, 8, 9],
     nutrition: {
       calories: 18,
@@ -79,21 +90,32 @@ const localProducts = {
       fiber: 1.2,
       vitaminC: 21,
     },
-    tips: [
-      '🌡️ Conservare a temperatura ambiente per massimo sapore',
-      '🚫 Evitare il frigorifero se possibile',
-      '🥗 Ottimo crudo in insalate o come snack',
-      '🍳 Perfetto per sughi veloci'
-    ],
-    curiosity: 'Il licopene, responsabile del colore rosso, è un potente antiossidante che aumenta con la cottura!'
+    tips: {
+      it: [
+        '🌡️ Conservare a temperatura ambiente per massimo sapore',
+        '🚫 Evitare il frigorifero se possibile',
+        '🥗 Ottimo crudo in insalate o come snack',
+        '🍳 Perfetto per sughi veloci'
+      ],
+      en: [
+        '🌡️ Store at room temperature for best flavor',
+        '🚫 Avoid refrigerator if possible',
+        '🥗 Great raw in salads or as a snack',
+        '🍳 Perfect for quick sauces'
+      ]
+    },
+    curiosity: {
+      it: 'Il licopene, responsabile del colore rosso, è un potente antiossidante che aumenta con la cottura!',
+      en: 'Lycopene, responsible for the red color, is a powerful antioxidant that increases with cooking!'
+    }
   },
   'mela': {
     id: 'mela',
-    name: 'Mela',
-    category: 'Frutta',
+    name: { it: 'Mela', en: 'Apple' },
+    category: { it: 'Frutta', en: 'Fruit' },
     emoji: '🍎',
     image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400',
-    origin: 'Trentino Alto Adige',
+    origin: { it: 'Trentino Alto Adige', en: 'Trentino Alto Adige, Italy' },
     seasonality: [9, 10, 11, 12, 1, 2],
     nutrition: {
       calories: 52,
@@ -102,12 +124,22 @@ const localProducts = {
       fiber: 2.4,
       vitaminC: 4.6,
     },
-    tips: [
-      '❄️ Conservare in frigorifero per mantenerla croccante',
-      '🍯 Ottima con miele e noci',
-      '🥧 Perfetta per torte e dolci'
-    ],
-    curiosity: 'Una mela al giorno toglie il medico di torno: contiene pectina che aiuta la digestione!'
+    tips: {
+      it: [
+        '❄️ Conservare in frigorifero per mantenerla croccante',
+        '🍯 Ottima con miele e noci',
+        '🥧 Perfetta per torte e dolci'
+      ],
+      en: [
+        '❄️ Store in refrigerator to keep it crispy',
+        '🍯 Great with honey and walnuts',
+        '🥧 Perfect for pies and desserts'
+      ]
+    },
+    curiosity: {
+      it: 'Una mela al giorno toglie il medico di torno: contiene pectina che aiuta la digestione!',
+      en: 'An apple a day keeps the doctor away: it contains pectin that aids digestion!'
+    }
   }
 };
 
@@ -194,15 +226,22 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
     fetchAiInfo();
   }, [productName, localProduct, i18n.language]);
   
+  // Helper per estrarre testo localizzato
+  const getLocalizedText = (field) => {
+    if (!field) return null;
+    if (typeof field === 'string') return field;
+    return field[language] || field.it || field;
+  };
+  
   // Merge data sources: local > AI > SWITCH > defaults
   const product = {
-    name: translateProductName(localProduct?.name || productName) || aiProductInfo?.name || t('products.unknown.name', 'Product'),
+    name: getLocalizedText(localProduct?.name) || translateProductName(productName) || aiProductInfo?.name || t('products.unknown.name', 'Product'),
     emoji: localProduct?.emoji || aiProductInfo?.emoji || '🥬',
-    category: translateCategory(localProduct?.category || switchData?.category?.group) || aiProductInfo?.category || t('products.category.other', 'Other'),
-    origin: localProduct?.origin || aiProductInfo?.origin || null,
+    category: getLocalizedText(localProduct?.category) || translateCategory(switchData?.category?.group) || aiProductInfo?.category || t('products.category.other', 'Other'),
+    origin: getLocalizedText(localProduct?.origin) || aiProductInfo?.origin || null,
     seasonality: localProduct?.seasonality || aiProductInfo?.seasonality || [],
-    tips: localProduct?.tips || aiProductInfo?.tips || [],
-    curiosity: localProduct?.curiosity || aiProductInfo?.curiosity || null,
+    tips: getLocalizedText(localProduct?.tips) || aiProductInfo?.tips || [],
+    curiosity: getLocalizedText(localProduct?.curiosity) || aiProductInfo?.curiosity || null,
     pairings: aiProductInfo?.pairings || [],
   };
   
