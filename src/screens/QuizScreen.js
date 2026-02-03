@@ -143,14 +143,27 @@ export default function QuizScreen() {
       return null;
     };
     
+    // Carboidrati e Proteine da SWITCH
+    const getCarbs = () => {
+      if (hasSwitchData && switchNutrition.carbohydrates) {
+        return parseFloat(switchNutrition.carbohydrates);
+      }
+      return null;
+    };
+    
+    const getProtein = () => {
+      if (hasSwitchData && switchNutrition.proteins) {
+        return parseFloat(switchNutrition.proteins);
+      }
+      return null;
+    };
+    
     return {
       calories: getCalories(),
-      water: getWater(),
+      carbs: getCarbs(),
+      protein: getProtein(),
       co2: getCO2(),
       waterFootprint: getWaterFootprint(),
-      // Flag per indicare la fonte dei dati
-      caloriesSource: scioData?.calories ? 'scio' : (hasSwitchData ? 'switch' : null),
-      waterSource: scioData?.water ? 'scio' : (hasSwitchData ? 'switch' : null),
       hasSwitchData
     };
   };
@@ -166,25 +179,39 @@ export default function QuizScreen() {
         : `How many calories do you think 100g of ${product.name} contains?`,
       unit: 'kcal/100g',
       min: 5,
-      max: 150,
+      max: 200,
       step: 5,
-      default: 40,
+      default: 50,
       realValue: realValues.calories,
       color: '#FF6B6B'
     },
     {
-      id: 'water',
-      icon: <Droplets size={32} color="#4ECDC4" />,
+      id: 'carbs',
+      icon: <Brain size={32} color="#FFA726" />,
       question: language === 'it'
-        ? `Quale percentuale di acqua contiene ${product.name}?`
-        : `What percentage of water does ${product.name} contain?`,
-      unit: '%',
-      min: 50,
-      max: 98,
-      step: 2,
-      default: 80,
-      realValue: realValues.water,
-      color: '#4ECDC4'
+        ? `Quanti grammi di carboidrati pensi che contenga 100g di ${product.name}?`
+        : `How many grams of carbohydrates do you think 100g of ${product.name} contains?`,
+      unit: 'g/100g',
+      min: 0,
+      max: 50,
+      step: 1,
+      default: 10,
+      realValue: realValues.carbs,
+      color: '#FFA726'
+    },
+    {
+      id: 'protein',
+      icon: <Droplets size={32} color="#7E57C2" />,
+      question: language === 'it'
+        ? `Quanti grammi di proteine pensi che contenga 100g di ${product.name}?`
+        : `How many grams of protein do you think 100g of ${product.name} contains?`,
+      unit: 'g/100g',
+      min: 0,
+      max: 30,
+      step: 0.5,
+      default: 3,
+      realValue: realValues.protein,
+      color: '#7E57C2'
     },
     {
       id: 'co2',
@@ -194,9 +221,9 @@ export default function QuizScreen() {
         : `How much CO₂ is emitted to produce 1kg of ${product.name}?`,
       unit: 'kg CO₂/kg',
       min: 0.1,
-      max: 3.0,
+      max: 5.0,
       step: 0.1,
-      default: 0.5,
+      default: 1.0,
       realValue: realValues.co2,
       color: '#95E1A3'
     },
@@ -210,7 +237,7 @@ export default function QuizScreen() {
       min: 50,
       max: 2000,
       step: 50,
-      default: 300,
+      default: 500,
       realValue: realValues.waterFootprint,
       color: SWITCH_COLORS.darkBlue
     }

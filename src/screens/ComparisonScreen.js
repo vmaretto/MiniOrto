@@ -198,7 +198,8 @@ export default function ComparisonScreen() {
     
     const metrics = [
       { key: 'calories', measured: scioData?.calories, db: switchData?.nutrition?.energy },
-      { key: 'water', measured: scioData?.water, db: null }, // DB SWITCH non ha water per tutti
+      { key: 'carbs', measured: scioData?.carbs, db: switchData?.nutrition?.carbohydrates },
+      { key: 'protein', measured: scioData?.protein, db: switchData?.nutrition?.proteins },
       { key: 'co2', measured: null, db: switchData?.environmental?.carbonFootprint },
       { key: 'waterFootprint', measured: null, db: switchData?.environmental?.waterFootprint }
     ];
@@ -342,12 +343,22 @@ export default function ComparisonScreen() {
         />
         
         <ComparisonRow
-          label={language === 'it' ? 'Contenuto Acqua' : 'Water Content'}
-          icon="💧"
-          userEstimate={answers.water}
-          measured={scioData?.water}
-          dbSwitch={null}
-          unit="%"
+          label={language === 'it' ? 'Carboidrati' : 'Carbohydrates'}
+          icon="🍞"
+          userEstimate={answers.carbs}
+          measured={scioData?.carbs}
+          dbSwitch={switchData?.nutrition?.carbohydrates}
+          unit="g/100g"
+          language={language}
+        />
+        
+        <ComparisonRow
+          label={language === 'it' ? 'Proteine' : 'Protein'}
+          icon="💪"
+          userEstimate={answers.protein}
+          measured={scioData?.protein}
+          dbSwitch={switchData?.nutrition?.proteins}
+          unit="g/100g"
           language={language}
         />
         
