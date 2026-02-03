@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { Flame, Droplets, Leaf, TrendingUp, TrendingDown, Minus, Trophy, Target } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import EnvironmentalCard from '../components/EnvironmentalCard';
+// EnvironmentalCard now integrated in ProductCard
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
 import GlobalProgress from '../components/GlobalProgress';
 
@@ -521,13 +521,7 @@ function ResultsScreen() {
             </div>
           )}
 
-          {/* Environmental Impact */}
-          {recognizedProduct && (
-            <EnvironmentalCard 
-              data={switchData} 
-              loading={switchLoading} 
-            />
-          )}
+          {/* Environmental Impact is now inside ProductCard */}
 
           {/* Product Card */}
           {recognizedProduct && (
