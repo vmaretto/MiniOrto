@@ -8,8 +8,9 @@ import GlobalProgress from '../components/GlobalProgress';
 
 // Componente per riga di confronto a 3 colonne
 const ComparisonRow = ({ label, icon, userEstimate, measured, dbSwitch, unit, language }) => {
-  // Determina quale valore usare come riferimento (misurato > DB)
-  const referenceValue = measured ?? dbSwitch;
+  // Confronta sempre stima vs DB SWITCH (valuta la "conoscenza" dell'utente sui valori tipici)
+  // Il valore misurato è informativo ma non cambia la valutazione
+  const referenceValue = dbSwitch;
   const hasReference = referenceValue !== null && referenceValue !== undefined;
   
   // Calcola scarto percentuale
