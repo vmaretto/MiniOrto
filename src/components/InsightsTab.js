@@ -1488,139 +1488,133 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
           {/* Main Trend Card */}
           {insights.mainTrend && (
             <div style={{
-              background: 'linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 100%)',
-              borderRadius: '20px',
-              padding: '2rem',
-              marginBottom: '2rem',
-              boxShadow: '0 10px 30px rgba(139, 92, 246, 0.2)',
-              border: '2px solid #7c3aed'
+              background: 'linear-gradient(135deg, #1E3A5F 0%, #2d4a6f 100%)',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              marginBottom: '1.5rem',
+              boxShadow: '0 8px 25px rgba(30, 58, 95, 0.3)',
+              border: '3px solid #FFC300'
             }}>
-              <TrendingUp size={48} style={{ marginBottom: '1rem', color: '#5b21b6' }} />
-              <h3 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1e1b4b' }}>
-                {insights.mainTrend.title}
-              </h3>
-              <p style={{ fontSize: '1.125rem', marginBottom: '1rem', color: '#312e81', fontWeight: '500' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                <div style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '12px',
+                  background: '#FFC300',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <TrendingUp size={28} color="#1E3A5F" />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'white', margin: 0 }}>
+                  {insights.mainTrend.title}
+                </h3>
+              </div>
+              <p style={{ fontSize: '1rem', marginBottom: '0.75rem', color: 'rgba(255,255,255,0.9)', lineHeight: '1.6' }}>
                 {insights.mainTrend.description}
               </p>
               {insights.mainTrend.significance && (
-                <p style={{ fontSize: '0.875rem', color: '#4c1d95', fontStyle: 'italic', fontWeight: '500' }}>
+                <p style={{ fontSize: '0.85rem', color: '#FFC300', fontWeight: '500', margin: 0 }}>
                   💡 {insights.mainTrend.significance}
                 </p>
               )}
             </div>
           )}
 
-          {/* Curiosities Grid - 2 columns for better readability */}
+          {/* Curiosities Grid - SWITCH style */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '1.5rem',
+            gap: '1rem',
             marginBottom: '2rem'
           }}>
             {(() => {
-              // Show only real curiosities - no duplicates
               let displayCuriosities = insights.curiosities || [];
               
-              // If no insights, show placeholder
               if (displayCuriosities.length === 0) {
                 displayCuriosities = [{
                   title: language === 'it' ? 'Analisi in corso' : 'Analyzing',
                   insight: language === 'it' ? 'Stiamo elaborando i dati...' : 'Processing data...',
                   emoji: '📊',
                   type: 'correlation',
-                  strength: 3,
-                  evidence: ''
+                  strength: 3
                 }];
               }
               
-              // Show what we have (max 6)
               displayCuriosities = displayCuriosities.slice(0, 6);
 
-              const getGradient = (type) => {
-                switch(type) {
-                  case 'paradox': return 'linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)';
-                  case 'psychological': return 'linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%)';
-                  case 'temporal': return 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)';
-                  case 'behavioral': return 'linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%)';
-                  case 'demographic': return 'linear-gradient(135deg, #eff6ff 0%, #bfdbfe 100%)';
-                  default: return 'linear-gradient(135deg, #f0fdfa 0%, #99f6e4 100%)';
-                }
-              };
-
-              const getBorderColor = (type) => {
-                switch(type) {
-                  case 'paradox': return '#ef4444';
-                  case 'psychological': return '#a855f7';
-                  case 'temporal': return '#f97316';
-                  case 'behavioral': return '#22c55e';
-                  case 'demographic': return '#3b82f6';
-                  default: return '#14b8a6';
-                }
-              };
+              // SWITCH colors
+              const GOLD = '#FFC300';
+              const DARK_BLUE = '#1E3A5F';
+              const GREEN = '#28A745';
               
               return displayCuriosities.map((curiosity, index) => (
                 <div
                   key={index}
                   style={{
-                    background: getGradient(curiosity.type),
-                    borderRadius: '20px',
-                    padding: '1.5rem',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.08)',
-                    borderLeft: `5px solid ${getBorderColor(curiosity.type)}`,
-                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    background: 'white',
+                    borderRadius: '16px',
+                    padding: '1.25rem',
+                    boxShadow: '0 4px 15px rgba(30, 58, 95, 0.1)',
+                    border: `2px solid ${GOLD}`,
+                    transition: 'all 0.2s ease',
                     position: 'relative',
-                    minHeight: '180px',
+                    minHeight: '160px',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 12px 35px rgba(0,0,0,0.12)';
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 195, 0, 0.25)';
+                    e.currentTarget.style.borderColor = DARK_BLUE;
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.08)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(30, 58, 95, 0.1)';
+                    e.currentTarget.style.borderColor = GOLD;
                   }}
                 >
                   <button
                     onClick={() => toggleFavorite(curiosity)}
                     style={{
                       position: 'absolute',
-                      top: '1rem',
-                      right: '1rem',
-                      background: 'white',
+                      top: '0.75rem',
+                      right: '0.75rem',
+                      background: 'none',
                       border: 'none',
-                      borderRadius: '50%',
-                      width: '32px',
-                      height: '32px',
                       cursor: 'pointer',
-                      color: isFavorite(curiosity) ? '#fbbf24' : '#9ca3af',
-                      transition: 'all 0.2s',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      color: isFavorite(curiosity) ? GOLD : '#d1d5db',
+                      transition: 'color 0.2s',
+                      padding: '4px'
                     }}
                   >
-                    <Star size={16} fill={isFavorite(curiosity) ? '#fbbf24' : 'none'} />
+                    <Star size={18} fill={isFavorite(curiosity) ? GOLD : 'none'} />
                   </button>
                   
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <div style={{
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      marginBottom: '1rem'
+                      alignItems: 'flex-start',
+                      gap: '0.75rem',
+                      marginBottom: '0.75rem'
                     }}>
-                      <span style={{ 
-                        fontSize: '2.5rem', 
-                        lineHeight: '1',
-                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
-                      }}>{curiosity.emoji}</span>
+                      <div style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '12px',
+                        background: `linear-gradient(135deg, ${GOLD}20 0%, ${GOLD}40 100%)`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <span style={{ fontSize: '1.5rem' }}>{curiosity.emoji}</span>
+                      </div>
                       <h4 style={{
-                        fontSize: '1.1rem',
+                        fontSize: '0.95rem',
                         fontWeight: '700',
-                        color: '#1f2937',
+                        color: DARK_BLUE,
                         lineHeight: '1.3',
                         flex: 1,
                         margin: 0
@@ -1630,34 +1624,29 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                     </div>
                     
                     <p style={{
-                      fontSize: '0.95rem',
-                      color: '#374151',
-                      lineHeight: '1.6',
-                      marginBottom: '1rem',
+                      fontSize: '0.85rem',
+                      color: '#4b5563',
+                      lineHeight: '1.5',
                       flex: 1,
-                      fontWeight: '400'
+                      margin: 0
                     }}>
                       {curiosity.insight}
                     </p>
                     
-                    {/* Strength indicator - dots style */}
+                    {/* Strength bar */}
                     <div style={{
-                      display: 'flex',
-                      gap: '6px',
-                      marginTop: 'auto'
+                      marginTop: '0.75rem',
+                      height: '4px',
+                      background: '#e5e7eb',
+                      borderRadius: '2px',
+                      overflow: 'hidden'
                     }}>
-                      {[...Array(5)].map((_, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            background: i < curiosity.strength ? getBorderColor(curiosity.type) : '#d1d5db',
-                            transition: 'background 0.2s'
-                          }}
-                        />
-                      ))}
+                      <div style={{
+                        width: `${(curiosity.strength / 5) * 100}%`,
+                        height: '100%',
+                        background: `linear-gradient(90deg, ${GOLD} 0%, ${GREEN} 100%)`,
+                        borderRadius: '2px'
+                      }} />
                     </div>
                   </div>
                 </div>
@@ -1668,28 +1657,30 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
           {/* Fun Fact */}
           {insights.funFact && (
             <div style={{
-              background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
-              borderRadius: '20px',
-              padding: '2rem',
+              background: 'linear-gradient(135deg, #FFC300 0%, #ffdb4d 100%)',
+              borderRadius: '16px',
+              padding: '1.5rem',
               textAlign: 'center',
-              boxShadow: '0 10px 30px rgba(252, 182, 159, 0.3)',
-              marginBottom: '2rem',
-              border: '2px solid #f59e0b'
+              boxShadow: '0 6px 20px rgba(255, 195, 0, 0.3)',
+              marginBottom: '1.5rem',
+              border: '2px solid #1E3A5F'
             }}>
-              <span style={{ fontSize: '3rem' }}>{insights.funFact.emoji}</span>
+              <span style={{ fontSize: '2.5rem' }}>{insights.funFact.emoji}</span>
               <h3 style={{
-                fontSize: '1.5rem',
+                fontSize: '1.1rem',
                 fontWeight: 'bold',
-                color: '#92400e', // Dark brown for high contrast
-                marginTop: '1rem'
+                color: '#1E3A5F',
+                marginTop: '0.75rem',
+                marginBottom: '0.5rem'
               }}>
                 {language === 'it' ? 'Lo sapevi che...' : 'Did you know...'}
               </h3>
               <p style={{
-                fontSize: '1.125rem',
-                color: '#451a03', // Very dark brown for readability
-                marginTop: '0.5rem',
-                fontWeight: '500'
+                fontSize: '0.95rem',
+                color: '#1E3A5F',
+                margin: 0,
+                fontWeight: '500',
+                lineHeight: '1.5'
               }}>
                 {insights.funFact.fact}
               </p>
