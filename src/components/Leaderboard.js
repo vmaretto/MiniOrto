@@ -167,12 +167,29 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
                   {/* Info */}
                   <div style={{ flex: 1 }}>
                     <div style={{
-                      fontSize: '1.125rem',
-                      fontWeight: '600',
-                      color: '#1f2937',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                       marginBottom: '0.25rem'
                     }}>
-                      {displayName}
+                      <div style={{
+                        fontSize: '1.125rem',
+                        fontWeight: '600',
+                        color: '#1f2937'
+                      }}>
+                        {displayName}
+                      </div>
+                      {/* Score - always visible */}
+                      <div style={{
+                        fontSize: '1.25rem',
+                        fontWeight: 'bold',
+                        color: '#667eea',
+                        background: '#667eea15',
+                        padding: '4px 12px',
+                        borderRadius: '20px'
+                      }}>
+                        {participant.totalScore} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{language === 'it' ? 'pt' : 'pts'}</span>
+                      </div>
                     </div>
                     <div style={{
                       fontSize: '0.875rem',
@@ -182,49 +199,30 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
                       {profile.profession && ` • ${profile.profession}`}
                     </div>
                     <div style={{
-                      fontSize: '0.75rem',
-                      color: '#9ca3af',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
                       marginTop: '0.25rem'
                     }}>
-                      {formatDate(participant.timestamp)}
-                    </div>
-                  </div>
-
-                  {/* Scores */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    gap: '4px',
-                    minWidth: '150px'
-                  }}>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{
-                        fontSize: '1.8rem',
-                        fontWeight: 'bold',
-                        color: '#667eea'
-                      }}>
-                        {participant.totalScore}
-                      </div>
-                      <div style={{
+                      <span style={{
                         fontSize: '0.75rem',
-                        color: '#6b7280'
+                        color: '#9ca3af'
                       }}>
-                        {language === 'it' ? 'punti' : 'points'}
-                      </div>
+                        {formatDate(participant.timestamp)}
+                      </span>
+                      {participant.quizBadge && (
+                        <span style={{
+                          fontSize: '0.7rem',
+                          padding: '2px 8px',
+                          borderRadius: '10px',
+                          background: `${participant.quizBadge.color}20`,
+                          color: participant.quizBadge.color,
+                          fontWeight: '500'
+                        }}>
+                          {participant.quizBadge.name}
+                        </span>
+                      )}
                     </div>
-                    {participant.quizBadge && (
-                      <div style={{
-                        fontSize: '0.85rem',
-                        padding: '4px 10px',
-                        borderRadius: '12px',
-                        background: `${participant.quizBadge.color}20`,
-                        color: participant.quizBadge.color,
-                        fontWeight: '500'
-                      }}>
-                        {participant.quizBadge.name}
-                      </div>
-                    )}
                   </div>
 
                   {/* Expand Icon */}
