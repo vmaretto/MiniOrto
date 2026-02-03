@@ -33,17 +33,52 @@ module.exports = async (req, res) => {
     // Normalize search term
     const normalizedSearch = searchTerm.toLowerCase().trim();
     
+    // Semantic mapping: different names that should match the same base food
+    const semanticMappings = {
+      // Yogurt variants → YOGURT
+      'yogurt greco': 'yogurt',
+      'yogurt bianco': 'yogurt',
+      'yogurt naturale': 'yogurt',
+      'yogurt magro': 'yogurt',
+      'yogurt intero': 'yogurt',
+      'greek yogurt': 'yogurt',
+      'plain yogurt': 'yogurt',
+      // Milk variants → COW MILK
+      'latte intero': 'cow milk',
+      'latte parzialmente scremato': 'cow milk',
+      'latte scremato': 'cow milk',
+      'whole milk': 'cow milk',
+      'skim milk': 'cow milk',
+      // Tomato variants → TOMATO
+      'pomodoro ciliegino': 'tomato',
+      'pomodoro datterino': 'tomato',
+      'pomodoro cuore di bue': 'tomato',
+      'cherry tomato': 'tomato',
+      'pomodorino': 'tomato',
+      // Cheese variants → CHEESE (generic)
+      'mozzarella': 'cheese',
+      'parmigiano': 'cheese',
+      'grana': 'cheese',
+      'pecorino': 'cheese',
+      'ricotta': 'cheese',
+    };
+    
+    // Check if we have a semantic mapping first
+    let semanticSearch = semanticMappings[normalizedSearch] || null;
+    
     // Remove common adjectives to get the main food item
-    // e.g., "Yogurt bianco" → "yogurt", "Fresh milk" → "milk"
-    const removeWords = ['bianco', 'white', 'fresh', 'fresco', 'naturale', 'natural', 'intero', 'whole', 'magro', 'low-fat', 'greco', 'greek'];
+    const removeWords = ['bianco', 'white', 'fresh', 'fresco', 'naturale', 'natural', 'intero', 'whole', 'magro', 'low-fat', 'greco', 'greek', 'scremato', 'parzialmente'];
     let cleanedSearch = normalizedSearch;
     removeWords.forEach(word => {
       cleanedSearch = cleanedSearch.replace(new RegExp(`\\b${word}\\b`, 'gi'), '').trim();
     });
     cleanedSearch = cleanedSearch.replace(/\s+/g, ' ').trim();
     
+    // Use semantic search if available, otherwise cleaned search
+    const primarySearch = semanticSearch || cleanedSearch;
+    
     // Extract main keyword (e.g., "Cherry tomato" → "tomato")
-    const searchWords = cleanedSearch.split(' ');
+    const searchWords = primarySearch.split(' ');
     
     // Try to find best match
     let bestMatch = null;
@@ -52,11 +87,21 @@ module.exports = async (req, res) => {
     for (const item of foodItems) {
       const itemName = (item['FOOD COMMODITY ITEM'] || '').toLowerCase();
       
-      // Check for exact match first (both original and cleaned)
-      if (itemName === normalizedSearch || itemName === cleanedSearch) {
+      // Check for exact match first (original, semantic, or cleaned)
+      if (itemName === normalizedSearch || itemName === primarySearch || itemName === cleanedSearch) {
         bestMatch = item;
         bestScore = 100;
         break;
+      }
+
+      // Check semantic/primary search match
+      if (primarySearch && (itemName.includes(primarySearch) || primarySearch.includes(itemName))) {
+        const score = itemName === primarySearch ? 98 : 92;
+        if (score > bestScore) {
+          bestMatch = item;
+          bestScore = score;
+        }
+        continue;
       }
 
       // Check if item name contains search term (cleaned version)
