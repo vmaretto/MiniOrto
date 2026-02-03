@@ -17,6 +17,7 @@ import AdminScreen from './screens/AdminScreen';
 import ScanFlowScreen from './screens/ScanFlowScreen';
 import EmbedProductScreen from './screens/EmbedProductScreen';
 import FeedbackScreen from './screens/FeedbackScreen';
+import ComparisonScreen from './screens/ComparisonScreen';
 import './screens/ScanFlowScreen.css';
 import { initGA, trackPageView } from './utils/analytics';
 
@@ -53,6 +54,7 @@ function App() {
           <Route path="/scan" element={<ScanScreen />} />
           <Route path="/scan-spectrometer" element={<SpectrometerScreen />} />
           <Route path="/results" element={<ResultsScreen />} />
+          <Route path="/comparison" element={<ComparisonScreen />} />
           <Route path="/dashboard" element={<DashboardScreen />} />
           <Route path="/admin" element={<AdminScreen />} />
           <Route path="/scan-flow" element={<ScanFlowScreen />} />

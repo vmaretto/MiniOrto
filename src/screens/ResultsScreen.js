@@ -296,147 +296,53 @@ function ResultsScreen() {
     );
   }
 
+  // Salva switchData in sessionStorage per ComparisonScreen
+  useEffect(() => {
+    if (switchData) {
+      sessionStorage.setItem('switchData', JSON.stringify(switchData));
+    }
+  }, [switchData]);
+
   return (
     <SwitchLayout 
-      title={`📊 ${language === 'it' ? 'Confronto Risultati' : 'Results Comparison'}`}
-      subtitle={recognizedProduct?.name || (language === 'it' ? 'Percezione vs Realtà' : 'Perception vs Reality')}
+      title={`🍽️ ${language === 'it' ? 'Scheda Prodotto' : 'Product Card'}`}
+      subtitle={recognizedProduct?.name || ''}
       compact={true}
     >
       <GlobalProgress currentStep="results" language={language} />
 
-      {/* HERO: Punteggio totale con animazione */}
-      {score !== null && (
-        <div style={{
-          background: `linear-gradient(135deg, ${SWITCH_COLORS.darkBlue} 0%, #2d4a6f 100%)`,
-          borderRadius: '20px',
-          padding: '24px',
-          marginBottom: '24px',
-          color: 'white',
-          textAlign: 'center',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
-        }}>
-          <Trophy size={40} color={SWITCH_COLORS.gold} style={{ marginBottom: '12px' }} />
-          <div style={{
-            fontSize: '4rem',
-            fontWeight: 'bold',
-            lineHeight: 1,
-            marginBottom: '8px',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
-          }}>
-            {score}
-          </div>
-          <div style={{ opacity: 0.9, marginBottom: '12px' }}>
-            {language === 'it' ? 'punti su 100' : 'points out of 100'}
-          </div>
-          <div style={{
-            fontSize: '1.3rem',
-            fontWeight: '600',
-            color: getBadge(score).color
-          }}>
-            {getBadge(score).name}
-          </div>
-        </div>
-      )}
-
-      {/* Prodotto riconosciuto */}
+      {/* SCHEDA PRODOTTO - Prima di tutto */}
       {recognizedProduct && (
-        <div style={{
-          background: `linear-gradient(135deg, ${SWITCH_COLORS.gold}20 0%, ${SWITCH_COLORS.gold}10 100%)`,
-          borderRadius: '12px',
-          padding: '16px',
-          marginBottom: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          border: `2px solid ${SWITCH_COLORS.gold}`
-        }}>
-          {productImage ? (
-            <img 
-              src={productImage} 
-              alt={recognizedProduct.name}
-              style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: '10px',
-                objectFit: 'cover'
-              }}
-            />
-          ) : (
-            <div style={{ fontSize: '2.5rem' }}>{recognizedProduct.emoji || '🥬'}</div>
-          )}
-          <div>
-            <div style={{ fontWeight: 'bold', color: SWITCH_COLORS.darkBlue, fontSize: '1.1rem' }}>
-              {recognizedProduct.name}
-            </div>
-            {recognizedProduct.category && (
-              <div style={{ fontSize: '0.85rem', color: '#666' }}>{recognizedProduct.category}</div>
-            )}
-          </div>
+        <div style={{ marginBottom: '20px' }}>
+          <ProductCard 
+            productName={recognizedProduct.name}
+            measuredValue={results?.value}
+            productImage={productImage}
+            switchData={switchData}
+          />
         </div>
       )}
 
-      {/* CONFRONTO PERCEZIONE VS REALTÀ */}
-      {quizAnswers && !quizAnswers.skipped && quizAnswers.answers && quizAnswers.realValues && (
-        <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ 
-            color: SWITCH_COLORS.darkBlue, 
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <Target size={20} />
-            {language === 'it' ? 'Le tue stime vs Realtà' : 'Your estimates vs Reality'}
-          </h3>
-          
-          {quizAnswers.answers.calories !== undefined && (
-            <ComparisonRow
-              icon={<Flame size={24} color="#FF6B6B" />}
-              label={language === 'it' ? 'Calorie' : 'Calories'}
-              userValue={quizAnswers.answers.calories}
-              realValue={quizAnswers.realValues.calories}
-              unit="kcal/100g"
-              color="#FF6B6B"
-              language={language}
-            />
-          )}
-          
-          {quizAnswers.answers.water !== undefined && (
-            <ComparisonRow
-              icon={<Droplets size={24} color="#4ECDC4" />}
-              label={language === 'it' ? 'Contenuto acqua' : 'Water content'}
-              userValue={quizAnswers.answers.water}
-              realValue={quizAnswers.realValues.water}
-              unit="%"
-              color="#4ECDC4"
-              language={language}
-            />
-          )}
-          
-          {quizAnswers.answers.co2 !== undefined && (
-            <ComparisonRow
-              icon={<Leaf size={24} color="#95E1A3" />}
-              label={language === 'it' ? 'Impronta CO₂' : 'CO₂ footprint'}
-              userValue={quizAnswers.answers.co2}
-              realValue={quizAnswers.realValues.co2}
-              unit="kg/kg"
-              color="#95E1A3"
-              language={language}
-            />
-          )}
-          
-          {quizAnswers.answers.waterFootprint !== undefined && (
-            <ComparisonRow
-              icon={<Droplets size={24} color={SWITCH_COLORS.darkBlue} />}
-              label={language === 'it' ? 'Impronta idrica' : 'Water footprint'}
-              userValue={quizAnswers.answers.waterFootprint}
-              realValue={quizAnswers.realValues.waterFootprint}
-              unit="L/kg"
-              color={SWITCH_COLORS.darkBlue}
-              language={language}
-            />
-          )}
-        </div>
+      {/* Bottone per vedere il Confronto */}
+      {quizAnswers && !quizAnswers.skipped && (
+        <button 
+          onClick={() => navigate('/comparison')}
+          style={{ 
+            marginBottom: '10px',
+            width: '100%',
+            padding: '16px',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: 'white',
+            background: SWITCH_COLORS.green,
+            border: 'none',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            boxShadow: `0 4px 12px ${SWITCH_COLORS.green}50`
+          }}
+        >
+          📊 {language === 'it' ? 'Vedi Confronto Stime vs Realtà' : 'See Your Estimates vs Reality'}
+        </button>
       )}
 
       {/* Messaggio se quiz saltato */}
@@ -454,88 +360,6 @@ function ResultsScreen() {
               : '⚠️ You skipped the quiz. Next time try to estimate the values!'}
           </p>
         </div>
-      )}
-
-      {/* Toggle per dati completi */}
-      <button
-        onClick={() => setShowFullResults(!showFullResults)}
-        style={{
-          width: '100%',
-          padding: '12px',
-          background: 'transparent',
-          border: `2px solid ${SWITCH_COLORS.darkBlue}`,
-          borderRadius: '12px',
-          color: SWITCH_COLORS.darkBlue,
-          cursor: 'pointer',
-          fontWeight: '500',
-          marginBottom: '20px'
-        }}
-      >
-        {showFullResults 
-          ? (language === 'it' ? '▲ Nascondi dettagli' : '▲ Hide details')
-          : (language === 'it' ? '▼ Mostra tutti i dati' : '▼ Show all data')
-        }
-      </button>
-
-      {/* Dati dettagliati (collapsible) */}
-      {showFullResults && (
-        <>
-          {/* SCIO Value */}
-          {results?.value !== undefined && (
-            <div style={{
-              background: `linear-gradient(135deg, ${SWITCH_COLORS.darkBlue} 0%, #2d4a6f 100%)`,
-              borderRadius: '12px',
-              padding: '20px',
-              marginBottom: '20px',
-              color: 'white',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '8px' }}>
-                🔬 {results.modelName || 'SCIO'}
-              </div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
-                {typeof results.value === 'number' ? results.value.toFixed(2) : results.value}
-                <span style={{ fontSize: '1.2rem', marginLeft: '4px' }}>{results.units || ''}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Nutritional Values */}
-          {results && (
-            <div style={{
-              background: SWITCH_COLORS.lightBg,
-              borderRadius: '12px',
-              padding: '15px',
-              marginBottom: '20px'
-            }}>
-              <h3 style={{ marginBottom: '10px', color: SWITCH_COLORS.darkBlue }}>{t('results.nutritionValues')}</h3>
-              
-              <NutrientRow label={t('results.calories')} value={results.calories} unit="kcal" />
-              <NutrientRow label={t('results.carbs')} value={results.carbs} unit="g" />
-              <NutrientRow label={t('results.sugar')} value={results.sugar} unit="g" />
-              <NutrientRow label={t('results.fiber')} value={results.fiber} unit="g" />
-              <NutrientRow label={t('results.protein')} value={results.protein} unit="g" />
-              <NutrientRow label={t('results.fat')} value={results.fat} unit="g" />
-              <NutrientRow label={t('results.water')} value={results.water} unit="g" />
-              {results.brix && <NutrientRow label="°Brix" value={results.brix} unit="" />}
-            </div>
-          )}
-
-          {/* Environmental Impact is now inside ProductCard */}
-
-          {/* Product Card */}
-          {recognizedProduct && (
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ marginBottom: '10px', color: SWITCH_COLORS.darkBlue }}>🍅 {t('results.productCard')}</h3>
-              <ProductCard 
-                productName={recognizedProduct.name}
-                measuredValue={results?.value}
-                productImage={productImage}
-                switchData={switchData}
-              />
-            </div>
-          )}
-        </>
       )}
 
       {/* Continue to Feedback */}
