@@ -232,7 +232,7 @@ export default function ComparisonScreen() {
     if (storedProduct) setRecognizedProduct(JSON.parse(storedProduct));
   }, []);
 
-  // Calcola punteggio totale
+  // Calcola punteggio totale - usa BEST OF (misurato, db) come i singoli
   const calculateScore = () => {
     if (!quizAnswers?.answers) return null;
     
@@ -248,17 +248,37 @@ export default function ComparisonScreen() {
       { key: 'waterFootprint', measured: null, db: switchData?.environmental?.waterFootprint }
     ];
     
+    const getScore = (deviation) => {
+      if (deviation <= 10) return 100;
+      if (deviation <= 20) return 80;
+      if (deviation <= 35) return 60;
+      if (deviation <= 50) return 40;
+      return 20;
+    };
+    
     metrics.forEach(({ key, measured, db }) => {
       const estimate = answers[key];
-      const reference = measured ?? db;
       
-      if (estimate !== undefined && reference) {
-        const deviation = Math.abs((estimate - reference) / reference * 100);
-        if (deviation <= 10) totalScore += 100;
-        else if (deviation <= 20) totalScore += 80;
-        else if (deviation <= 35) totalScore += 60;
-        else if (deviation <= 50) totalScore += 40;
-        else totalScore += 20;
+      // Calcola deviazione da entrambi
+      const devFromMeasured = (measured !== null && measured !== undefined && measured !== 0) 
+        ? Math.abs((estimate - measured) / measured * 100) 
+        : null;
+      const devFromDb = (db !== null && db !== undefined && db !== 0) 
+        ? Math.abs((estimate - db) / db * 100) 
+        : null;
+      
+      // Usa il MIGLIORE dei due (stessa logica dei singoli)
+      let bestDeviation = null;
+      if (devFromMeasured !== null && devFromDb !== null) {
+        bestDeviation = Math.min(devFromMeasured, devFromDb);
+      } else if (devFromMeasured !== null) {
+        bestDeviation = devFromMeasured;
+      } else if (devFromDb !== null) {
+        bestDeviation = devFromDb;
+      }
+      
+      if (estimate !== undefined && bestDeviation !== null) {
+        totalScore += getScore(bestDeviation);
         count++;
       }
     });
