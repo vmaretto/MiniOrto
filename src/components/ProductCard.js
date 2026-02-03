@@ -2,6 +2,43 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+// Traduzioni nomi prodotti
+const productNameTranslations = {
+  'pomodoro': { it: 'Pomodoro', en: 'Tomato' },
+  'pomodoro ciliegino': { it: 'Pomodoro Ciliegino', en: 'Cherry Tomato' },
+  'mela': { it: 'Mela', en: 'Apple' },
+  'mela golden': { it: 'Mela Golden', en: 'Golden Apple' },
+  'arancia': { it: 'Arancia', en: 'Orange' },
+  'limone': { it: 'Limone', en: 'Lemon' },
+  'banana': { it: 'Banana', en: 'Banana' },
+  'fragola': { it: 'Fragola', en: 'Strawberry' },
+  'uva': { it: 'Uva', en: 'Grape' },
+  'pera': { it: 'Pera', en: 'Pear' },
+  'pesca': { it: 'Pesca', en: 'Peach' },
+  'anguria': { it: 'Anguria', en: 'Watermelon' },
+  'melone': { it: 'Melone', en: 'Melon' },
+  'kiwi': { it: 'Kiwi', en: 'Kiwi' },
+  'avocado': { it: 'Avocado', en: 'Avocado' },
+  'carota': { it: 'Carota', en: 'Carrot' },
+  'zucchina': { it: 'Zucchina', en: 'Zucchini' },
+  'peperone': { it: 'Peperone', en: 'Bell Pepper' },
+  'cetriolo': { it: 'Cetriolo', en: 'Cucumber' },
+  'lattuga': { it: 'Lattuga', en: 'Lettuce' },
+  'spinaci': { it: 'Spinaci', en: 'Spinach' },
+  'broccoli': { it: 'Broccoli', en: 'Broccoli' },
+  'cavolfiore': { it: 'Cavolfiore', en: 'Cauliflower' },
+  'patata': { it: 'Patata', en: 'Potato' },
+  'cipolla': { it: 'Cipolla', en: 'Onion' },
+  'aglio': { it: 'Aglio', en: 'Garlic' },
+};
+
+// Traduzioni categorie
+const categoryTranslations = {
+  'frutta': { it: 'Frutta', en: 'Fruit' },
+  'verdura': { it: 'Verdura', en: 'Vegetable' },
+  'ortaggio': { it: 'Ortaggio', en: 'Vegetable' },
+};
+
 // Database prodotti locali (fallback)
 const localProducts = {
   'pomodoro': {
@@ -97,6 +134,29 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
   const { t, i18n } = useTranslation();
   const [aiProductInfo, setAiProductInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const language = i18n.language || 'it';
+  
+  // Funzione per tradurre nomi prodotti
+  const translateProductName = (name) => {
+    if (!name) return '';
+    const key = name.toLowerCase().trim();
+    const translation = productNameTranslations[key];
+    if (translation) {
+      return language === 'en' ? translation.en : translation.it;
+    }
+    return name;
+  };
+  
+  // Funzione per tradurre categorie
+  const translateCategory = (cat) => {
+    if (!cat) return '';
+    const key = cat.toLowerCase().trim();
+    const translation = categoryTranslations[key];
+    if (translation) {
+      return language === 'en' ? translation.en : translation.it;
+    }
+    return cat;
+  };
   
   // Normalize product name for lookup
   const normalizedName = (productName || '').toLowerCase().trim();
@@ -136,9 +196,9 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
   
   // Merge data sources: local > AI > SWITCH > defaults
   const product = {
-    name: localProduct?.name || aiProductInfo?.name || productName || t('products.unknown.name', 'Prodotto'),
+    name: translateProductName(localProduct?.name || productName) || aiProductInfo?.name || t('products.unknown.name', 'Product'),
     emoji: localProduct?.emoji || aiProductInfo?.emoji || '🥬',
-    category: localProduct?.category || aiProductInfo?.category || switchData?.category?.group || t('products.category.other', 'Altro'),
+    category: translateCategory(localProduct?.category || switchData?.category?.group) || aiProductInfo?.category || t('products.category.other', 'Other'),
     origin: localProduct?.origin || aiProductInfo?.origin || null,
     seasonality: localProduct?.seasonality || aiProductInfo?.seasonality || [],
     tips: localProduct?.tips || aiProductInfo?.tips || [],
@@ -253,43 +313,43 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
               {measuredData.calories && (
                 <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🔥 Calorie</div>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🔥 {language === 'en' ? 'Calories' : 'Calorie'}</div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.calories} <span style={{ fontSize: '0.75rem' }}>kcal</span></div>
                 </div>
               )}
               {measuredData.carbs && (
                 <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🍞 Carboidrati</div>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🍞 {language === 'en' ? 'Carbs' : 'Carboidrati'}</div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.carbs} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}
               {measuredData.sugar && (
                 <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🍬 Zuccheri</div>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🍬 {language === 'en' ? 'Sugar' : 'Zuccheri'}</div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.sugar} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}
               {measuredData.protein && (
                 <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>💪 Proteine</div>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>💪 {language === 'en' ? 'Protein' : 'Proteine'}</div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.protein} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}
               {measuredData.fiber && (
                 <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🌾 Fibre</div>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🌾 {language === 'en' ? 'Fiber' : 'Fibre'}</div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.fiber} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}
               {measuredData.fat && (
                 <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🧈 Grassi</div>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🧈 {language === 'en' ? 'Fat' : 'Grassi'}</div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.fat} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}
               {measuredData.water && (
                 <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>💧 Acqua</div>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>💧 {language === 'en' ? 'Water' : 'Acqua'}</div>
                   <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.water} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}

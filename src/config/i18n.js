@@ -222,6 +222,13 @@ const resources = {
       "productCard.quality.optimal": "Ottimale",
       "productCard.quality.belowAverage": "Sotto la media",
       "productCard.quality.aboveAverage": "Sopra la media",
+      "productCard.measuredValues": "Valori Misurati",
+      "productCard.fromScio": "dal tuo prodotto",
+      "productCard.averageValues": "valori medi",
+      "productCard.environmentalImpact": "Impatto Ambientale",
+      "productCard.protein": "Proteine",
+      "productCard.carbs": "Carboidrati",
+      "productCard.fat": "Grassi",
       
       // Products
       "products.category.fruit": "Frutta",
@@ -498,6 +505,13 @@ const resources = {
       "productCard.quality.optimal": "Optimal",
       "productCard.quality.belowAverage": "Below average",
       "productCard.quality.aboveAverage": "Above average",
+      "productCard.measuredValues": "Measured Values",
+      "productCard.fromScio": "from your product",
+      "productCard.averageValues": "average values",
+      "productCard.environmentalImpact": "Environmental Impact",
+      "productCard.protein": "Protein",
+      "productCard.carbs": "Carbohydrates",
+      "productCard.fat": "Fat",
       
       // Products
       "products.category.fruit": "Fruit",

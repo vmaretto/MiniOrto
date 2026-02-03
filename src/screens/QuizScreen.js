@@ -6,6 +6,36 @@ import { Brain, Droplets, Flame, Leaf, ChevronRight, Info } from 'lucide-react';
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
 import GlobalProgress from '../components/GlobalProgress';
 
+// Traduzioni nomi prodotti
+const productNames = {
+  'pomodoro': { it: 'Pomodoro', en: 'Tomato' },
+  'pomodoro ciliegino': { it: 'Pomodoro ciliegino', en: 'Cherry tomato' },
+  'mela': { it: 'Mela', en: 'Apple' },
+  'mela golden': { it: 'Mela Golden', en: 'Golden Apple' },
+  'arancia': { it: 'Arancia', en: 'Orange' },
+  'limone': { it: 'Limone', en: 'Lemon' },
+  'banana': { it: 'Banana', en: 'Banana' },
+  'fragola': { it: 'Fragola', en: 'Strawberry' },
+  'uva': { it: 'Uva', en: 'Grape' },
+  'pera': { it: 'Pera', en: 'Pear' },
+  'pesca': { it: 'Pesca', en: 'Peach' },
+  'anguria': { it: 'Anguria', en: 'Watermelon' },
+  'melone': { it: 'Melone', en: 'Melon' },
+  'kiwi': { it: 'Kiwi', en: 'Kiwi' },
+  'avocado': { it: 'Avocado', en: 'Avocado' },
+  'carota': { it: 'Carota', en: 'Carrot' },
+  'zucchina': { it: 'Zucchina', en: 'Zucchini' },
+  'peperone': { it: 'Peperone', en: 'Bell pepper' },
+  'cetriolo': { it: 'Cetriolo', en: 'Cucumber' },
+  'lattuga': { it: 'Lattuga', en: 'Lettuce' },
+  'spinaci': { it: 'Spinaci', en: 'Spinach' },
+  'broccoli': { it: 'Broccoli', en: 'Broccoli' },
+  'cavolfiore': { it: 'Cavolfiore', en: 'Cauliflower' },
+  'patata': { it: 'Patata', en: 'Potato' },
+  'cipolla': { it: 'Cipolla', en: 'Onion' },
+  'aglio': { it: 'Aglio', en: 'Garlic' },
+};
+
 // NESSUN FALLBACK - Tutti i dati DEVONO venire dall'API SWITCH
 // Se l'API non trova il prodotto, mostriamo un messaggio invece di dati inventati
 
@@ -13,6 +43,17 @@ export default function QuizScreen() {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const language = i18n.language || 'it';
+  
+  // Funzione per tradurre i nomi dei prodotti
+  const translateProductName = (name) => {
+    if (!name) return '';
+    const key = name.toLowerCase().trim();
+    const translation = productNames[key];
+    if (translation) {
+      return language === 'en' ? translation.en : translation.it;
+    }
+    return name;
+  };
   
   const [product, setProduct] = useState(null);
   const [switchData, setSwitchData] = useState(null);
@@ -175,8 +216,8 @@ export default function QuizScreen() {
       id: 'calories',
       icon: <Flame size={32} color="#FF6B6B" />,
       question: language === 'it' 
-        ? `Quante calorie pensi che contenga 100g di ${product.name}?`
-        : `How many calories do you think 100g of ${product.name} contains?`,
+        ? `Quante calorie pensi che contenga 100g di ${translateProductName(product.name)}?`
+        : `How many calories do you think 100g of ${translateProductName(product.name)} contains?`,
       unit: 'kcal/100g',
       min: 5,
       max: 200,
@@ -189,8 +230,8 @@ export default function QuizScreen() {
       id: 'carbs',
       icon: <Brain size={32} color="#FFA726" />,
       question: language === 'it'
-        ? `Quanti grammi di carboidrati pensi che contenga 100g di ${product.name}?`
-        : `How many grams of carbohydrates do you think 100g of ${product.name} contains?`,
+        ? `Quanti grammi di carboidrati pensi che contenga 100g di ${translateProductName(product.name)}?`
+        : `How many grams of carbohydrates do you think 100g of ${translateProductName(product.name)} contains?`,
       unit: 'g/100g',
       min: 0,
       max: 50,
@@ -203,8 +244,8 @@ export default function QuizScreen() {
       id: 'protein',
       icon: <Droplets size={32} color="#7E57C2" />,
       question: language === 'it'
-        ? `Quanti grammi di proteine pensi che contenga 100g di ${product.name}?`
-        : `How many grams of protein do you think 100g of ${product.name} contains?`,
+        ? `Quanti grammi di proteine pensi che contenga 100g di ${translateProductName(product.name)}?`
+        : `How many grams of protein do you think 100g of ${translateProductName(product.name)} contains?`,
       unit: 'g/100g',
       min: 0,
       max: 30,
@@ -217,8 +258,8 @@ export default function QuizScreen() {
       id: 'co2',
       icon: <Leaf size={32} color="#95E1A3" />,
       question: language === 'it'
-        ? `Quanta CO₂ viene emessa per produrre 1kg di ${product.name}?`
-        : `How much CO₂ is emitted to produce 1kg of ${product.name}?`,
+        ? `Quanta CO₂ viene emessa per produrre 1kg di ${translateProductName(product.name)}?`
+        : `How much CO₂ is emitted to produce 1kg of ${translateProductName(product.name)}?`,
       unit: 'kg CO₂/kg',
       min: 0.1,
       max: 5.0,
@@ -231,8 +272,8 @@ export default function QuizScreen() {
       id: 'waterFootprint',
       icon: <Droplets size={32} color={SWITCH_COLORS.darkBlue} />,
       question: language === 'it'
-        ? `Quanti litri d'acqua servono per produrre 1kg di ${product.name}?`
-        : `How many liters of water are needed to produce 1kg of ${product.name}?`,
+        ? `Quanti litri d'acqua servono per produrre 1kg di ${translateProductName(product.name)}?`
+        : `How many liters of water are needed to produce 1kg of ${translateProductName(product.name)}?`,
       unit: 'L/kg',
       min: 50,
       max: 2000,
@@ -333,7 +374,7 @@ export default function QuizScreen() {
     return (
       <SwitchLayout
         title={language === 'it' ? '🧠 Quiz Conoscenza' : '🧠 Knowledge Quiz'}
-        subtitle={`${product.emoji || '🥬'} ${product.name}`}
+        subtitle={`${product.emoji || '🥬'} ${translateProductName(product.name)}`}
       >
         <GlobalProgress currentStep="quiz" language={language} />
 
@@ -429,7 +470,7 @@ export default function QuizScreen() {
   return (
     <SwitchLayout
       title={`${language === 'it' ? 'Domanda' : 'Question'} ${currentQuestion + 1}/${questions.length}`}
-      subtitle={`${product.emoji || '🥬'} ${product.name}`}
+      subtitle={`${product.emoji || '🥬'} ${translateProductName(product.name)}`}
       compact={true}
     >
       <GlobalProgress currentStep="quiz" language={language} />
