@@ -171,7 +171,7 @@ export default function ScanFlowScreen() {
   };
 
   const handleContinueToResults = () => {
-    navigate('/comparison');
+    navigate('/results');
   };
 
   const getStepTitle = () => {
@@ -465,7 +465,7 @@ export default function ScanFlowScreen() {
                 boxShadow: `0 4px 12px ${SWITCH_COLORS.green}50`
               }}
             >
-              📊 {language === 'it' ? 'Confronta i risultati' : 'Compare results'}
+              🍽️ {language === 'it' ? 'Vai alla Scheda Prodotto' : 'Go to Product Card'}
               <ChevronRight size={20} />
             </button>
           </>
