@@ -7,9 +7,10 @@ import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
 import GlobalProgress from '../components/GlobalProgress';
 
 // Dati SWITCH per prodotti comuni (fallback se API non disponibile)
+// NOTA: Usare SEMPRE l'API quando possibile, questi sono solo backup
 const SWITCH_FALLBACK_DATA = {
-  'pomodoro': { calories: 18, water: 94.5, co2: 0.7, waterFootprint: 214 },
-  'tomato': { calories: 18, water: 94.5, co2: 0.7, waterFootprint: 214 },
+  'pomodoro': { calories: 18, water: 94.5, co2: 0.47, waterFootprint: 68.8 },
+  'tomato': { calories: 18, water: 94.5, co2: 0.47, waterFootprint: 68.8 },
   'mela': { calories: 52, water: 85.6, co2: 0.4, waterFootprint: 822 },
   'apple': { calories: 52, water: 85.6, co2: 0.4, waterFootprint: 822 },
   'arancia': { calories: 47, water: 86.8, co2: 0.5, waterFootprint: 560 },
@@ -30,7 +31,14 @@ const SWITCH_FALLBACK_DATA = {
   'avocado': { calories: 160, water: 73.2, co2: 2.5, waterFootprint: 1981 },
   'anguria': { calories: 30, water: 91.5, co2: 0.2, waterFootprint: 235 },
   'watermelon': { calories: 30, water: 91.5, co2: 0.2, waterFootprint: 235 },
-  'default': { calories: 35, water: 85, co2: 0.5, waterFootprint: 400 }
+  // Latticini
+  'yogurt': { calories: 59, water: 87, co2: 2.44, waterFootprint: 1390 },
+  'yogurt bianco': { calories: 59, water: 87, co2: 2.44, waterFootprint: 1390 },
+  'latte': { calories: 42, water: 88, co2: 1.39, waterFootprint: 1020 },
+  'milk': { calories: 42, water: 88, co2: 1.39, waterFootprint: 1020 },
+  'formaggio': { calories: 350, water: 37, co2: 8.5, waterFootprint: 5060 },
+  'cheese': { calories: 350, water: 37, co2: 8.5, waterFootprint: 5060 },
+  'default': { calories: 50, water: 80, co2: 1.0, waterFootprint: 500 }
 };
 
 export default function QuizScreen() {

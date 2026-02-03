@@ -33,8 +33,17 @@ module.exports = async (req, res) => {
     // Normalize search term
     const normalizedSearch = searchTerm.toLowerCase().trim();
     
+    // Remove common adjectives to get the main food item
+    // e.g., "Yogurt bianco" → "yogurt", "Fresh milk" → "milk"
+    const removeWords = ['bianco', 'white', 'fresh', 'fresco', 'naturale', 'natural', 'intero', 'whole', 'magro', 'low-fat', 'greco', 'greek'];
+    let cleanedSearch = normalizedSearch;
+    removeWords.forEach(word => {
+      cleanedSearch = cleanedSearch.replace(new RegExp(`\\b${word}\\b`, 'gi'), '').trim();
+    });
+    cleanedSearch = cleanedSearch.replace(/\s+/g, ' ').trim();
+    
     // Extract main keyword (e.g., "Cherry tomato" → "tomato")
-    const searchWords = normalizedSearch.split(' ');
+    const searchWords = cleanedSearch.split(' ');
     
     // Try to find best match
     let bestMatch = null;
@@ -43,16 +52,26 @@ module.exports = async (req, res) => {
     for (const item of foodItems) {
       const itemName = (item['FOOD COMMODITY ITEM'] || '').toLowerCase();
       
-      // Check for exact match first
-      if (itemName === normalizedSearch) {
+      // Check for exact match first (both original and cleaned)
+      if (itemName === normalizedSearch || itemName === cleanedSearch) {
         bestMatch = item;
         bestScore = 100;
         break;
       }
 
-      // Check if item name contains search term
+      // Check if item name contains search term (cleaned version)
+      if (itemName.includes(cleanedSearch) || cleanedSearch.includes(itemName)) {
+        const score = itemName === cleanedSearch ? 95 : 90;
+        if (score > bestScore) {
+          bestMatch = item;
+          bestScore = score;
+        }
+        continue;
+      }
+
+      // Check if item name contains search term (original)
       if (itemName.includes(normalizedSearch)) {
-        const score = 90;
+        const score = 85;
         if (score > bestScore) {
           bestMatch = item;
           bestScore = score;
