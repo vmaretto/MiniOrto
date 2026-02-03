@@ -215,23 +215,29 @@ const DashboardScreen = () => {
   };
 
   const handleDeleteAll = async () => {
+    // Admin password protection
+    const ADMIN_PASSWORD = 'switch2026';
+    
+    const passwordPrompt = language === 'it'
+      ? 'Inserisci la password admin per cancellare i dati:'
+      : 'Enter admin password to delete data:';
+    
+    const enteredPassword = window.prompt(passwordPrompt);
+    
+    if (!enteredPassword) {
+      return; // User cancelled
+    }
+    
+    if (enteredPassword !== ADMIN_PASSWORD) {
+      alert(language === 'it' ? '❌ Password errata. Accesso negato.' : '❌ Wrong password. Access denied.');
+      return;
+    }
+    
     const confirmMsg = language === 'it' 
       ? `Sei sicuro di voler cancellare TUTTI i ${participants.length} partecipanti? Questa azione non può essere annullata!`
       : `Are you sure you want to delete ALL ${participants.length} participants? This action cannot be undone!`;
     
     if (!window.confirm(confirmMsg)) return;
-    
-    // Double confirm for safety
-    const doubleConfirm = language === 'it'
-      ? 'Scrivi "ELIMINA" per confermare:'
-      : 'Type "DELETE" to confirm:';
-    const expected = language === 'it' ? 'ELIMINA' : 'DELETE';
-    const userInput = window.prompt(doubleConfirm);
-    
-    if (userInput !== expected) {
-      alert(language === 'it' ? 'Cancellazione annullata.' : 'Deletion cancelled.');
-      return;
-    }
     
     try {
       const response = await fetch('/api/participants', { method: 'DELETE' });

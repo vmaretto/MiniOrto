@@ -181,14 +181,20 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
                       </div>
                       {/* Score - always visible */}
                       <div style={{
-                        fontSize: '1.25rem',
-                        fontWeight: 'bold',
-                        color: '#667eea',
-                        background: '#667eea15',
-                        padding: '4px 12px',
-                        borderRadius: '20px'
+                        fontSize: '1.5rem',
+                        fontWeight: '800',
+                        color: index < 3 ? '#1e40af' : '#3730a3',
+                        background: index === 0 ? 'linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%)' 
+                                  : index === 1 ? 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)'
+                                  : index === 2 ? 'linear-gradient(135deg, #fcd9bd 0%, #f59e0b 100%)'
+                                  : '#e0e7ff',
+                        padding: '8px 16px',
+                        borderRadius: '12px',
+                        boxShadow: index < 3 ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
+                        minWidth: '70px',
+                        textAlign: 'center'
                       }}>
-                        {participant.totalScore} <span style={{ fontSize: '0.75rem', fontWeight: 'normal' }}>{language === 'it' ? 'pt' : 'pts'}</span>
+                        {participant.totalScore} <span style={{ fontSize: '0.85rem', fontWeight: '600', color: index < 3 ? '#374151' : '#6366f1' }}>{language === 'it' ? 'pt' : 'pts'}</span>
                       </div>
                     </div>
                     <div style={{

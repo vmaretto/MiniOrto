@@ -119,6 +119,20 @@ const AdminScreen = () => {
   };
 
   const handleDeleteAll = async () => {
+    // Admin password protection
+    const ADMIN_PASSWORD = 'switch2026';
+    
+    const enteredPassword = window.prompt('Inserisci la password admin / Enter admin password:');
+    
+    if (!enteredPassword) {
+      return; // User cancelled
+    }
+    
+    if (enteredPassword !== ADMIN_PASSWORD) {
+      alert('❌ Password errata / Wrong password. Access denied.');
+      return;
+    }
+    
     if (!window.confirm(t('admin.confirmDelete'))) {
       return;
     }
