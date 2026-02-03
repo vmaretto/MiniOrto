@@ -1,6 +1,9 @@
 // api/recognize-product.js
 // Vercel Serverless Function to recognize fruits/vegetables with Claude Vision
 
+// Load .env.local for local development
+require('dotenv').config({ path: '.env.local' });
+
 const Anthropic = require('@anthropic-ai/sdk');
 
 module.exports = async (req, res) => {

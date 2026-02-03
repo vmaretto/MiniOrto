@@ -1,6 +1,9 @@
 // api/generate-product-info.js
 // Generate product tips, curiosity, and seasonality using AI
 
+// Load .env.local for local development
+require('dotenv').config({ path: '.env.local' });
+
 const Anthropic = require('@anthropic-ai/sdk');
 
 const anthropic = new Anthropic({

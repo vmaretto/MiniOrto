@@ -5,6 +5,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
     "@vercel/postgres": "^0.5.1",
+    "dotenv": "^17.2.3",
     "html2canvas": "^1.4.1",
     "i18next": "^23.7.8",
     "lucide-react": "^0.294.0",

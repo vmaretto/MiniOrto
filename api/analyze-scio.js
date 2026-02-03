@@ -1,6 +1,9 @@
 // api/analyze-scio.js
 // Vercel Serverless Function to analyze SCIO screenshots with Claude Vision
 
+// Load .env.local for local development
+require('dotenv').config({ path: '.env.local' });
+
 const Anthropic = require('@anthropic-ai/sdk');
 
 module.exports = async (req, res) => {
