@@ -350,8 +350,8 @@ export default function ComparisonScreen() {
           {language === 'it' ? '📋 Legenda:' : '📋 Legend:'}
         </div>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <span><strong style={{ color: SWITCH_COLORS.darkBlue }}>Tua Stima</strong> = {language === 'it' ? 'quello che hai indicato' : 'what you estimated'}</span>
-          <span><strong style={{ color: '#1d4ed8' }}>Misurato</strong> = {language === 'it' ? 'dallo SCIO' : 'from SCIO'}</span>
+          <span><strong style={{ color: SWITCH_COLORS.darkBlue }}>{language === 'it' ? 'Tua Stima' : 'Your Estimate'}</strong> = {language === 'it' ? 'quello che hai indicato' : 'what you estimated'}</span>
+          <span><strong style={{ color: '#1d4ed8' }}>{language === 'it' ? 'Misurato' : 'Measured'}</strong> = {language === 'it' ? 'dallo SCIO' : 'from SCIO'}</span>
           <span><strong style={{ color: '#15803d' }}>DB SWITCH</strong> = {language === 'it' ? 'valore medio' : 'average value'}</span>
         </div>
       </div>
