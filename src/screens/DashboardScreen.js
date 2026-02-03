@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Users, Download, RefreshCw, Trophy, Brain, BarChart3 } from 'lucide-react';
+import { Users, Download, RefreshCw, Trophy, Brain, BarChart3, Trash2 } from 'lucide-react';
 import Leaderboard from '../components/Leaderboard';
 import InsightsTab from '../components/InsightsTab';
 import StatsTab from '../components/StatsTab';
@@ -214,6 +214,39 @@ const DashboardScreen = () => {
     document.body.removeChild(link);
   };
 
+  const handleDeleteAll = async () => {
+    const confirmMsg = language === 'it' 
+      ? `Sei sicuro di voler cancellare TUTTI i ${participants.length} partecipanti? Questa azione non può essere annullata!`
+      : `Are you sure you want to delete ALL ${participants.length} participants? This action cannot be undone!`;
+    
+    if (!window.confirm(confirmMsg)) return;
+    
+    // Double confirm for safety
+    const doubleConfirm = language === 'it'
+      ? 'Scrivi "ELIMINA" per confermare:'
+      : 'Type "DELETE" to confirm:';
+    const expected = language === 'it' ? 'ELIMINA' : 'DELETE';
+    const userInput = window.prompt(doubleConfirm);
+    
+    if (userInput !== expected) {
+      alert(language === 'it' ? 'Cancellazione annullata.' : 'Deletion cancelled.');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/participants', { method: 'DELETE' });
+      if (response.ok) {
+        alert(language === 'it' ? 'Tutti i dati sono stati cancellati!' : 'All data has been deleted!');
+        fetchData(); // Refresh
+      } else {
+        throw new Error('Delete failed');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert(language === 'it' ? 'Errore durante la cancellazione.' : 'Error during deletion.');
+    }
+  };
+
   if (loading) {
     return (
       <SwitchLayout 
@@ -285,6 +318,28 @@ const DashboardScreen = () => {
         >
           <Download size={18} />
           Export CSV
+        </button>
+
+        <button
+          onClick={handleDeleteAll}
+          disabled={participants.length === 0}
+          style={{
+            padding: '12px 16px',
+            background: participants.length > 0 ? '#dc2626' : '#ccc',
+            color: 'white',
+            border: 'none',
+            borderRadius: '10px',
+            cursor: participants.length > 0 ? 'pointer' : 'not-allowed',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            fontSize: '0.9rem',
+            fontWeight: '600'
+          }}
+        >
+          <Trash2 size={18} />
+          {language === 'it' ? 'Cancella tutto' : 'Delete all'}
         </button>
       </div>
 
