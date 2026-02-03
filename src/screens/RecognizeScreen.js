@@ -87,18 +87,50 @@ function RecognizeScreen() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const handleImageSelect = (e) => {
+  // Comprimi immagine per anteprima (fix Safari con immagini grandi)
+  const compressForPreview = (file, maxWidth = 600) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ratio = Math.min(maxWidth / img.width, maxWidth / img.height, 1);
+          canvas.width = img.width * ratio;
+          canvas.height = img.height * ratio;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.onerror = () => {
+          // Fallback: usa l'originale se la compressione fallisce
+          resolve(e.target.result);
+        };
+      };
+    });
+  };
+
+  const handleImageSelect = async (e) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
       setError(null);
       setRecognized(null);
       
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      // Comprimi per anteprima (fix Safari)
+      try {
+        const compressed = await compressForPreview(file);
+        setImagePreview(compressed);
+      } catch (err) {
+        // Fallback: usa FileReader standard
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
