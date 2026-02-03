@@ -14,26 +14,13 @@ const ComparisonRow = ({ label, icon, userEstimate, measured, dbSwitch, unit, la
     return ((estimate - reference) / reference * 100);
   };
   
-  // Calcola deviazione da entrambi i riferimenti
-  const deviationFromMeasured = measured !== null && measured !== undefined 
-    ? calculateDeviation(userEstimate, measured) 
-    : null;
+  // Punteggio e icona basati SOLO su DB SWITCH (valuta la conoscenza)
+  // SCIO è solo informativo
   const deviationFromDb = dbSwitch !== null && dbSwitch !== undefined 
     ? calculateDeviation(userEstimate, dbSwitch) 
     : null;
   
-  const absDeviationMeasured = deviationFromMeasured !== null ? Math.abs(deviationFromMeasured) : null;
-  const absDeviationDb = deviationFromDb !== null ? Math.abs(deviationFromDb) : null;
-  
-  // Usa il MIGLIORE dei due (se vicino ad almeno uno → OK)
-  let absDeviation = null;
-  if (absDeviationMeasured !== null && absDeviationDb !== null) {
-    absDeviation = Math.min(absDeviationMeasured, absDeviationDb);
-  } else if (absDeviationMeasured !== null) {
-    absDeviation = absDeviationMeasured;
-  } else if (absDeviationDb !== null) {
-    absDeviation = absDeviationDb;
-  }
+  const absDeviation = deviationFromDb !== null ? Math.abs(deviationFromDb) : null;
   
   // Per la visualizzazione della % usa il riferimento principale (misurato se c'è, altrimenti DB)
   const referenceValue = measured ?? dbSwitch;
@@ -232,7 +219,8 @@ export default function ComparisonScreen() {
     if (storedProduct) setRecognizedProduct(JSON.parse(storedProduct));
   }, []);
 
-  // Calcola punteggio totale - usa BEST OF (misurato, db) come i singoli
+  // Calcola punteggio totale: stima vs DB SWITCH (valuta la conoscenza)
+  // SCIO è solo informativo, non influenza il punteggio
   const calculateScore = () => {
     if (!quizAnswers?.answers) return null;
     
@@ -241,11 +229,11 @@ export default function ComparisonScreen() {
     let count = 0;
     
     const metrics = [
-      { key: 'calories', measured: scioData?.calories, db: switchData?.nutrition?.energy },
-      { key: 'carbs', measured: scioData?.carbs, db: switchData?.nutrition?.carbohydrates },
-      { key: 'protein', measured: scioData?.protein, db: switchData?.nutrition?.proteins },
-      { key: 'co2', measured: null, db: switchData?.environmental?.carbonFootprint },
-      { key: 'waterFootprint', measured: null, db: switchData?.environmental?.waterFootprint }
+      { key: 'calories', db: switchData?.nutrition?.energy || switchData?.nutrition?.calories },
+      { key: 'carbs', db: switchData?.nutrition?.carbohydrates },
+      { key: 'protein', db: switchData?.nutrition?.proteins },
+      { key: 'co2', db: switchData?.environmental?.carbonFootprint },
+      { key: 'waterFootprint', db: switchData?.environmental?.waterFootprint }
     ];
     
     const getScore = (deviation) => {
@@ -256,31 +244,13 @@ export default function ComparisonScreen() {
       return 20;
     };
     
-    metrics.forEach(({ key, measured, db }) => {
+    metrics.forEach(({ key, db }) => {
       const estimate = answers[key];
+      if (estimate === undefined || db === null || db === undefined || db === 0) return;
       
-      // Calcola deviazione da entrambi
-      const devFromMeasured = (measured !== null && measured !== undefined && measured !== 0) 
-        ? Math.abs((estimate - measured) / measured * 100) 
-        : null;
-      const devFromDb = (db !== null && db !== undefined && db !== 0) 
-        ? Math.abs((estimate - db) / db * 100) 
-        : null;
-      
-      // Usa il MIGLIORE dei due (stessa logica dei singoli)
-      let bestDeviation = null;
-      if (devFromMeasured !== null && devFromDb !== null) {
-        bestDeviation = Math.min(devFromMeasured, devFromDb);
-      } else if (devFromMeasured !== null) {
-        bestDeviation = devFromMeasured;
-      } else if (devFromDb !== null) {
-        bestDeviation = devFromDb;
-      }
-      
-      if (estimate !== undefined && bestDeviation !== null) {
-        totalScore += getScore(bestDeviation);
-        count++;
-      }
+      const deviation = Math.abs((estimate - db) / db * 100);
+      totalScore += getScore(deviation);
+      count++;
     });
     
     return count > 0 ? Math.round(totalScore / count) : null;

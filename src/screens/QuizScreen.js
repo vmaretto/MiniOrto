@@ -263,7 +263,8 @@ export default function QuizScreen() {
       setCurrentQuestion(prev => prev + 1);
     } else {
       // Quiz completato - calcola punteggio e salva
-      // Calcola punteggio usando logica "best of" (SCIO o SWITCH)
+      // Calcola punteggio: stima vs DB SWITCH (valuta la conoscenza dei valori tipici)
+      // SCIO è solo informativo, non influenza il punteggio
       const calculateScore = (ans) => {
         let totalScore = 0;
         let count = 0;
@@ -279,41 +280,21 @@ export default function QuizScreen() {
           return 20;
         };
         
-        const calcDeviation = (estimate, reference) => {
-          if (reference === null || reference === undefined || reference === 0) return null;
-          return Math.abs((estimate - reference) / reference * 100);
-        };
-        
         const metrics = [
-          { key: 'calories', scio: scioData?.calories, db: switchNutrition.calories || switchNutrition.energy },
-          { key: 'carbs', scio: scioData?.carbs, db: switchNutrition.carbohydrates },
-          { key: 'protein', scio: scioData?.protein, db: switchNutrition.proteins },
-          { key: 'co2', scio: null, db: environmental.carbonFootprint || environmental.co2 },
-          { key: 'waterFootprint', scio: null, db: environmental.waterFootprint || environmental.water }
+          { key: 'calories', db: switchNutrition.calories || switchNutrition.energy },
+          { key: 'carbs', db: switchNutrition.carbohydrates },
+          { key: 'protein', db: switchNutrition.proteins },
+          { key: 'co2', db: environmental.carbonFootprint || environmental.co2 },
+          { key: 'waterFootprint', db: environmental.waterFootprint || environmental.water }
         ];
         
-        metrics.forEach(({ key, scio, db }) => {
+        metrics.forEach(({ key, db }) => {
           const estimate = ans[key];
-          if (estimate === undefined) return;
+          if (estimate === undefined || db === null || db === undefined || db === 0) return;
           
-          // Calcola deviazione da entrambi
-          const devFromScio = calcDeviation(estimate, scio);
-          const devFromDb = calcDeviation(estimate, db);
-          
-          // Usa il MIGLIORE dei due (stessa logica della ComparisonScreen)
-          let bestDeviation = null;
-          if (devFromScio !== null && devFromDb !== null) {
-            bestDeviation = Math.min(devFromScio, devFromDb);
-          } else if (devFromScio !== null) {
-            bestDeviation = devFromScio;
-          } else if (devFromDb !== null) {
-            bestDeviation = devFromDb;
-          }
-          
-          if (bestDeviation !== null) {
-            totalScore += getScore(bestDeviation);
-            count++;
-          }
+          const deviation = Math.abs((estimate - db) / db * 100);
+          totalScore += getScore(deviation);
+          count++;
         });
         
         return count > 0 ? Math.round(totalScore / count) : 0;
