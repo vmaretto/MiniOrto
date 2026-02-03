@@ -236,7 +236,7 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
 
       <div style={{ padding: '20px' }}>
         {/* VALORI MISURATI (SCIO) - mostrati solo se disponibili */}
-        {measuredData && (measuredData.calories || measuredData.water || measuredData.protein || measuredData.fat) && (
+        {measuredData && (measuredData.calories || measuredData.water || measuredData.protein || measuredData.fat || measuredData.carbs || measuredData.sugar || measuredData.fiber) && (
           <div style={{
             background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
             borderRadius: '16px',
@@ -246,33 +246,51 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
           }}>
             <h3 style={{ margin: '0 0 16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
               🔬 {t('productCard.measuredValues', 'Valori Misurati')}
-              <span style={{ fontSize: '0.75rem', opacity: 0.8, fontWeight: 'normal' }}>
+              <span style={{ fontSize: '0.8rem', opacity: 1, fontWeight: 'normal', color: '#b3d4fc' }}>
                 ({t('productCard.fromScio', 'dal tuo prodotto')})
               </span>
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
               {measuredData.calories && (
-                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>🔥 Calorie</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.calories} <span style={{ fontSize: '0.7rem' }}>kcal</span></div>
+                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🔥 Calorie</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.calories} <span style={{ fontSize: '0.75rem' }}>kcal</span></div>
                 </div>
               )}
-              {measuredData.water && (
-                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>💧 Acqua</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.water} <span style={{ fontSize: '0.7rem' }}>g</span></div>
+              {measuredData.carbs && (
+                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🍞 Carboidrati</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.carbs} <span style={{ fontSize: '0.75rem' }}>g</span></div>
+                </div>
+              )}
+              {measuredData.sugar && (
+                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🍬 Zuccheri</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.sugar} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}
               {measuredData.protein && (
-                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>💪 Proteine</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.protein} <span style={{ fontSize: '0.7rem' }}>g</span></div>
+                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>💪 Proteine</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.protein} <span style={{ fontSize: '0.75rem' }}>g</span></div>
+                </div>
+              )}
+              {measuredData.fiber && (
+                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🌾 Fibre</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.fiber} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}
               {measuredData.fat && (
-                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>🧈 Grassi</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.fat} <span style={{ fontSize: '0.7rem' }}>g</span></div>
+                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🧈 Grassi</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.fat} <span style={{ fontSize: '0.75rem' }}>g</span></div>
+                </div>
+              )}
+              {measuredData.water && (
+                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>💧 Acqua</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.water} <span style={{ fontSize: '0.75rem' }}>g</span></div>
                 </div>
               )}
             </div>
