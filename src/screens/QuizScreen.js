@@ -262,12 +262,41 @@ export default function QuizScreen() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
     } else {
-      // Quiz completato, salva e vai a scan-flow
+      // Quiz completato - calcola punteggio e salva
+      const calculateScore = (ans, real) => {
+        let totalScore = 0;
+        let count = 0;
+        
+        const metrics = ['calories', 'carbs', 'protein', 'co2', 'waterFootprint'];
+        metrics.forEach(key => {
+          const estimate = ans[key];
+          const reference = real[key];
+          
+          if (estimate !== undefined && reference) {
+            const deviation = Math.abs((estimate - reference) / reference * 100);
+            if (deviation <= 10) totalScore += 100;
+            else if (deviation <= 20) totalScore += 80;
+            else if (deviation <= 35) totalScore += 60;
+            else if (deviation <= 50) totalScore += 40;
+            else totalScore += 20;
+            count++;
+          }
+        });
+        
+        return count > 0 ? Math.round(totalScore / count) : 0;
+      };
+      
+      const score = calculateScore(updatedAnswers, realValues);
+      
       const quizData = {
         answers: updatedAnswers,
         realValues,
         productName: product.name,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        score: {
+          total: score,
+          details: { answers: updatedAnswers, realValues }
+        }
       };
       sessionStorage.setItem('quizAnswers', JSON.stringify(quizData));
       navigate('/scan-flow');
