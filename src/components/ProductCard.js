@@ -93,7 +93,7 @@ function NutrientBox({ label, value, unit, icon }) {
   );
 }
 
-function ProductCard({ productName, measuredValue, productImage, switchData }) {
+function ProductCard({ productName, measuredValue, measuredData, productImage, switchData }) {
   const { t, i18n } = useTranslation();
   const [aiProductInfo, setAiProductInfo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -235,8 +235,52 @@ function ProductCard({ productName, measuredValue, productImage, switchData }) {
       </div>
 
       <div style={{ padding: '20px' }}>
-        {/* SCIO Measured Value */}
-        {measuredValue && (
+        {/* VALORI MISURATI (SCIO) - mostrati solo se disponibili */}
+        {measuredData && (measuredData.calories || measuredData.water || measuredData.protein || measuredData.fat) && (
+          <div style={{
+            background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '20px',
+            color: 'white'
+          }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🔬 {t('productCard.measuredValues', 'Valori Misurati')}
+              <span style={{ fontSize: '0.75rem', opacity: 0.8, fontWeight: 'normal' }}>
+                ({t('productCard.fromScio', 'dal tuo prodotto')})
+              </span>
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+              {measuredData.calories && (
+                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>🔥 Calorie</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.calories} <span style={{ fontSize: '0.7rem' }}>kcal</span></div>
+                </div>
+              )}
+              {measuredData.water && (
+                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>💧 Acqua</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.water} <span style={{ fontSize: '0.7rem' }}>g</span></div>
+                </div>
+              )}
+              {measuredData.protein && (
+                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>💪 Proteine</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.protein} <span style={{ fontSize: '0.7rem' }}>g</span></div>
+                </div>
+              )}
+              {measuredData.fat && (
+                <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.75rem', opacity: 0.8 }}>🧈 Grassi</div>
+                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.fat} <span style={{ fontSize: '0.7rem' }}>g</span></div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Vecchia sezione SCIO singolo valore - manteniamo per °Brix se presente */}
+        {measuredValue && !measuredData?.calories && (
           <div style={{
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             borderRadius: '16px',
@@ -277,8 +321,11 @@ function ProductCard({ productName, measuredValue, productImage, switchData }) {
           marginBottom: '20px',
           border: '1px solid #eee'
         }}>
-          <h3 style={{ margin: '0 0 15px', color: '#333', fontSize: '1.1rem' }}>
+          <h3 style={{ margin: '0 0 15px', color: '#333', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             📊 {t('productCard.nutritionalValues', 'Valori Nutrizionali')}
+            <span style={{ fontSize: '0.75rem', color: '#666', fontWeight: 'normal' }}>
+              ({t('productCard.averageValues', 'valori medi')})
+            </span>
           </h3>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>

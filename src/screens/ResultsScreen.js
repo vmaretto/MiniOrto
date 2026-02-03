@@ -317,6 +317,7 @@ function ResultsScreen() {
           <ProductCard 
             productName={recognizedProduct.name}
             measuredValue={results?.value}
+            measuredData={results}
             productImage={productImage}
             switchData={switchData}
           />
