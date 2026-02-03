@@ -87,10 +87,10 @@ function EnvironmentalCard({ data, loading }) {
         </div>
         <div style={{ marginLeft: '16px', textAlign: 'left' }}>
           <div style={{ fontWeight: 'bold', color: '#333' }}>
-            {t('environmental.envScore', 'Environmental Score')}
+            {t('environmental.envScore', 'Punteggio Ambientale')}
           </div>
-          <div style={{ fontSize: '0.85rem', color: '#666' }}>
-            {matchedItem}
+          <div style={{ fontSize: '0.9rem', color: '#1565c0', fontWeight: '600' }}>
+            {matchedItem || t('environmental.unknown', 'Prodotto non trovato')}
           </div>
         </div>
       </div>
@@ -152,7 +152,7 @@ function EnvironmentalCard({ data, loading }) {
         </div>
       </div>
 
-      {/* Impact explanation */}
+      {/* Impact explanation - shows matched item */}
       <div style={{
         marginTop: '16px',
         padding: '12px',
@@ -162,7 +162,15 @@ function EnvironmentalCard({ data, loading }) {
         color: '#555',
         textAlign: 'center'
       }}>
-        💡 {t('environmental.explanation', 'Dati calcolati per 1 kg di prodotto. Fonte: SWITCH Food Explorer Database.')}
+        💡 {t('environmental.explanation', 'Dati calcolati per 1 kg di prodotto.')}
+        {matchedItem && (
+          <div style={{ marginTop: '4px', fontWeight: '600', color: '#1565c0' }}>
+            📊 {t('environmental.matchedItem', 'Dati per:')} <strong>{matchedItem}</strong>
+          </div>
+        )}
+        <div style={{ marginTop: '4px', fontSize: '0.7rem', color: '#888' }}>
+          {t('environmental.source', 'Fonte: SWITCH Food Explorer Database')}
+        </div>
       </div>
     </div>
   );

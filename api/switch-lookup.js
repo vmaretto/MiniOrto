@@ -87,6 +87,9 @@ module.exports = async (req, res) => {
     for (const item of foodItems) {
       const itemName = (item['FOOD COMMODITY ITEM'] || '').toLowerCase();
       
+      // Skip items without a name
+      if (!itemName || itemName.trim() === '') continue;
+      
       // Check for exact match first (original, semantic, or cleaned)
       if (itemName === normalizedSearch || itemName === primarySearch || itemName === cleanedSearch) {
         bestMatch = item;
