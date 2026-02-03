@@ -208,8 +208,8 @@ export default function QuizScreen() {
       unit: 'g/100g',
       min: 0,
       max: 30,
-      step: 0.5,
-      default: 3,
+      step: 0.1,
+      default: 1,
       realValue: realValues.protein,
       color: '#7E57C2'
     },
