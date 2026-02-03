@@ -40,11 +40,12 @@ export default function QuizScreen() {
   
   const [product, setProduct] = useState(null);
   const [switchData, setSwitchData] = useState(null);
+  const [scioData, setScioData] = useState(null); // Dati misurati dallo SCIO
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(-1); // Show intro screen first
   const [answers, setAnswers] = useState({});
 
-  // Carica prodotto e dati SWITCH
+  // Carica prodotto, dati SWITCH e dati SCIO
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
@@ -56,6 +57,17 @@ export default function QuizScreen() {
     
     const productData = JSON.parse(storedProduct);
     setProduct(productData);
+    
+    // Carica dati SCIO se disponibili (valori misurati realmente)
+    const storedScioResults = sessionStorage.getItem('scioResults');
+    const storedScioScanData = sessionStorage.getItem('scioScanData');
+    
+    if (storedScioScanData) {
+      const scanData = JSON.parse(storedScioScanData);
+      setScioData(scanData.nutrition || scanData);
+    } else if (storedScioResults) {
+      setScioData(JSON.parse(storedScioResults));
+    }
     
     // Fetch SWITCH data
     const fetchSwitchData = async () => {
@@ -115,20 +127,36 @@ export default function QuizScreen() {
     );
   }
 
-  // Valori reali dal database SWITCH
+  // Valori reali: SCIO per nutrienti (se disponibili), SWITCH per impatto ambientale
   const getRealValues = () => {
-    const nutrition = switchData?.nutrition || {};
+    const switchNutrition = switchData?.nutrition || {};
     const environmental = switchData?.environmental || {};
     
     // Usa fallback se non ci sono dati
     const productKey = (product.name || '').toLowerCase();
     const fallback = SWITCH_FALLBACK_DATA[productKey] || SWITCH_FALLBACK_DATA.default;
     
+    // PRIORITÀ per nutrienti: SCIO > SWITCH > fallback
+    // I dati SCIO sono misurati sul prodotto specifico, quindi sono i "veri" valori reali
+    const getCalories = () => {
+      if (scioData?.calories) return scioData.calories;
+      return switchNutrition.calories || switchNutrition.energy || fallback.calories;
+    };
+    
+    const getWater = () => {
+      if (scioData?.water) return scioData.water;
+      return switchNutrition.water || fallback.water;
+    };
+    
+    // Impatto ambientale: solo da SWITCH (SCIO non lo misura)
     return {
-      calories: nutrition.calories || nutrition.energy || fallback.calories,
-      water: nutrition.water || fallback.water,
+      calories: getCalories(),
+      water: getWater(),
       co2: environmental.co2 || environmental.carbonFootprint || fallback.co2,
-      waterFootprint: environmental.water || environmental.waterUsage || fallback.waterFootprint
+      waterFootprint: environmental.water || environmental.waterUsage || fallback.waterFootprint,
+      // Flag per indicare la fonte dei dati
+      caloriesSource: scioData?.calories ? 'scio' : 'switch',
+      waterSource: scioData?.water ? 'scio' : 'switch'
     };
   };
 
