@@ -63,33 +63,48 @@ module.exports = async (req, res) => {
             },
             {
               type: 'text',
-              text: `Identify the fruit or vegetable in this image. This is from an Italian mini-orto (vegetable garden), so expect common Italian produce.
+              text: `Identify the food item in this image. Focus is on fresh produce, but recognize ALL food types.
 
-IMPORTANT VISUAL DISTINCTIONS:
-- Peperone giallo (yellow bell pepper): blocky shape, thick walls, stem on top, smooth shiny skin, hollow inside
-- Papaya: oval/pear shape, thin skin, orange flesh with black seeds when cut, tropical fruit
-- Bietola da costa (Swiss chard): large green leaves with thick white/colored stalks (coste)
-- Bietola da taglio: smaller leaves, thinner stalks, used for cutting
-- Spinacio (spinach): smaller, darker green leaves, no thick stalks
+MAIN CATEGORIES:
+1. FRUTTA E VERDURA (primary focus):
+   - Vegetables: pomodoro, zucchina, melanzana, peperone, cetriolo, fagiolino, insalata, bietola, spinacio, cavolo, broccolo, cavolfiore
+   - Fruits: mela, pera, arancia, limone, banana, fragola, pesca, albicocca, ciliegia, uva, kiwi, melone, anguria
+   - Herbs: basilico, prezzemolo, rosmarino, salvia, menta
 
-COMMON ITALIAN GARDEN PRODUCE:
-- Vegetables: pomodoro, zucchina, melanzana, peperone (rosso/giallo/verde), cetriolo, fagiolino, insalata, bietola, spinacio, cavolo, broccolo, cavolfiore
-- Herbs: basilico, prezzemolo, rosmarino, salvia, menta
-- Fruits: fragola, lampone, mirtillo, ribes
+2. LATTICINI (dairy):
+   - Latte, yogurt, formaggio (mozzarella, parmigiano, ricotta, etc.), burro, panna
+
+3. CEREALI E DERIVATI (grains):
+   - Pane, pasta, riso, farro, orzo, cereali da colazione, crackers, biscotti
+
+4. PROTEINE (proteins):
+   - Carne (pollo, manzo, maiale), pesce, uova, legumi (fagioli, ceci, lenticchie), tofu
+
+5. BEVANDE (beverages):
+   - Succhi, smoothie, caffè, tè
+
+6. ALTRO:
+   - Snack, dolci, condimenti, etc.
+
+VISUAL CUES FOR DAIRY:
+- Yogurt: white/cream colored, in glass jar or plastic container, creamy texture
+- Latte: white liquid in glass, bottle, or carton
+- Formaggio: various textures and colors depending on type
 
 Return a JSON object with these fields:
 {
-  "name": string (specific Italian name, e.g., "Peperone giallo", "Bietola da costa", "Pomodoro cuore di bue"),
+  "name": string (specific Italian name, e.g., "Yogurt bianco", "Mozzarella di bufala", "Pomodoro cuore di bue"),
   "nameEn": string (English name),
-  "category": string (one of: "frutta", "verdura", "ortaggio", "legume", "erba aromatica", "altro"),
-  "emoji": string (single emoji - use exact match: 🍎apple, 🍐pear, 🍊orange, 🍋lemon, 🍌banana, 🍉watermelon, 🍇grapes, 🍓strawberry, 🫐blueberry, 🍑peach, 🥭mango, 🍍pineapple, 🥝kiwi, 🍒cherry, 🥬leafy greens/chard, 🥒cucumber, 🥕carrot, 🌽corn, 🫑pepper, 🍆eggplant, 🥦broccoli, 🧅onion, 🧄garlic, 🥔potato, 🍅tomato, 🌶️chili. For plum/prugna use 🟣, for zucchini use 🥒, if no match use 🥬),
+  "category": string (one of: "frutta", "verdura", "ortaggio", "legume", "erba aromatica", "latticino", "cereale", "proteina", "bevanda", "altro"),
+  "emoji": string (single emoji - 🍎apple, 🍐pear, 🍊orange, 🍋lemon, 🍌banana, 🍉watermelon, 🍇grapes, 🍓strawberry, 🫐blueberry, 🍑peach, 🥭mango, 🍍pineapple, 🥝kiwi, 🍒cherry, 🥬leafy greens, 🥒cucumber/zucchini, 🥕carrot, 🌽corn, 🫑pepper, 🍆eggplant, 🥦broccoli, 🧅onion, 🧄garlic, 🥔potato, 🍅tomato, 🌶️chili, 🥛milk/yogurt, 🧀cheese, 🥚egg, 🍞bread, 🥖baguette, 🍝pasta, 🍗chicken, 🥩meat, 🐟fish, 🫘beans, ☕coffee, 🧃juice. Use closest match or 🍽️ if none),
   "confidence": "alta" | "media" | "bassa",
   "description": string (brief description in Italian, max 20 words),
   "visualCues": string (what visual features led to this identification),
-  "commonVarieties": array of strings (common varieties if applicable)
+  "commonVarieties": array of strings (common varieties if applicable),
+  "nutritionHint": string (brief nutrition fact in Italian, optional)
 }
 
-If you cannot identify a fruit or vegetable, return:
+If you cannot identify the food, return:
 {
   "name": "Non riconosciuto",
   "nameEn": "Not recognized",
