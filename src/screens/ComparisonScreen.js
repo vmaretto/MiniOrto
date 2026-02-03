@@ -8,21 +8,38 @@ import GlobalProgress from '../components/GlobalProgress';
 
 // Componente per riga di confronto a 3 colonne
 const ComparisonRow = ({ label, icon, userEstimate, measured, dbSwitch, unit, language }) => {
-  // Confronta sempre stima vs DB SWITCH (valuta la "conoscenza" dell'utente sui valori tipici)
-  // Il valore misurato è informativo ma non cambia la valutazione
-  const referenceValue = dbSwitch;
-  const hasReference = referenceValue !== null && referenceValue !== undefined;
-  
   // Calcola scarto percentuale
   const calculateDeviation = (estimate, reference) => {
     if (!reference || reference === 0 || estimate === null || estimate === undefined) return null;
     return ((estimate - reference) / reference * 100);
   };
   
-  const deviation = hasReference ? calculateDeviation(userEstimate, referenceValue) : null;
-  const absDeviation = deviation !== null ? Math.abs(deviation) : null;
+  // Calcola deviazione da entrambi i riferimenti
+  const deviationFromMeasured = measured !== null && measured !== undefined 
+    ? calculateDeviation(userEstimate, measured) 
+    : null;
+  const deviationFromDb = dbSwitch !== null && dbSwitch !== undefined 
+    ? calculateDeviation(userEstimate, dbSwitch) 
+    : null;
   
-  // Determina stato (vicino/medio/lontano)
+  const absDeviationMeasured = deviationFromMeasured !== null ? Math.abs(deviationFromMeasured) : null;
+  const absDeviationDb = deviationFromDb !== null ? Math.abs(deviationFromDb) : null;
+  
+  // Usa il MIGLIORE dei due (se vicino ad almeno uno → OK)
+  let absDeviation = null;
+  if (absDeviationMeasured !== null && absDeviationDb !== null) {
+    absDeviation = Math.min(absDeviationMeasured, absDeviationDb);
+  } else if (absDeviationMeasured !== null) {
+    absDeviation = absDeviationMeasured;
+  } else if (absDeviationDb !== null) {
+    absDeviation = absDeviationDb;
+  }
+  
+  // Per la visualizzazione della % usa il riferimento principale (misurato se c'è, altrimenti DB)
+  const referenceValue = measured ?? dbSwitch;
+  const deviation = referenceValue ? calculateDeviation(userEstimate, referenceValue) : null;
+  
+  // Determina stato (vicino/medio/lontano) - basato sul MIGLIORE dei due confronti
   const getStatus = () => {
     if (absDeviation === null) return 'unknown';
     if (absDeviation <= 15) return 'accurate';
