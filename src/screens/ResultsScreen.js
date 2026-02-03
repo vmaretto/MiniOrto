@@ -267,6 +267,13 @@ function ResultsScreen() {
     );
   };
 
+  // Salva switchData in sessionStorage per ComparisonScreen
+  useEffect(() => {
+    if (switchData) {
+      sessionStorage.setItem('switchData', JSON.stringify(switchData));
+    }
+  }, [switchData]);
+
   if (!results && !quizAnswers) {
     return (
       <SwitchLayout 
@@ -295,13 +302,6 @@ function ResultsScreen() {
       </SwitchLayout>
     );
   }
-
-  // Salva switchData in sessionStorage per ComparisonScreen
-  useEffect(() => {
-    if (switchData) {
-      sessionStorage.setItem('switchData', JSON.stringify(switchData));
-    }
-  }, [switchData]);
 
   return (
     <SwitchLayout 
