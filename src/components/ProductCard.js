@@ -160,21 +160,8 @@ function ProductCard({ productName, measuredValue, productImage, switchData }) {
   // Use custom image if provided
   const displayImage = productImage || localProduct?.image || null;
   
-  // Calculate quality based on measured sugar vs expected range
-  const getQualityIndicator = () => {
-    if (!measuredValue || !nutrition.sugar.min) return null;
-    const measured = parseFloat(measuredValue);
-    
-    if (measured >= nutrition.sugar.min && measured <= nutrition.sugar.max) {
-      return { status: 'optimal', label: t('productCard.quality.optimal', 'Ottimale'), color: '#4CAF50', icon: '✅' };
-    } else if (measured < nutrition.sugar.min) {
-      return { status: 'low', label: t('productCard.quality.belowAverage', 'Sotto la media'), color: '#FF9800', icon: '📉' };
-    } else {
-      return { status: 'high', label: t('productCard.quality.aboveAverage', 'Sopra la media'), color: '#FF5722', icon: '📈' };
-    }
-  };
-  
-  const quality = getQualityIndicator();
+  // Quality indicator removed - no longer using sugar min/max ranges
+  const quality = null;
   
   // Month names
   const monthNames = i18n.language === 'en' 
@@ -294,53 +281,6 @@ function ProductCard({ productName, measuredValue, productImage, switchData }) {
             📊 {t('productCard.nutritionalValues', 'Valori Nutrizionali')}
           </h3>
           
-          {/* Sugar comparison bar */}
-          {nutrition.sugar.min > 0 && measuredValue && (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                marginBottom: '8px',
-                fontSize: '0.9rem'
-              }}>
-                <span>{t('productCard.sugar', 'Zuccheri')}</span>
-                <span style={{ color: '#666' }}>
-                  {nutrition.sugar.min}-{nutrition.sugar.max}%
-                </span>
-              </div>
-              <div style={{
-                height: '12px',
-                background: '#e0e0e0',
-                borderRadius: '6px',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                {/* Optimal range */}
-                <div style={{
-                  position: 'absolute',
-                  left: `${(nutrition.sugar.min / 15) * 100}%`,
-                  width: `${((nutrition.sugar.max - nutrition.sugar.min) / 15) * 100}%`,
-                  height: '100%',
-                  background: '#c8e6c9',
-                  borderRadius: '6px'
-                }} />
-                {/* Measured value marker */}
-                <div style={{
-                  position: 'absolute',
-                  left: `${Math.min((parseFloat(measuredValue) / 15) * 100, 100)}%`,
-                  top: '-4px',
-                  width: '20px',
-                  height: '20px',
-                  background: quality?.color || '#667eea',
-                  borderRadius: '50%',
-                  border: '3px solid white',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-                  transform: 'translateX(-50%)'
-                }} />
-              </div>
-            </div>
-          )}
-
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             {nutrition.calories && <NutrientBox label={t('productCard.calories', 'Calorie')} value={nutrition.calories} unit="kcal/100g" icon="🔥" />}
             {nutrition.protein && <NutrientBox label={t('productCard.protein', 'Proteine')} value={nutrition.protein} unit="g" icon="💪" />}
