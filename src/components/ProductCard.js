@@ -146,20 +146,15 @@ function ProductCard({ productName, measuredValue, productImage, switchData }) {
     pairings: aiProductInfo?.pairings || [],
   };
   
-  // Nutrition: prefer SWITCH data, then local/AI
+  // Nutrition: SOLO dati DB SWITCH - niente dati inventati/AI
   const nutrition = {
-    calories: switchData?.nutrition?.energy || localProduct?.nutrition?.calories || aiProductInfo?.nutrition?.calories || null,
-    water: localProduct?.nutrition?.water || aiProductInfo?.nutrition?.water || null,
-    fiber: switchData?.nutrition?.fiber || localProduct?.nutrition?.fiber || aiProductInfo?.nutrition?.fiber || null,
-    vitaminC: localProduct?.nutrition?.vitaminC || aiProductInfo?.nutrition?.vitaminC || null,
+    calories: switchData?.nutrition?.energy || null,
     protein: switchData?.nutrition?.proteins || null,
     carbs: switchData?.nutrition?.carbohydrates || null,
     fat: switchData?.nutrition?.fat || null,
-    sugar: {
-      typical: localProduct?.nutrition?.sugar?.typical || aiProductInfo?.nutrition?.sugar?.typical || null,
-      min: localProduct?.nutrition?.sugar?.min || aiProductInfo?.nutrition?.sugar?.min || 0,
-      max: localProduct?.nutrition?.sugar?.max || aiProductInfo?.nutrition?.sugar?.max || 15,
-    }
+    saturatedFat: switchData?.nutrition?.saturatedFat || null,
+    fiber: switchData?.nutrition?.fiber || null,
+    sugar: switchData?.nutrition?.soluble || null, // "soluble" = zuccheri nel DB SWITCH
   };
   
   // Use custom image if provided
@@ -347,21 +342,124 @@ function ProductCard({ productName, measuredValue, productImage, switchData }) {
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <NutrientBox label={t('productCard.calories', 'Calorie')} value={nutrition.calories} unit="kcal/100g" icon="🔥" />
-            <NutrientBox label={t('productCard.water', 'Acqua')} value={nutrition.water} unit="%" icon="💧" />
-            <NutrientBox label={t('productCard.fiber', 'Fibre')} value={nutrition.fiber} unit="g" icon="🌾" />
-            <NutrientBox label={t('productCard.vitaminC', 'Vitamina C')} value={nutrition.vitaminC} unit="mg" icon="🍊" />
+            {nutrition.calories && <NutrientBox label={t('productCard.calories', 'Calorie')} value={nutrition.calories} unit="kcal/100g" icon="🔥" />}
             {nutrition.protein && <NutrientBox label={t('productCard.protein', 'Proteine')} value={nutrition.protein} unit="g" icon="💪" />}
             {nutrition.carbs && <NutrientBox label={t('productCard.carbs', 'Carboidrati')} value={nutrition.carbs} unit="g" icon="🍞" />}
+            {nutrition.fat && <NutrientBox label={t('productCard.fat', 'Grassi')} value={nutrition.fat} unit="g" icon="🧈" />}
+            {nutrition.fiber && <NutrientBox label={t('productCard.fiber', 'Fibre')} value={nutrition.fiber} unit="g" icon="🌾" />}
+            {nutrition.sugar && <NutrientBox label={t('productCard.sugar', 'Zuccheri')} value={nutrition.sugar} unit="g" icon="🍬" />}
           </div>
           
-          {/* Source indicator */}
+          {/* Source indicator with matched item */}
           {switchData?.found && (
             <div style={{ marginTop: '12px', fontSize: '0.75rem', color: '#999', textAlign: 'center' }}>
-              📊 {t('productCard.nutritionSource', 'Dati calcolati per 1 kg di prodotto. Fonte: SWITCH Food Explorer Database.')}
+              📊 {t('productCard.dataFor', 'Dati per:')} <strong style={{ color: '#1565c0' }}>{switchData.matchedItem}</strong>
+              <div style={{ marginTop: '2px' }}>{t('productCard.source', 'Fonte: SWITCH Food Explorer Database')}</div>
             </div>
           )}
         </div>
+
+        {/* Environmental Impact - inside Product Card */}
+        {switchData?.found && switchData?.environmental && (
+          <div style={{
+            background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '20px'
+          }}>
+            <h3 style={{ margin: '0 0 16px', color: '#1565c0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🌍 {t('productCard.environmentalImpact', 'Impatto Ambientale')}
+            </h3>
+
+            {/* Environmental Score Badge */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px'
+            }}>
+              <div style={{
+                background: switchData.environmental.environmentalScore === 'A' ? '#1b5e20' : 
+                           switchData.environmental.environmentalScore === 'B' ? '#4caf50' :
+                           switchData.environmental.environmentalScore === 'C' ? '#ffc107' :
+                           switchData.environmental.environmentalScore === 'D' ? '#ff9800' : '#f44336',
+                color: ['A', 'B', 'D', 'E'].includes(switchData.environmental.environmentalScore) ? '#fff' : '#000',
+                width: '50px',
+                height: '50px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              }}>
+                {switchData.environmental.environmentalScore}
+              </div>
+              <div style={{ marginLeft: '12px', textAlign: 'left' }}>
+                <div style={{ fontWeight: 'bold', color: '#333', fontSize: '0.9rem' }}>
+                  {t('productCard.envScore', 'Punteggio Ambientale')}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#1565c0', fontWeight: '600' }}>
+                  {switchData.matchedItem}
+                </div>
+              </div>
+            </div>
+
+            {/* Carbon and Water Footprint */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{
+                background: '#fff',
+                borderRadius: '12px',
+                padding: '14px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '1.3rem', marginBottom: '4px' }}>🏭</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>
+                  {switchData.environmental.carbonFootprint?.toFixed(2) || '—'}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#666' }}>kg CO₂e/kg</div>
+                <div style={{
+                  display: 'inline-block',
+                  padding: '3px 8px',
+                  borderRadius: '10px',
+                  fontSize: '0.65rem',
+                  fontWeight: 'bold',
+                  marginTop: '6px',
+                  background: switchData.environmental.carbonFootprintBanding?.includes('green') ? '#4caf50' : '#ffc107',
+                  color: '#fff'
+                }}>
+                  {switchData.environmental.carbonFootprintImpact || 'N/A'}
+                </div>
+              </div>
+
+              <div style={{
+                background: '#fff',
+                borderRadius: '12px',
+                padding: '14px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '1.3rem', marginBottom: '4px' }}>💧</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>
+                  {switchData.environmental.waterFootprint?.toFixed(0) || '—'}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#666' }}>{t('productCard.litersPerKg', 'litri/kg')}</div>
+                <div style={{
+                  display: 'inline-block',
+                  padding: '3px 8px',
+                  borderRadius: '10px',
+                  fontSize: '0.65rem',
+                  fontWeight: 'bold',
+                  marginTop: '6px',
+                  background: switchData.environmental.waterFootprintBanding?.includes('green') ? '#4caf50' : '#ffc107',
+                  color: '#fff'
+                }}>
+                  {switchData.environmental.waterFootprintImpact || 'N/A'}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Seasonality */}
         {product.seasonality.length > 0 && (
