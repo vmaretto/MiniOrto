@@ -263,22 +263,55 @@ export default function QuizScreen() {
       setCurrentQuestion(prev => prev + 1);
     } else {
       // Quiz completato - calcola punteggio e salva
-      const calculateScore = (ans, real) => {
+      // Calcola punteggio usando logica "best of" (SCIO o SWITCH)
+      const calculateScore = (ans) => {
         let totalScore = 0;
         let count = 0;
         
-        const metrics = ['calories', 'carbs', 'protein', 'co2', 'waterFootprint'];
-        metrics.forEach(key => {
+        const switchNutrition = switchData?.nutrition || {};
+        const environmental = switchData?.environmental || {};
+        
+        const getScore = (deviation) => {
+          if (deviation <= 10) return 100;
+          if (deviation <= 20) return 80;
+          if (deviation <= 35) return 60;
+          if (deviation <= 50) return 40;
+          return 20;
+        };
+        
+        const calcDeviation = (estimate, reference) => {
+          if (reference === null || reference === undefined || reference === 0) return null;
+          return Math.abs((estimate - reference) / reference * 100);
+        };
+        
+        const metrics = [
+          { key: 'calories', scio: scioData?.calories, db: switchNutrition.calories || switchNutrition.energy },
+          { key: 'carbs', scio: scioData?.carbs, db: switchNutrition.carbohydrates },
+          { key: 'protein', scio: scioData?.protein, db: switchNutrition.proteins },
+          { key: 'co2', scio: null, db: environmental.carbonFootprint || environmental.co2 },
+          { key: 'waterFootprint', scio: null, db: environmental.waterFootprint || environmental.water }
+        ];
+        
+        metrics.forEach(({ key, scio, db }) => {
           const estimate = ans[key];
-          const reference = real[key];
+          if (estimate === undefined) return;
           
-          if (estimate !== undefined && reference) {
-            const deviation = Math.abs((estimate - reference) / reference * 100);
-            if (deviation <= 10) totalScore += 100;
-            else if (deviation <= 20) totalScore += 80;
-            else if (deviation <= 35) totalScore += 60;
-            else if (deviation <= 50) totalScore += 40;
-            else totalScore += 20;
+          // Calcola deviazione da entrambi
+          const devFromScio = calcDeviation(estimate, scio);
+          const devFromDb = calcDeviation(estimate, db);
+          
+          // Usa il MIGLIORE dei due (stessa logica della ComparisonScreen)
+          let bestDeviation = null;
+          if (devFromScio !== null && devFromDb !== null) {
+            bestDeviation = Math.min(devFromScio, devFromDb);
+          } else if (devFromScio !== null) {
+            bestDeviation = devFromScio;
+          } else if (devFromDb !== null) {
+            bestDeviation = devFromDb;
+          }
+          
+          if (bestDeviation !== null) {
+            totalScore += getScore(bestDeviation);
             count++;
           }
         });
@@ -286,7 +319,7 @@ export default function QuizScreen() {
         return count > 0 ? Math.round(totalScore / count) : 0;
       };
       
-      const score = calculateScore(updatedAnswers, realValues);
+      const score = calculateScore(updatedAnswers);
       
       const quizData = {
         answers: updatedAnswers,
