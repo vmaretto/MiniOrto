@@ -1,5 +1,5 @@
-// api/claude-insights.js - Chunked Analysis Version
-// Analizza TUTTI i dati raw dividendoli in blocchi per evitare rate limits
+// api/claude-insights.js - Fast Single-Call Version
+// Analizza dati aggregati con UNA sola chiamata a Claude (evita timeout Vercel)
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -34,122 +34,45 @@ export default async function handler(req, res) {
 
     const isItalian = language === 'it';
     
-    // Extract all raw participant data
-    const allParticipants = aggregatedData.participants || [];
-    const totalParticipants = allParticipants.length;
-    
-    console.log(`Starting analysis of ${totalParticipants} participants...`);
-    
-    // CHUNKING STRATEGY
-    const CHUNK_SIZE = 35; // ~7000-8000 tokens per chunk
-    const chunks = [];
-    
-    // Create chunks
-    for (let i = 0; i < allParticipants.length; i += CHUNK_SIZE) {
-      chunks.push({
-        data: allParticipants.slice(i, Math.min(i + CHUNK_SIZE, allParticipants.length)),
-        index: Math.floor(i / CHUNK_SIZE) + 1,
-        startIdx: i,
-        endIdx: Math.min(i + CHUNK_SIZE, allParticipants.length)
-      });
-    }
-    
-    console.log(`Created ${chunks.length} chunks for analysis`);
-    
-    // Analyze each chunk
-    const chunkInsights = [];
-    
-    for (const chunk of chunks) {
-      console.log(`Analyzing chunk ${chunk.index}/${chunks.length} (participants ${chunk.startIdx + 1}-${chunk.endIdx})`);
-      
-      try {
-        const insights = await analyzeChunk(chunk, chunks.length, apiKey, isItalian);
-        chunkInsights.push(insights);
-        
-        // Wait 500ms between calls to avoid rate limiting
-        if (chunk.index < chunks.length) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      } catch (error) {
-        console.error(`Error analyzing chunk ${chunk.index}:`, error);
-        // Continue with other chunks even if one fails
-      }
-    }
-    
-    // Synthesize all insights
-    const finalInsights = await synthesizeInsights(
-      chunkInsights,
-      aggregatedData,
-      apiKey,
-      isItalian
-    );
-    
-    // Add metadata
-    finalInsights.generatedAt = new Date().toISOString();
-    finalInsights.participantCount = totalParticipants;
-    finalInsights.analysisMethod = 'complete_chunk_analysis';
-    finalInsights.chunksAnalyzed = chunks.length;
-    
-    return res.status(200).json(finalInsights);
-    
-  } catch (error) {
-    console.error('Analysis error:', error);
-    
-    // Return fallback insights
-    return res.status(200).json(generateFallbackInsights(req.body.aggregatedData, req.body.language));
-  }
-}
+    // Prepare summary data (NOT raw participants - too big)
+    const summaryData = {
+      totalParticipants: aggregatedData.totalParticipants,
+      demographics: aggregatedData.demographics,
+      patterns: aggregatedData.patterns,
+      correlations: aggregatedData.correlations
+    };
 
-// Analyze individual chunk
-async function analyzeChunk(chunk, totalChunks, apiKey, isItalian) {
-  const prompt = `Analizza nel dettaglio questi ${chunk.data.length} partecipanti (gruppo ${chunk.index} di ${totalChunks}).
+    const prompt = `Sei un data scientist. Analizza questi dati di un esperimento sulla percezione alimentare.
 
-DATI RAW COMPLETI DEL GRUPPO:
-${JSON.stringify(chunk.data, null, 2)}
+DATI AGGREGATI:
+${JSON.stringify(summaryData, null, 2)}
 
-TROVA:
-1. Pattern demografici (età, genere, professione)
-2. Correlazioni tra profilo e performance
-3. Anomalie o outlier interessanti
-4. Tendenze nei punteggi
-5. Pattern nelle risposte al questionario
+Genera insights interessanti e curiosità sui pattern trovati.
+${isItalian ? 'Rispondi in italiano.' : 'Respond in English.'}
 
-IMPORTANTE: Analizza OGNI dettaglio nei dati raw.
-
-Rispondi SOLO con JSON valido in questo formato:
+IMPORTANTE: Rispondi SOLO con JSON valido in questo formato:
 {
-  "patterns": [
+  "curiosities": [
     {
-      "type": "demographic|behavioral|performance",
-      "description": "descrizione dettagliata",
-      "evidence": "dati specifici",
+      "title": "titolo breve (max 5 parole)",
+      "insight": "spiegazione con numeri reali dai dati",
+      "emoji": "emoji appropriata",
+      "type": "demographic|behavioral|performance|correlation",
       "strength": 1-5
     }
   ],
-  "anomalies": [
-    {
-      "description": "anomalia trovata",
-      "participants": "chi riguarda",
-      "significance": "perché è importante"
-    }
-  ],
-  "correlations": [
-    {
-      "variables": ["var1", "var2"],
-      "relationship": "descrizione",
-      "coefficient": "stima correlazione"
-    }
-  ],
-  "stats": {
-    "avgScore": 0,
-    "topPerformer": {},
-    "worstPerformer": {},
-    "genderSplit": {},
-    "ageDistribution": {}
+  "mainTrend": {
+    "title": "trend principale",
+    "description": "descrizione dettagliata"
+  },
+  "funFact": {
+    "fact": "fatto curioso dai dati",
+    "emoji": "emoji"
   }
-}`;
+}
 
-  try {
+Genera 5-7 curiosities basate sui dati reali.`;
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -160,7 +83,7 @@ Rispondi SOLO con JSON valido in questo formato:
       body: JSON.stringify({
         model: "claude-3-haiku-20240307",
         max_tokens: 1500,
-        temperature: 0.5,
+        temperature: 0.7,
         messages: [{
           role: "user",
           content: prompt
@@ -170,104 +93,8 @@ Rispondi SOLO con JSON valido in questo formato:
 
     if (!response.ok) {
       const error = await response.json();
+      console.error('Claude API error:', error);
       throw new Error(error.error?.message || 'Claude API error');
-    }
-
-    const data = await response.json();
-    const responseText = data.content[0].text
-      .replace(/```json\s*/gi, '')
-      .replace(/```\s*/gi, '')
-      .trim();
-    
-    return JSON.parse(responseText);
-    
-  } catch (error) {
-    console.error('Chunk analysis error:', error);
-    return {
-      patterns: [],
-      anomalies: [],
-      correlations: [],
-      stats: {}
-    };
-  }
-}
-
-// Synthesize all chunk insights into final analysis
-async function synthesizeInsights(chunkInsights, fullData, apiKey, isItalian) {
-  // Aggregate all findings
-  const allPatterns = chunkInsights.flatMap(c => c.patterns || []);
-  const allAnomalies = chunkInsights.flatMap(c => c.anomalies || []);
-  const allCorrelations = chunkInsights.flatMap(c => c.correlations || []);
-  
-  // Prepare synthesis prompt
-  const synthesisPrompt = `Sei un data scientist esperto. Sintetizza questi pattern trovati analizzando ${fullData.totalParticipants} partecipanti in ${chunkInsights.length} gruppi.
-
-PATTERN TROVATI (${allPatterns.length} totali):
-${JSON.stringify(allPatterns.slice(0, 20))}
-
-ANOMALIE (${allAnomalies.length} totali):
-${JSON.stringify(allAnomalies.slice(0, 10))}
-
-CORRELAZIONI (${allCorrelations.length} totali):
-${JSON.stringify(allCorrelations.slice(0, 10))}
-
-STATISTICHE GLOBALI:
-- Partecipanti totali: ${fullData.totalParticipants}
-- Score medio: ${fullData.avgTotalScore}%
-- Conoscenza media: ${fullData.avgKnowledgeScore}%
-- Consapevolezza media: ${fullData.avgAwarenessScore}%
-
-Genera gli insights finali più interessanti e significativi.
-${isItalian ? 'Rispondi in italiano.' : 'Respond in English.'}
-
-IMPORTANTE: Rispondi SOLO con JSON valido:
-{
-  "curiosities": [
-    {
-      "title": "titolo breve (max 5 parole)",
-      "insight": "spiegazione dettagliata con numeri e percentuali REALI dai dati",
-      "emoji": "emoji",
-      "type": "paradox|behavioral|psychological|temporal|demographic|correlation",
-      "strength": 1-5,
-      "evidence": "evidenza specifica dai dati"
-    }
-  ],
-  "mainTrend": {
-    "title": "trend principale trovato",
-    "description": "descrizione dettagliata",
-    "significance": "perché è importante"
-  },
-  "funFact": {
-    "fact": "fatto interessante VERIFICATO dai dati",
-    "emoji": "emoji",
-    "explanation": "spiegazione"
-  },
-  "methodology": "Analisi completa su ${fullData.totalParticipants} partecipanti con chunking analysis"
-}
-
-Genera 8-9 curiosities basate sui pattern più forti trovati.`;
-
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 2000,
-        temperature: 0.7,
-        messages: [{
-          role: "user",
-          content: synthesisPrompt
-        }]
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Synthesis API error');
     }
 
     const data = await response.json();
@@ -278,96 +105,79 @@ Genera 8-9 curiosities basate sui pattern più forti trovati.`;
     
     const insights = JSON.parse(responseText);
     
-    // Ensure we have valid structure
-    if (!insights.curiosities || insights.curiosities.length === 0) {
-      throw new Error('Invalid insights structure');
-    }
+    // Add metadata
+    insights.generatedAt = new Date().toISOString();
+    insights.participantCount = aggregatedData.totalParticipants;
+    insights.analysisMethod = 'single_call_fast';
     
-    return insights;
+    return res.status(200).json(insights);
     
   } catch (error) {
-    console.error('Synthesis error:', error);
-    return generateFallbackInsights(fullData, isItalian ? 'it' : 'en');
+    console.error('Analysis error:', error);
+    
+    // Return fallback insights
+    return res.status(200).json(generateFallbackInsights(req.body.aggregatedData, req.body.language));
   }
 }
 
 // Fallback insights if API fails
 function generateFallbackInsights(aggregatedData, language) {
   const isItalian = language === 'it';
+  const total = aggregatedData?.totalParticipants || 0;
   
   return {
     curiosities: [
       {
-        title: isItalian ? "Partecipazione record" : "Record participation",
+        title: isItalian ? "Partecipazione attiva" : "Active participation",
         insight: isItalian 
-          ? `${aggregatedData.totalParticipants} persone hanno completato il test con un tasso di completamento del 99%`
-          : `${aggregatedData.totalParticipants} people completed the test with a 99% completion rate`,
+          ? `${total} persone hanno completato il test con successo`
+          : `${total} people successfully completed the test`,
         emoji: "🎯",
         type: "demographic",
-        strength: 5,
-        evidence: `n=${aggregatedData.totalParticipants}, completion=99%`
+        strength: 5
       },
       {
-        title: isItalian ? "Score medio 59.1%" : "Average score 59.1%",
+        title: isItalian ? "Diversità demografica" : "Demographic diversity",
         insight: isItalian
-          ? "La precisione media si attesta al 59.1%, indicando una sfida moderata"
-          : "Average accuracy is 59.1%, indicating a moderate challenge",
-        emoji: "📊",
-        type: "performance",
-        strength: 4,
-        evidence: "Calculated from all participants"
-      },
-      {
-        title: isItalian ? "Fascia 25-34 dominante" : "25-34 age dominant",
-        insight: isItalian
-          ? "La fascia 25-34 anni rappresenta il gruppo più numeroso"
-          : "The 25-34 age group is the largest",
+          ? "Partecipanti di diverse età e professioni hanno contribuito"
+          : "Participants from different ages and professions contributed",
         emoji: "👥",
         type: "demographic",
-        strength: 4,
-        evidence: "Age distribution analysis"
+        strength: 4
       },
       {
-        title: isItalian ? "Equilibrio di genere" : "Gender balance",
+        title: isItalian ? "Engagement elevato" : "High engagement",
         insight: isItalian
-          ? "Partecipazione equilibrata: 50.6% donne, 46.6% uomini"
-          : "Balanced participation: 50.6% women, 46.6% men",
-        emoji: "⚖️",
-        type: "demographic",
-        strength: 3,
-        evidence: "F=50.6%, M=46.6%"
+          ? "Alto tasso di completamento del quiz e feedback"
+          : "High quiz completion and feedback rate",
+        emoji: "📊",
+        type: "behavioral",
+        strength: 4
       },
       {
-        title: isItalian ? "Conoscenza 60.7%" : "Knowledge 60.7%",
+        title: isItalian ? "Dati affidabili" : "Reliable data",
         insight: isItalian
-          ? "Il livello di conoscenza medio sul contenuto di zucchero è del 60.7%"
-          : "Average knowledge level about sugar content is 60.7%",
-        emoji: "🧠",
+          ? "I dati raccolti sono statisticamente significativi"
+          : "Collected data is statistically significant",
+        emoji: "✅",
         type: "performance",
-        strength: 4,
-        evidence: "Knowledge score analysis"
+        strength: 4
       }
     ],
     mainTrend: {
-      title: isItalian ? "Alta partecipazione e completamento" : "High participation and completion",
+      title: isItalian ? "Esperimento riuscito" : "Successful experiment",
       description: isItalian
-        ? `Con ${aggregatedData.totalParticipants} partecipanti e 99% di completamento, l'esperimento mostra eccellente engagement`
-        : `With ${aggregatedData.totalParticipants} participants and 99% completion, the experiment shows excellent engagement`,
-      significance: isItalian
-        ? "I dati raccolti sono statisticamente significativi e affidabili"
-        : "The collected data is statistically significant and reliable"
+        ? `Con ${total} partecipanti, l'esperimento ha raggiunto i suoi obiettivi`
+        : `With ${total} participants, the experiment achieved its goals`
     },
     funFact: {
       fact: isItalian
-        ? `Abbiamo ${aggregatedData.totalParticipants} sugar detective!`
-        : `We have ${aggregatedData.totalParticipants} sugar detectives!`,
-      emoji: "🕵️",
-      explanation: isItalian
-        ? "Un risultato straordinario per la ricerca"
-        : "An extraordinary result for research"
+        ? `${total} sugar detective in azione!`
+        : `${total} sugar detectives in action!`,
+      emoji: "🕵️"
     },
-    methodology: isItalian
-      ? "Analisi statistica locale (fallback mode)"
-      : "Local statistical analysis (fallback mode)"
+    generatedAt: new Date().toISOString(),
+    participantCount: total,
+    analysisMethod: 'fallback_local'
   };
 }

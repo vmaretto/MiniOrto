@@ -105,9 +105,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         note: 'Thursday data excluded (test data)'
       };
 
-      // Use local insights directly (faster and more reliable for demos)
-      // API call disabled temporarily - uncomment below to re-enable
-      /*
+      // Call server-side API endpoint
       const response = await fetch("/api/claude-insights", {
         method: "POST",
         headers: {
@@ -130,16 +128,13 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       }
 
       const data = await response.json();
-      const claudeInsights = data.insights;
-      */
+      const claudeInsights = data.curiosities ? data : data.insights;
       
-      // Generate insights locally (no API call)
-      const localInsights = generateLocalInsights(participants);
-      setInsights(localInsights);
+      setInsights(claudeInsights);
       setApiConfigured(true);
       
       // Save to history
-      const newHistory = [localInsights, ...insightHistory].slice(0, 10);
+      const newHistory = [claudeInsights, ...insightHistory].slice(0, 10);
       setInsightHistory(newHistory);
       localStorage.setItem('insight_history', JSON.stringify(newHistory));
       
