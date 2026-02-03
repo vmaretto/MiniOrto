@@ -108,28 +108,17 @@ function FeedbackScreen() {
         }
         
         setSubmitted(true);
-        setTimeout(() => {
-          sessionStorage.clear();
-          navigate('/');
-        }, 5000);
+        // No auto-redirect - let user click "Vedi Classifica Completa"
       } else {
         // Response not OK - still show success to not block user
         console.error('API response not OK:', response.status);
         setSubmitted(true);
-        setTimeout(() => {
-          sessionStorage.clear();
-          navigate('/');
-        }, 3000);
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
       // Anche in caso di errore, mostra il messaggio di successo
       // per non bloccare l'utente
       setSubmitted(true);
-      setTimeout(() => {
-        sessionStorage.clear();
-        navigate('/');
-      }, 3000);
     } finally {
       setSubmitting(false);
     }
