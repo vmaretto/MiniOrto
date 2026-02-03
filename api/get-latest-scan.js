@@ -1,3 +1,4 @@
+import 'dotenv/config';
 // api/get-latest-scan.js
 // Returns the latest scan received for a session
 // Uses pg Pool for Postgres (Supabase/Neon compatible)

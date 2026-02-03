@@ -1,3 +1,4 @@
+import 'dotenv/config';
 // api/foods.js - Compatible with Neon/Standard Postgres
 import { Pool } from 'pg';
 

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 // api/config.js - API per gestire configurazioni esperienze
 import { Pool } from 'pg';
 

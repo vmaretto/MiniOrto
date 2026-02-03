@@ -1,4 +1,5 @@
 // api/participants.js - FIXED TIMESTAMP VERSION
+import 'dotenv/config';
 import { Pool } from 'pg';
 
 const pool = new Pool({

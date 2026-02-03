@@ -1,3 +1,4 @@
+import 'dotenv/config';
 // api/receive-scio.js
 // Endpoint to receive SCIO scan data directly from iOS app
 // Uses pg Pool for Postgres (Supabase/Neon compatible)
