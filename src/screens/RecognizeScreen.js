@@ -10,6 +10,7 @@ const productNames = {
   'pomodoro': { it: 'Pomodoro', en: 'Tomato' },
   'pomodoro ciliegino': { it: 'Pomodoro ciliegino', en: 'Cherry tomato' },
   'mela': { it: 'Mela', en: 'Apple' },
+  'mela fuji': { it: 'Mela Fuji', en: 'Fuji Apple' },
   'mela golden': { it: 'Mela Golden', en: 'Golden Apple' },
   'arancia': { it: 'Arancia', en: 'Orange' },
   'limone': { it: 'Limone', en: 'Lemon' },
@@ -29,6 +30,7 @@ const productNames = {
   'lattuga': { it: 'Lattuga', en: 'Lettuce' },
   'spinaci': { it: 'Spinaci', en: 'Spinach' },
   'broccoli': { it: 'Broccoli', en: 'Broccoli' },
+  'broccolo': { it: 'Broccolo', en: 'Broccoli' },
   'cavolfiore': { it: 'Cavolfiore', en: 'Cauliflower' },
   'patata': { it: 'Patata', en: 'Potato' },
   'cipolla': { it: 'Cipolla', en: 'Onion' },
@@ -39,6 +41,8 @@ const categoryNames = {
   'frutta': { it: 'frutta', en: 'fruit' },
   'verdura': { it: 'verdura', en: 'vegetable' },
   'ortaggio': { it: 'ortaggio', en: 'vegetable' },
+  'fruit': { it: 'frutta', en: 'fruit' },
+  'vegetable': { it: 'verdura', en: 'vegetable' },
 };
 
 function RecognizeScreen() {
@@ -82,10 +86,31 @@ function RecognizeScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [recognized, setRecognized] = useState(null);
+  
+  // Demo products gallery state
+  const [demoProducts, setDemoProducts] = useState([]);
+  const [loadingDemoProducts, setLoadingDemoProducts] = useState(true);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Fetch demo products on mount
+    fetchDemoProducts();
   }, []);
+  
+  const fetchDemoProducts = async () => {
+    try {
+      setLoadingDemoProducts(true);
+      const response = await fetch('/api/demo-products');
+      if (response.ok) {
+        const data = await response.json();
+        setDemoProducts(data);
+      }
+    } catch (err) {
+      console.error('Error fetching demo products:', err);
+    } finally {
+      setLoadingDemoProducts(false);
+    }
+  };
 
   const handleImageSelect = async (e) => {
     const file = e.target.files[0];
@@ -160,6 +185,41 @@ function RecognizeScreen() {
       console.error('Error recognizing product:', err);
       setError(t('recognize.error') + ': ' + err.message);
       setLoading(false);
+    }
+  };
+  
+  // Handle demo product selection
+  const handleSelectDemoProduct = (product) => {
+    // Create recognized product object from demo product
+    const recognizedData = {
+      name: product.name,
+      category: product.category,
+      emoji: product.emoji,
+      confidence: 'alta',
+      isDemoProduct: true,
+      demoProductId: product.id,
+      scioData: {
+        brix: product.scio_brix,
+        calories: product.scio_calories,
+        carbs: product.scio_carbs,
+        sugar: product.scio_sugar,
+        water: product.scio_water,
+        protein: product.scio_protein,
+        fiber: product.scio_fiber
+      }
+    };
+    
+    setRecognized(recognizedData);
+    sessionStorage.setItem('recognizedProduct', JSON.stringify(recognizedData));
+    
+    // If demo product has an image, use it
+    if (product.image_base64) {
+      sessionStorage.setItem('productImage', product.image_base64);
+      setImagePreview(product.image_base64);
+    } else {
+      // Clear product image for demo products without image
+      sessionStorage.removeItem('productImage');
+      setImagePreview(null);
     }
   };
 
@@ -298,6 +358,114 @@ function RecognizeScreen() {
         </div>
       )}
 
+      {/* Demo Products Gallery - Only show when not recognized */}
+      {!recognized && !loading && demoProducts.length > 0 && (
+        <div style={{ marginTop: '30px' }}>
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '16px',
+            color: '#666',
+            fontSize: '0.9rem'
+          }}>
+            <span style={{ 
+              background: SWITCH_COLORS.lightBg, 
+              padding: '4px 12px', 
+              borderRadius: '20px' 
+            }}>
+              {language === 'it' ? '— oppure scegli un prodotto demo —' : '— or choose a demo product —'}
+            </span>
+          </div>
+          
+          {/* Horizontal scrollable gallery */}
+          <div style={{
+            display: 'flex',
+            overflowX: 'auto',
+            gap: '12px',
+            padding: '8px 4px',
+            marginBottom: '10px',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin'
+          }}>
+            {demoProducts.map((product) => (
+              <div
+                key={product.id}
+                onClick={() => handleSelectDemoProduct(product)}
+                style={{
+                  flex: '0 0 auto',
+                  width: '100px',
+                  padding: '12px 8px',
+                  background: 'white',
+                  border: `2px solid ${SWITCH_COLORS.gold}`,
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                }}
+              >
+                {product.image_base64 ? (
+                  <img 
+                    src={product.image_base64} 
+                    alt={product.name}
+                    style={{
+                      width: '60px',
+                      height: '60px',
+                      objectFit: 'cover',
+                      borderRadius: '8px',
+                      marginBottom: '8px'
+                    }}
+                  />
+                ) : (
+                  <div style={{ 
+                    fontSize: '2.5rem', 
+                    marginBottom: '8px',
+                    lineHeight: 1
+                  }}>
+                    {product.emoji || '🥬'}
+                  </div>
+                )}
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  fontWeight: '600',
+                  color: SWITCH_COLORS.darkBlue,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }}>
+                  {translateProductName(product.name)}
+                </div>
+                <div style={{
+                  fontSize: '0.65rem',
+                  color: '#888',
+                  marginTop: '2px'
+                }}>
+                  {translateCategory(product.category)}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <p style={{ 
+            fontSize: '0.75rem', 
+            color: '#999', 
+            textAlign: 'center',
+            margin: 0 
+          }}>
+            {language === 'it' 
+              ? '👆 Scorri per vedere tutti i prodotti demo con dati SCIO pre-registrati' 
+              : '👆 Scroll to see all demo products with pre-registered SCIO data'}
+          </p>
+        </div>
+      )}
+
       {/* Recognition Result */}
       {recognized && (
         <div style={{ marginTop: '20px' }}>
@@ -324,6 +492,21 @@ function RecognizeScreen() {
               <p style={{ margin: '8px 0 0 0', color: '#888', fontSize: '0.85rem' }}>
                 {t('recognize.category')}: {translateCategory(recognized.category)}
               </p>
+            )}
+            {/* Demo product badge */}
+            {recognized.isDemoProduct && (
+              <div style={{
+                marginTop: '12px',
+                padding: '6px 12px',
+                background: SWITCH_COLORS.green + '20',
+                borderRadius: '20px',
+                display: 'inline-block',
+                fontSize: '0.75rem',
+                color: SWITCH_COLORS.green,
+                fontWeight: '600'
+              }}>
+                ✓ {language === 'it' ? 'Dati SCIO disponibili' : 'SCIO data available'}
+              </div>
             )}
           </div>
 

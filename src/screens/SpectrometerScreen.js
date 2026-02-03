@@ -16,11 +16,31 @@ function SpectrometerScreen() {
   const sessionStartRef = useRef(null);
   const foundDataRef = useRef(false);
   
+  // Demo products state
+  const [demoProducts, setDemoProducts] = useState([]);
+  const [loadingDemoProducts, setLoadingDemoProducts] = useState(true);
+  
   const recognizedProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    fetchDemoProducts();
   }, []);
+  
+  const fetchDemoProducts = async () => {
+    try {
+      setLoadingDemoProducts(true);
+      const response = await fetch('/api/demo-products');
+      if (response.ok) {
+        const data = await response.json();
+        setDemoProducts(data);
+      }
+    } catch (err) {
+      console.error('Error fetching demo products:', err);
+    } finally {
+      setLoadingDemoProducts(false);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -87,6 +107,39 @@ function SpectrometerScreen() {
   const handleBackToRecognize = () => {
     navigate('/recognize');
   };
+  
+  // Handle demo product SCIO data selection
+  const handleUseDemoScioData = (product) => {
+    // Create SCIO scan data from demo product
+    const scioData = {
+      brix: parseFloat(product.scio_brix) || 0,
+      calories: parseFloat(product.scio_calories) || 0,
+      carbs: parseFloat(product.scio_carbs) || 0,
+      sugar: parseFloat(product.scio_sugar) || 0,
+      water: parseFloat(product.scio_water) || 0,
+      protein: parseFloat(product.scio_protein) || 0,
+      fiber: parseFloat(product.scio_fiber) || 0,
+      isDemoData: true,
+      demoProductId: product.id,
+      demoProductName: product.name
+    };
+    
+    sessionStorage.setItem('scioScanData', JSON.stringify(scioData));
+    sessionStorage.setItem('scanMethod', 'demo');
+    
+    // Update recognized product with SCIO data
+    const currentProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
+    currentProduct.scioData = scioData;
+    sessionStorage.setItem('recognizedProduct', JSON.stringify(currentProduct));
+    
+    navigate('/results');
+  };
+  
+  // Check if current product is a demo product with SCIO data
+  const hasPreloadedScioData = recognizedProduct.isDemoProduct && recognizedProduct.scioData;
+  
+  // Filter demo products for gallery (show all or filtered by matching product)
+  const filteredDemoProducts = demoProducts;
 
   return (
     <SwitchLayout 
@@ -113,12 +166,81 @@ function SpectrometerScreen() {
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#666' }}>
               {t('spectrometer.productToAnalyze')}
             </p>
+            {hasPreloadedScioData && (
+              <span style={{
+                display: 'inline-block',
+                marginTop: '4px',
+                padding: '2px 8px',
+                background: SWITCH_COLORS.green + '20',
+                borderRadius: '10px',
+                fontSize: '0.7rem',
+                color: SWITCH_COLORS.green,
+                fontWeight: '600'
+              }}>
+                ✓ {language === 'it' ? 'Dati SCIO disponibili' : 'SCIO data available'}
+              </span>
+            )}
           </div>
         </div>
       )}
 
       {!waitingForScan ? (
         <>
+          {/* Quick action for demo products with pre-loaded SCIO data */}
+          {hasPreloadedScioData && (
+            <div style={{
+              background: `linear-gradient(135deg, ${SWITCH_COLORS.green}15 0%, ${SWITCH_COLORS.green}05 100%)`,
+              borderRadius: '12px',
+              padding: '16px',
+              marginBottom: '20px',
+              border: `2px solid ${SWITCH_COLORS.green}`
+            }}>
+              <h4 style={{ 
+                margin: '0 0 10px 0', 
+                color: SWITCH_COLORS.green,
+                fontSize: '0.95rem' 
+              }}>
+                ⚡ {language === 'it' ? 'Azione rapida' : 'Quick action'}
+              </h4>
+              <p style={{ 
+                margin: '0 0 12px 0', 
+                color: '#666', 
+                fontSize: '0.85rem' 
+              }}>
+                {language === 'it' 
+                  ? 'Questo prodotto ha già dati SCIO registrati. Puoi usarli direttamente!'
+                  : 'This product already has registered SCIO data. You can use it directly!'}
+              </p>
+              <button
+                onClick={() => handleUseDemoScioData({
+                  scio_brix: recognizedProduct.scioData.brix,
+                  scio_calories: recognizedProduct.scioData.calories,
+                  scio_carbs: recognizedProduct.scioData.carbs,
+                  scio_sugar: recognizedProduct.scioData.sugar,
+                  scio_water: recognizedProduct.scioData.water,
+                  scio_protein: recognizedProduct.scioData.protein,
+                  scio_fiber: recognizedProduct.scioData.fiber,
+                  id: recognizedProduct.demoProductId,
+                  name: recognizedProduct.name
+                })}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: SWITCH_COLORS.green,
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: 'white',
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  boxShadow: `0 4px 12px ${SWITCH_COLORS.green}40`
+                }}
+              >
+                ✓ {language === 'it' ? 'Usa dati SCIO pre-registrati' : 'Use pre-registered SCIO data'}
+              </button>
+            </div>
+          )}
+
           <div style={{
             background: SWITCH_COLORS.lightBg,
             borderRadius: '12px',
@@ -185,6 +307,102 @@ function SpectrometerScreen() {
               ← {t('spectrometer.goBack')}
             </button>
           </div>
+          
+          {/* Demo products SCIO gallery */}
+          {!hasPreloadedScioData && filteredDemoProducts.length > 0 && (
+            <div style={{ marginTop: '30px' }}>
+              <div style={{ 
+                textAlign: 'center', 
+                marginBottom: '16px',
+                color: '#666',
+                fontSize: '0.9rem'
+              }}>
+                <span style={{ 
+                  background: SWITCH_COLORS.lightBg, 
+                  padding: '4px 12px', 
+                  borderRadius: '20px' 
+                }}>
+                  {language === 'it' ? '— oppure usa dati SCIO già registrati —' : '— or use pre-registered SCIO data —'}
+                </span>
+              </div>
+              
+              {/* Horizontal scrollable gallery */}
+              <div style={{
+                display: 'flex',
+                overflowX: 'auto',
+                gap: '12px',
+                padding: '8px 4px',
+                marginBottom: '10px',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin'
+              }}>
+                {filteredDemoProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    onClick={() => handleUseDemoScioData(product)}
+                    style={{
+                      flex: '0 0 auto',
+                      width: '110px',
+                      padding: '12px 8px',
+                      background: 'white',
+                      border: `2px solid ${SWITCH_COLORS.gold}`,
+                      borderRadius: '12px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                    }}
+                  >
+                    <div style={{ 
+                      fontSize: '2rem', 
+                      marginBottom: '6px',
+                      lineHeight: 1
+                    }}>
+                      {product.emoji || '🥬'}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.75rem', 
+                      fontWeight: '600',
+                      color: SWITCH_COLORS.darkBlue,
+                      marginBottom: '4px'
+                    }}>
+                      {product.name}
+                    </div>
+                    <div style={{
+                      fontSize: '0.6rem',
+                      color: SWITCH_COLORS.green,
+                      fontWeight: '600',
+                      background: SWITCH_COLORS.green + '15',
+                      padding: '2px 6px',
+                      borderRadius: '8px',
+                      display: 'inline-block'
+                    }}>
+                      Brix: {product.scio_brix}°
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <p style={{ 
+                fontSize: '0.75rem', 
+                color: '#999', 
+                textAlign: 'center',
+                margin: 0 
+              }}>
+                {language === 'it' 
+                  ? '👆 Seleziona un prodotto per usare i suoi dati SCIO' 
+                  : '👆 Select a product to use its SCIO data'}
+              </p>
+            </div>
+          )}
         </>
       ) : (
         <div style={{

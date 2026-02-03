@@ -14,6 +14,7 @@ import SpectrometerScreen from './screens/SpectrometerScreen';
 import ResultsScreen from './screens/ResultsScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import AdminScreen from './screens/AdminScreen';
+import AdminProductsScreen from './screens/AdminProductsScreen';
 import ScanFlowScreen from './screens/ScanFlowScreen';
 import EmbedProductScreen from './screens/EmbedProductScreen';
 import FeedbackScreen from './screens/FeedbackScreen';
@@ -57,6 +58,7 @@ function App() {
           <Route path="/comparison" element={<ComparisonScreen />} />
           <Route path="/dashboard" element={<DashboardScreen />} />
           <Route path="/admin" element={<AdminScreen />} />
+          <Route path="/admin/products" element={<AdminProductsScreen />} />
           <Route path="/scan-flow" element={<ScanFlowScreen />} />
           <Route path="/feedback" element={<FeedbackScreen />} />
           <Route path="/embed/product/:productId" element={<EmbedProductScreen />} />

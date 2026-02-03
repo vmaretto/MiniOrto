@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation, useTranslation as useI18n } from 'react-i18next';
-import { Download, Trash2, RefreshCw, Settings } from 'lucide-react';
+import { Download, Trash2, RefreshCw, Settings, Package } from 'lucide-react';
 import Leaderboard from '../components/Leaderboard';
 import { generateRanking } from '../utils/rankingUtils';
 
@@ -247,6 +247,26 @@ const AdminScreen = () => {
             >
               <Settings size={20} />
               Configurazione
+            </button>
+
+            <button
+              onClick={() => navigate('/admin/products')}
+              style={{
+                padding: '0.75rem 1.5rem',
+                background: '#FFC300',
+                color: '#1E3A5F',
+                border: 'none',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '1rem',
+                fontWeight: '600'
+              }}
+            >
+              <Package size={20} />
+              Prodotti Demo
             </button>
 
             <button
