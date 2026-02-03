@@ -6,10 +6,10 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
   const [expandedId, setExpandedId] = useState(null);
 
   const getRankIcon = (rank) => {
-    if (rank === 1) return <Trophy size={24} color="#FFD700" />;
-    if (rank === 2) return <Medal size={24} color="#C0C0C0" />;
-    if (rank === 3) return <Medal size={24} color="#CD7F32" />;
-    return <Award size={20} color="#9ca3af" />;
+    if (rank === 1) return <Trophy size={20} color="#FFD700" />;
+    if (rank === 2) return <Medal size={20} color="#C0C0C0" />;
+    if (rank === 3) return <Medal size={20} color="#CD7F32" />;
+    return <Award size={18} color="#9ca3af" />;
   };
 
   const getRankColor = (rank) => {
@@ -17,6 +17,13 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
     if (rank === 2) return '#C0C0C0';
     if (rank === 3) return '#CD7F32';
     return '#9ca3af';
+  };
+
+  const getScoreBackground = (index) => {
+    if (index === 0) return 'linear-gradient(135deg, #fcd34d, #f59e0b)';
+    if (index === 1) return 'linear-gradient(135deg, #e5e7eb, #9ca3af)';
+    if (index === 2) return 'linear-gradient(135deg, #fed7aa, #ea580c)';
+    return 'linear-gradient(135deg, #c7d2fe, #6366f1)';
   };
 
   const formatDate = (timestamp) => {
@@ -31,7 +38,6 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
   };
 
   const getParticipantData = (participant) => {
-    // Handle nested data structure
     const rawData = participant.participant?.data || participant.data || {};
     return rawData.data || rawData;
   };
@@ -57,14 +63,15 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
   };
 
   const DetailSection = ({ icon, title, children }) => (
-    <div style={{ marginBottom: '16px' }}>
+    <div style={{ marginBottom: '12px' }}>
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        gap: '8px', 
-        marginBottom: '8px',
+        gap: '6px', 
+        marginBottom: '6px',
         color: '#667eea',
-        fontWeight: '600'
+        fontWeight: '600',
+        fontSize: '0.85rem'
       }}>
         {icon}
         <span>{title}</span>
@@ -72,8 +79,8 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
       <div style={{ 
         background: '#f9fafb', 
         borderRadius: '8px', 
-        padding: '12px',
-        fontSize: '0.9rem'
+        padding: '10px',
+        fontSize: '0.85rem'
       }}>
         {children}
       </div>
@@ -82,9 +89,15 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
 
   const DataRow = ({ label, value }) => (
     value ? (
-      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #e5e7eb' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        padding: '3px 0', 
+        borderBottom: '1px solid #e5e7eb',
+        fontSize: '0.8rem'
+      }}>
         <span style={{ color: '#6b7280' }}>{label}</span>
-        <span style={{ fontWeight: '500' }}>{value}</span>
+        <span style={{ fontWeight: '500', textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{value}</span>
       </div>
     ) : null
   );
@@ -92,19 +105,19 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
   return (
     <div style={{
       background: 'white',
-      borderRadius: '20px',
-      padding: '2rem',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+      borderRadius: '16px',
+      padding: '16px',
     }}>
+      {/* Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '1rem',
-        marginBottom: '2rem'
+        gap: '10px',
+        marginBottom: '16px'
       }}>
-        <Trophy size={32} color="#667eea" />
+        <Trophy size={24} color="#667eea" />
         <h2 style={{
-          fontSize: '1.75rem',
+          fontSize: '1.25rem',
           fontWeight: 'bold',
           color: '#667eea',
           margin: 0
@@ -114,13 +127,13 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
       </div>
 
       {ranking.length === 0 ? (
-        <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>
+        <p style={{ color: '#666', textAlign: 'center', padding: '24px' }}>
           {language === 'it' 
             ? 'Nessun partecipante ancora. Sii il primo!'
             : 'No participants yet. Be the first!'}
         </p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {ranking.map((participant, index) => {
             const profile = getProfile(participant);
             const displayName = getDisplayName(participant);
@@ -129,125 +142,119 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
             
             return (
               <div key={participant.id}>
-                {/* Main Row */}
+                {/* Main Card */}
                 <div
                   onClick={() => toggleExpand(participant.id)}
                   style={{
-                    padding: '1.5rem',
+                    padding: '12px',
                     background: index < 3 
-                      ? `linear-gradient(135deg, ${getRankColor(participant.rank)}15 0%, ${getRankColor(participant.rank)}05 100%)`
-                      : '#f9fafb',
-                    border: index < 3 ? `2px solid ${getRankColor(participant.rank)}` : '2px solid #e5e7eb',
-                    borderRadius: isExpanded ? '15px 15px 0 0' : '15px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    transition: 'all 0.2s',
-                    cursor: 'pointer'
+                      ? `linear-gradient(135deg, ${getRankColor(participant.rank)}20 0%, ${getRankColor(participant.rank)}08 100%)`
+                      : '#fafafa',
+                    border: index < 3 ? `2px solid ${getRankColor(participant.rank)}` : '1px solid #e5e7eb',
+                    borderRadius: isExpanded ? '12px 12px 0 0' : '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
                   }}
                 >
-                  {/* Rank */}
+                  {/* Top row: Rank + Name + Score */}
                   <div style={{
-                    minWidth: '60px',
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '0.25rem'
+                    gap: '10px',
+                    marginBottom: '8px'
                   }}>
-                    {getRankIcon(participant.rank)}
-                    <span style={{
-                      fontSize: '1.25rem',
-                      fontWeight: 'bold',
-                      color: getRankColor(participant.rank)
-                    }}>
-                      #{participant.rank}
-                    </span>
-                  </div>
-
-                  {/* Info */}
-                  <div style={{ flex: 1 }}>
+                    {/* Rank badge */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '0.25rem'
+                      gap: '4px',
+                      minWidth: '50px'
                     }}>
-                      <div style={{
-                        fontSize: '1.125rem',
-                        fontWeight: '600',
-                        color: '#1f2937'
-                      }}>
-                        {displayName}
-                      </div>
-                      {/* Score - always visible */}
-                      <div style={{
-                        fontSize: '1.5rem',
-                        fontWeight: '800',
-                        color: index < 3 ? '#1e40af' : '#3730a3',
-                        background: index === 0 ? 'linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%)' 
-                                  : index === 1 ? 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)'
-                                  : index === 2 ? 'linear-gradient(135deg, #fcd9bd 0%, #f59e0b 100%)'
-                                  : '#e0e7ff',
-                        padding: '8px 16px',
-                        borderRadius: '12px',
-                        boxShadow: index < 3 ? '0 2px 8px rgba(0,0,0,0.15)' : 'none',
-                        minWidth: '70px',
-                        textAlign: 'center'
-                      }}>
-                        {participant.totalScore} <span style={{ fontSize: '0.85rem', fontWeight: '600', color: index < 3 ? '#374151' : '#6366f1' }}>{language === 'it' ? 'pt' : 'pts'}</span>
-                      </div>
-                    </div>
-                    <div style={{
-                      fontSize: '0.875rem',
-                      color: '#6b7280'
-                    }}>
-                      {profile.age && `${profile.age} ${language === 'it' ? 'anni' : 'years old'}`}
-                      {profile.profession && ` • ${profile.profession}`}
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      marginTop: '0.25rem'
-                    }}>
+                      {getRankIcon(participant.rank)}
                       <span style={{
-                        fontSize: '0.75rem',
-                        color: '#9ca3af'
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                        color: getRankColor(participant.rank)
                       }}>
-                        {formatDate(participant.timestamp)}
+                        #{participant.rank}
                       </span>
-                      {participant.quizBadge && (
-                        <span style={{
-                          fontSize: '0.7rem',
-                          padding: '2px 8px',
-                          borderRadius: '10px',
-                          background: `${participant.quizBadge.color}20`,
-                          color: participant.quizBadge.color,
-                          fontWeight: '500'
-                        }}>
-                          {participant.quizBadge.name}
-                        </span>
-                      )}
+                    </div>
+
+                    {/* Name - takes remaining space */}
+                    <div style={{
+                      flex: 1,
+                      fontSize: '0.95rem',
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {displayName}
+                    </div>
+
+                    {/* Score badge */}
+                    <div style={{
+                      background: getScoreBackground(index),
+                      color: 'white',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      fontWeight: '800',
+                      fontSize: '1.1rem',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                      display: 'flex',
+                      alignItems: 'baseline',
+                      gap: '2px'
+                    }}>
+                      {participant.totalScore}
+                      <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>pt</span>
+                    </div>
+
+                    {/* Expand arrow */}
+                    <div style={{ 
+                      padding: '4px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      {isExpanded 
+                        ? <ChevronUp size={20} color="#667eea" /> 
+                        : <ChevronDown size={20} color="#9ca3af" />
+                      }
                     </div>
                   </div>
 
-                  {/* Expand Icon */}
-                  <div style={{ marginLeft: '8px' }}>
-                    {isExpanded ? <ChevronUp size={24} color="#667eea" /> : <ChevronDown size={24} color="#9ca3af" />}
+                  {/* Bottom row: Details */}
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '6px',
+                    fontSize: '0.75rem',
+                    color: '#6b7280',
+                    paddingLeft: '54px'
+                  }}>
+                    {profile.age && (
+                      <span>{profile.age} {language === 'it' ? 'anni' : 'y/o'}</span>
+                    )}
+                    {profile.profession && (
+                      <span>• {profile.profession}</span>
+                    )}
+                    <span style={{ color: '#9ca3af' }}>
+                      • {formatDate(participant.timestamp)}
+                    </span>
                   </div>
                 </div>
 
                 {/* Expanded Details */}
                 {isExpanded && (
                   <div style={{
-                    padding: '1.5rem',
+                    padding: '12px',
                     background: '#fff',
-                    border: '2px solid #e5e7eb',
+                    border: '1px solid #e5e7eb',
                     borderTop: 'none',
-                    borderRadius: '0 0 15px 15px'
+                    borderRadius: '0 0 12px 12px'
                   }}>
                     {/* Profile */}
-                    <DetailSection icon={<User size={18} />} title={language === 'it' ? 'Profilo' : 'Profile'}>
+                    <DetailSection icon={<User size={16} />} title={language === 'it' ? 'Profilo' : 'Profile'}>
                       <DataRow label={language === 'it' ? 'Età' : 'Age'} value={profile.age} />
                       <DataRow label={language === 'it' ? 'Genere' : 'Gender'} value={profile.gender} />
                       <DataRow label={language === 'it' ? 'Professione' : 'Profession'} value={profile.profession} />
@@ -259,7 +266,7 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
 
                     {/* Product */}
                     {data.product && (
-                      <DetailSection icon={<Leaf size={18} />} title={language === 'it' ? 'Prodotto Analizzato' : 'Analyzed Product'}>
+                      <DetailSection icon={<Leaf size={16} />} title={language === 'it' ? 'Prodotto Analizzato' : 'Analyzed Product'}>
                         <DataRow label={language === 'it' ? 'Nome' : 'Name'} value={data.product.name} />
                         <DataRow label={language === 'it' ? 'Categoria' : 'Category'} value={data.product.category} />
                         <DataRow label="Emoji" value={data.product.emoji} />
@@ -269,7 +276,7 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
 
                     {/* SCIO Results */}
                     {data.scioResults && (
-                      <DetailSection icon={<BarChart2 size={18} />} title={language === 'it' ? 'Risultati SCIO' : 'SCIO Results'}>
+                      <DetailSection icon={<BarChart2 size={16} />} title={language === 'it' ? 'Risultati SCIO' : 'SCIO Results'}>
                         <DataRow label="Brix" value={data.scioResults.brix} />
                         <DataRow label={language === 'it' ? 'Calorie' : 'Calories'} value={data.scioResults.calories ? `${data.scioResults.calories} kcal` : null} />
                         <DataRow label={language === 'it' ? 'Carboidrati' : 'Carbs'} value={data.scioResults.carbs ? `${data.scioResults.carbs}g` : null} />
@@ -283,13 +290,13 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
 
                     {/* Feedback */}
                     {data.feedback && (
-                      <DetailSection icon={<MessageSquare size={18} />} title="Feedback">
+                      <DetailSection icon={<MessageSquare size={16} />} title="Feedback">
                         <DataRow label={language === 'it' ? 'Differenze trovate' : 'Found Differences'} value={data.feedback.foundDifferences} />
                         <DataRow label={language === 'it' ? 'Spiegazione' : 'Explanation'} value={data.feedback.differenceExplanation} />
                         <DataRow label={language === 'it' ? 'Utilità spettrometro' : 'Spectrometer Useful'} value={data.feedback.spectrometerUseful ? `${data.feedback.spectrometerUseful}/5` : null} />
                         <DataRow label={language === 'it' ? 'Rating' : 'Rating'} value={data.feedback.overallRating ? `${'⭐'.repeat(data.feedback.overallRating)}` : null} />
                         {data.feedback.comments && (
-                          <div style={{ marginTop: '8px', fontStyle: 'italic', color: '#4b5563' }}>
+                          <div style={{ marginTop: '6px', fontStyle: 'italic', color: '#4b5563', fontSize: '0.8rem' }}>
                             "{data.feedback.comments}"
                           </div>
                         )}
@@ -306,35 +313,35 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
       {/* Stats Footer */}
       {ranking.length > 0 && (
         <div style={{
-          marginTop: '2rem',
-          padding: '1.5rem',
+          marginTop: '16px',
+          padding: '12px',
           background: '#f3f4f6',
-          borderRadius: '15px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: '1rem'
+          borderRadius: '12px',
+          display: 'flex',
+          justifyContent: 'space-around',
+          textAlign: 'center'
         }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-              {language === 'it' ? 'Partecipanti' : 'Participants'}
+          <div>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+              {language === 'it' ? 'Totale' : 'Total'}
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#667eea' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#667eea' }}>
               {ranking.length}
             </div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-              {language === 'it' ? 'Punteggio Medio' : 'Avg Score'}
+          <div>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+              {language === 'it' ? 'Media' : 'Avg'}
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#667eea' }}>
-              {(ranking.reduce((sum, p) => sum + p.totalScore, 0) / ranking.length).toFixed(1)}
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#667eea' }}>
+              {(ranking.reduce((sum, p) => sum + p.totalScore, 0) / ranking.length).toFixed(0)}
             </div>
           </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-              {language === 'it' ? 'Top Score' : 'Top Score'}
+          <div>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+              Top
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#10b981' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#10b981' }}>
               {ranking[0].totalScore}
             </div>
           </div>
