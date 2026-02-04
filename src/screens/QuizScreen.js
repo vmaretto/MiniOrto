@@ -493,9 +493,15 @@ export default function QuizScreen() {
     >
       <GlobalProgress currentStep="quiz" language={language} />
 
-      {/* Back Button */}
+      {/* Back Button - goes to previous question, or previous screen if on intro */}
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => {
+          if (currentQuestion > 0) {
+            setCurrentQuestion(prev => prev - 1);
+          } else {
+            navigate(-1);
+          }
+        }}
         style={{
           background: 'transparent',
           border: `1px solid ${SWITCH_COLORS.darkBlue}`,
