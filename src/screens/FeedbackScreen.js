@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { trackEvent } from '../utils/analytics';
 import SwitchLayout, { SWITCH_COLORS } from '../components/SwitchLayout';
 import GlobalProgress from '../components/GlobalProgress';
+import { generateRanking, findParticipantRank } from '../utils/rankingUtils';
 
 function FeedbackScreen() {
   const { t, i18n } = useTranslation();
@@ -100,19 +101,15 @@ function FeedbackScreen() {
           const rankingResponse = await fetch('/api/participants');
           if (rankingResponse.ok) {
             const allParticipants = await rankingResponse.json();
-            const userScore = quizResults?.score?.total || 0;
-            const sortedByScore = allParticipants
-              .map(p => {
-                const d = p.data?.data || p.data || {};
-                return {
-                  id: p.id,
-                  score: d.quizResults?.score?.total || 0
-                };
-              })
-              .sort((a, b) => b.score - a.score);
-            
-            const position = sortedByScore.findIndex(p => p.id === result.id) + 1;
-            setRanking({ position, total: allParticipants.length, score: userScore });
+            // Use the same ranking algorithm as Dashboard/Leaderboard
+            const rankedData = generateRanking(allParticipants);
+            const position = findParticipantRank(result.id, rankedData);
+            const myEntry = rankedData.find(p => p.id === result.id);
+            setRanking({ 
+              position: position || 0, 
+              total: allParticipants.length, 
+              score: myEntry?.totalScore || 0 
+            });
           }
         } catch (e) {
           console.error('Error fetching ranking:', e);
