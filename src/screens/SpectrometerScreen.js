@@ -252,23 +252,47 @@ function SpectrometerScreen() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Back button - mobile friendly */}
+            <button 
+              onClick={handleBackToRecognize}
+              style={{ 
+                background: 'transparent',
+                border: `1px solid ${SWITCH_COLORS.darkBlue}`,
+                color: SWITCH_COLORS.darkBlue,
+                cursor: 'pointer',
+                padding: '12px 16px',
+                fontSize: '0.95rem',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                alignSelf: 'flex-start',
+                minHeight: '44px', // Touch-friendly minimum height
+                fontWeight: '500'
+              }}
+            >
+              ← {t('spectrometer.goBack')}
+            </button>
+
             <button 
               onClick={handleWaitForScan}
               style={{
                 background: `linear-gradient(135deg, ${SWITCH_COLORS.darkBlue} 0%, #2d4a6f 100%)`,
                 border: 'none',
-                padding: '16px',
+                padding: '18px',
                 borderRadius: '12px',
                 color: 'white',
                 fontWeight: '600',
-                fontSize: '1rem',
+                fontSize: '1.1rem',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 12px rgba(30, 58, 95, 0.3)'
+                gap: '10px',
+                boxShadow: '0 4px 12px rgba(30, 58, 95, 0.3)',
+                minHeight: '56px', // Touch-friendly height
+                lineHeight: '1.4'
               }}
             >
               📡 {t('spectrometer.waitForScan')}
@@ -280,31 +304,20 @@ function SpectrometerScreen() {
                 background: '#fff',
                 border: `2px solid ${SWITCH_COLORS.green}`,
                 color: SWITCH_COLORS.green,
-                padding: '16px',
+                padding: '18px',
                 borderRadius: '12px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '10px',
+                minHeight: '56px', // Touch-friendly height
+                fontSize: '1.1rem',
+                lineHeight: '1.4'
               }}
             >
               📱 {t('spectrometer.uploadScreenshot')}
-            </button>
-            
-            <button 
-              onClick={handleBackToRecognize}
-              style={{ 
-                background: 'transparent',
-                border: 'none',
-                color: '#666',
-                cursor: 'pointer',
-                padding: '12px',
-                fontSize: '0.9rem'
-              }}
-            >
-              ← {t('spectrometer.goBack')}
             </button>
           </div>
           
@@ -326,7 +339,7 @@ function SpectrometerScreen() {
                 </span>
               </div>
               
-              {/* Horizontal scrollable gallery */}
+              {/* Horizontal scrollable gallery - mobile optimized */}
               <div style={{
                 display: 'flex',
                 overflowX: 'auto',
@@ -334,7 +347,8 @@ function SpectrometerScreen() {
                 padding: '8px 4px',
                 marginBottom: '10px',
                 WebkitOverflowScrolling: 'touch',
-                scrollbarWidth: 'thin'
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
               }}>
                 {filteredDemoProducts.map((product) => (
                   <div
@@ -342,15 +356,19 @@ function SpectrometerScreen() {
                     onClick={() => handleUseDemoScioData(product)}
                     style={{
                       flex: '0 0 auto',
-                      width: '110px',
-                      padding: '12px 8px',
+                      width: '120px', // Slightly wider for better touch targets
+                      minHeight: '140px', // Ensure adequate touch area
+                      padding: '14px 10px',
                       background: 'white',
                       border: `2px solid ${SWITCH_COLORS.gold}`,
                       borderRadius: '12px',
                       textAlign: 'center',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
                     }}
                     onMouseOver={(e) => {
                       e.currentTarget.style.transform = 'scale(1.05)';
@@ -455,6 +473,11 @@ function SpectrometerScreen() {
             @keyframes spin {
               from { transform: rotate(0deg); }
               to { transform: rotate(360deg); }
+            }
+            
+            /* Hide scrollbar for mobile gallery */
+            div::-webkit-scrollbar {
+              display: none;
             }
           `}</style>
         </div>

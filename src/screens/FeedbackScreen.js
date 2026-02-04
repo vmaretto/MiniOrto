@@ -85,6 +85,11 @@ function FeedbackScreen() {
         const result = await response.json();
         console.log('API result:', result);
         
+        // Save participant ID for display in ResultsScreen
+        if (result.id) {
+          sessionStorage.setItem('participantId', result.id.toString());
+        }
+        
         try {
           const rankingResponse = await fetch('/api/participants');
           if (rankingResponse.ok) {

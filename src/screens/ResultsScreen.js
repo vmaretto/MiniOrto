@@ -141,6 +141,7 @@ function ResultsScreen() {
   const [quizAnswers, setQuizAnswers] = useState(null);
   const [showFullResults, setShowFullResults] = useState(false);
   const [scanMethod, setScanMethod] = useState(null);
+  const [participantNumber, setParticipantNumber] = useState(null);
   const language = i18n?.language || 'it';
 
   useEffect(() => {
@@ -307,6 +308,35 @@ function ResultsScreen() {
     }
   }, [switchData]);
 
+  // Fetch participant number
+  useEffect(() => {
+    const fetchParticipantNumber = async () => {
+      try {
+        // Check if we have a saved participant ID from feedback submission
+        const savedParticipantId = sessionStorage.getItem('participantId');
+        
+        if (savedParticipantId) {
+          // If we have the ID, use it as the participant number
+          setParticipantNumber(parseInt(savedParticipantId));
+        } else {
+          // If no ID, fetch all participants and count them to estimate position
+          const response = await fetch('/api/participants');
+          if (response.ok) {
+            const participants = await response.json();
+            // Use total count + 1 as estimated participant number
+            setParticipantNumber(participants.length + 1);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching participant number:', error);
+        // Fallback: just use a timestamp-based number
+        setParticipantNumber(Math.floor(Date.now() / 1000) % 10000);
+      }
+    };
+
+    fetchParticipantNumber();
+  }, []);
+
   if (!results && !quizAnswers) {
     return (
       <SwitchLayout 
@@ -343,6 +373,47 @@ function ResultsScreen() {
       compact={true}
     >
       <GlobalProgress currentStep="results" language={language} />
+
+      {/* PARTICIPANT NUMBER - Show prominently */}
+      {participantNumber && (
+        <div style={{
+          background: `linear-gradient(135deg, ${SWITCH_COLORS.darkBlue} 0%, #2d4a6f 100%)`,
+          borderRadius: '16px',
+          padding: '20px',
+          margin: '0 0 20px 0',
+          color: 'white',
+          textAlign: 'center',
+          border: '3px solid #FFD700',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+        }}>
+          <div style={{ 
+            fontSize: '0.9rem', 
+            opacity: 0.9, 
+            marginBottom: '8px',
+            textTransform: 'uppercase',
+            letterSpacing: '1px'
+          }}>
+            {language === 'it' ? '📋 Il tuo numero partecipante' : '📋 Your participant number'}
+          </div>
+          <div style={{ 
+            fontSize: '3.5rem', 
+            fontWeight: 'bold',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+            color: '#FFD700'
+          }}>
+            #{participantNumber}
+          </div>
+          <div style={{ 
+            fontSize: '0.8rem', 
+            opacity: 0.8,
+            marginTop: '8px'
+          }}>
+            {language === 'it' 
+              ? '💡 Annota questo numero per la classifica fisica!'
+              : '💡 Note this number for the physical leaderboard!'}
+          </div>
+        </div>
+      )}
 
       {/* SCHEDA PRODOTTO - Prima di tutto */}
       {recognizedProduct && (

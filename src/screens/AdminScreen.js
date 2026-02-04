@@ -137,6 +137,41 @@ const AdminScreen = () => {
     document.body.removeChild(link);
   };
 
+  const handleDeleteParticipant = async (participantId) => {
+    // Admin password protection
+    const enteredPassword = window.prompt('Inserisci la password admin / Enter admin password:');
+    
+    if (!enteredPassword) {
+      return; // User cancelled
+    }
+    
+    if (enteredPassword !== ADMIN_PASSWORD) {
+      alert('❌ Password errata / Wrong password. Access denied.');
+      return;
+    }
+    
+    const confirmMessage = `Sei sicuro di voler eliminare il partecipante #${participantId}?\n\nAre you sure you want to delete participant #${participantId}?`;
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/participants?id=${participantId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete participant');
+      }
+
+      alert(`✅ Partecipante #${participantId} eliminato / Participant #${participantId} deleted`);
+      fetchParticipants();
+    } catch (err) {
+      console.error('Error deleting participant:', err);
+      alert('❌ Errore nell\'eliminazione / Error deleting participant');
+    }
+  };
+
   const handleDeleteAll = async () => {
     // Admin password protection
     const ADMIN_PASSWORD = 'switch2026';
@@ -370,6 +405,9 @@ const AdminScreen = () => {
               <thead>
                 <tr style={{ background: '#f3f4f6', borderBottom: '2px solid #667eea' }}>
                   <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>
+                    ID
+                  </th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>
                     {t('admin.timestamp')}
                   </th>
                   <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>
@@ -380,6 +418,9 @@ const AdminScreen = () => {
                   </th>
                   <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>
                     {t('admin.data')}
+                  </th>
+                  <th style={{ padding: '1rem', textAlign: 'center', fontWeight: '600' }}>
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -392,6 +433,9 @@ const AdminScreen = () => {
                       background: index % 2 === 0 ? 'white' : '#f9fafb'
                     }}
                   >
+                    <td style={{ padding: '1rem' }}>
+                      <strong style={{ color: '#667eea' }}>#{participant.id}</strong>
+                    </td>
                     <td style={{ padding: '1rem' }}>
                       {new Date(participant.timestamp).toLocaleString()}
                     </td>
@@ -420,6 +464,28 @@ const AdminScreen = () => {
                         }}
                       >
                         {t('admin.viewDetails')}
+                      </button>
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                      <button
+                        onClick={() => handleDeleteParticipant(participant.id)}
+                        style={{
+                          padding: '0.5rem 0.75rem',
+                          background: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '5px',
+                          cursor: 'pointer',
+                          fontSize: '0.875rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          margin: '0 auto'
+                        }}
+                        title={`Delete participant #${participant.id}`}
+                      >
+                        <Trash2 size={14} />
+                        Delete
                       </button>
                     </td>
                   </tr>

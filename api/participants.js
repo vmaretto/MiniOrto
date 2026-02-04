@@ -60,10 +60,27 @@ export default async function handler(req, res) {
 
     // DELETE
     if (req.method === 'DELETE') {
-      await pool.query('DELETE FROM participants');
-      return res.status(200).json({ 
-        message: 'All participants deleted' 
-      });
+      const { id } = req.query;
+      
+      if (id) {
+        // Delete specific participant by ID
+        const result = await pool.query('DELETE FROM participants WHERE id = $1 RETURNING *', [id]);
+        
+        if (result.rows.length === 0) {
+          return res.status(404).json({ error: 'Participant not found' });
+        }
+        
+        return res.status(200).json({ 
+          message: 'Participant deleted successfully',
+          deletedParticipant: result.rows[0]
+        });
+      } else {
+        // Delete all participants (existing functionality)
+        await pool.query('DELETE FROM participants');
+        return res.status(200).json({ 
+          message: 'All participants deleted' 
+        });
+      }
     }
 
     return res.status(405).json({ error: 'Method not allowed' });

@@ -106,21 +106,25 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
     <div style={{
       background: 'white',
       borderRadius: '16px',
-      padding: '16px',
+      padding: '12px',
+      maxWidth: '100%',
+      overflow: 'hidden'
     }}>
       {/* Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '10px',
-        marginBottom: '16px'
+        gap: '8px',
+        marginBottom: '12px',
+        flexWrap: 'wrap'
       }}>
-        <Trophy size={24} color="#667eea" />
+        <Trophy size={20} color="#667eea" />
         <h2 style={{
-          fontSize: '1.25rem',
+          fontSize: '1.1rem',
           fontWeight: 'bold',
           color: '#667eea',
-          margin: 0
+          margin: 0,
+          lineHeight: '1.3'
         }}>
           {language === 'it' ? 'Classifica Generale' : 'Leaderboard'}
         </h2>
@@ -156,23 +160,24 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
                     transition: 'all 0.2s'
                   }}
                 >
-                  {/* Top row: Rank + Name + Score */}
+                  {/* Top row: Rank + Name + Score - Mobile optimized */}
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
-                    marginBottom: '8px'
+                    gap: '8px',
+                    marginBottom: '6px',
+                    flexWrap: 'wrap'
                   }}>
                     {/* Rank badge */}
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
-                      minWidth: '50px'
+                      gap: '3px',
+                      minWidth: '45px'
                     }}>
                       {getRankIcon(participant.rank)}
                       <span style={{
-                        fontSize: '1rem',
+                        fontSize: '0.9rem',
                         fontWeight: 'bold',
                         color: getRankColor(participant.rank)
                       }}>
@@ -180,45 +185,49 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
                       </span>
                     </div>
 
-                    {/* Name - takes remaining space */}
+                    {/* Name - takes remaining space, mobile friendly */}
                     <div style={{
                       flex: 1,
-                      fontSize: '0.95rem',
+                      minWidth: '120px', // Minimum width for readability
+                      fontSize: '0.9rem',
                       fontWeight: '600',
                       color: '#1f2937',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'nowrap',
+                      lineHeight: '1.3'
                     }}>
                       {displayName}
                     </div>
 
-                    {/* Score badge */}
+                    {/* Score badge - responsive */}
                     <div style={{
                       background: getScoreBackground(index),
                       color: 'white',
-                      padding: '6px 12px',
-                      borderRadius: '20px',
-                      fontWeight: '800',
-                      fontSize: '1.1rem',
+                      padding: '5px 10px',
+                      borderRadius: '16px',
+                      fontWeight: '700',
+                      fontSize: '0.95rem',
                       textShadow: '0 1px 2px rgba(0,0,0,0.2)',
                       display: 'flex',
                       alignItems: 'baseline',
-                      gap: '2px'
+                      gap: '1px',
+                      minWidth: '50px',
+                      justifyContent: 'center'
                     }}>
                       {participant.totalScore}
-                      <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>pt</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: '500' }}>pt</span>
                     </div>
 
                     {/* Expand arrow */}
                     <div style={{ 
-                      padding: '4px',
+                      padding: '2px',
                       display: 'flex',
                       alignItems: 'center'
                     }}>
                       {isExpanded 
-                        ? <ChevronUp size={20} color="#667eea" /> 
-                        : <ChevronDown size={20} color="#9ca3af" />
+                        ? <ChevronUp size={18} color="#667eea" /> 
+                        : <ChevronDown size={18} color="#9ca3af" />
                       }
                     </div>
                   </div>
