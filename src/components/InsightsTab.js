@@ -432,7 +432,8 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
     // Calculate averages
     ['avgCaloriesByCategory', 'avgWaterByCategory', 'avgCarbsByCategory',
      'spectrometerUsefulByCategory', 'ratingsByCategory', 'productRatings',
-     'avgRatingByProfession', 'avgRatingByAge', 'ratingsByTimeOfDay', 'ratingsByDayOfWeek'].forEach(key => {
+     'avgRatingByProfession', 'avgRatingByAge'].forEach(key => {
+      if (!patterns[key]) return;
       Object.keys(patterns[key]).forEach(subKey => {
         const values = patterns[key][subKey];
         if (Array.isArray(values) && values.length > 0) {
