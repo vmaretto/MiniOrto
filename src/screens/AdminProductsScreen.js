@@ -29,12 +29,172 @@ const emptyProduct = {
   active: true
 };
 
+// Camera Modal component — uses Web Camera API (getUserMedia)
+function CameraModal({ onCapture, onClose }) {
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const [cameraError, setCameraError] = useState(null);
+  const [cameraReady, setCameraReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        if (cancelled) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
+        }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.onloadedmetadata = () => {
+            if (!cancelled) setCameraReady(true);
+          };
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Camera error:', err);
+          if (err.name === 'NotAllowedError') {
+            setCameraError('Permesso fotocamera negato. Consenti l\'accesso nelle impostazioni del browser.');
+          } else if (err.name === 'NotFoundError') {
+            setCameraError('Nessuna fotocamera trovata su questo dispositivo.');
+          } else {
+            setCameraError('Errore fotocamera: ' + err.message);
+          }
+        }
+      }
+    };
+    startCamera();
+    return () => {
+      cancelled = true;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+      }
+    };
+  }, []);
+
+  const handleSnap = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    const base64 = canvas.toDataURL('image/jpeg', 0.7);
+    // Stop camera before closing
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+    }
+    onCapture(base64);
+  };
+
+  const handleClose = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+    }
+    onClose();
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 9999,
+      background: 'rgba(0,0,0,0.9)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}>
+      {cameraError ? (
+        <div style={{
+          color: 'white',
+          textAlign: 'center',
+          padding: '24px',
+          maxWidth: '400px'
+        }}>
+          <p style={{ fontSize: '1.2rem', marginBottom: '20px' }}>⚠️ {cameraError}</p>
+          <button
+            onClick={handleClose}
+            style={{
+              padding: '14px 32px',
+              background: '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '1.1rem',
+              fontWeight: '600'
+            }}
+          >
+            ❌ Chiudi
+          </button>
+        </div>
+      ) : (
+        <>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            style={{
+              maxWidth: '100%',
+              maxHeight: '70vh',
+              borderRadius: '12px',
+              background: '#000'
+            }}
+          />
+          <div style={{
+            display: 'flex',
+            gap: '20px',
+            marginTop: '24px'
+          }}>
+            <button
+              onClick={handleSnap}
+              disabled={!cameraReady}
+              style={{
+                padding: '16px 40px',
+                background: cameraReady ? SWITCH_COLORS.gold : '#555',
+                color: cameraReady ? SWITCH_COLORS.darkBlue : '#999',
+                border: 'none',
+                borderRadius: '16px',
+                cursor: cameraReady ? 'pointer' : 'not-allowed',
+                fontSize: '1.2rem',
+                fontWeight: '700'
+              }}
+            >
+              📸 Scatta
+            </button>
+            <button
+              onClick={handleClose}
+              style={{
+                padding: '16px 40px',
+                background: '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '16px',
+                cursor: 'pointer',
+                fontSize: '1.2rem',
+                fontWeight: '700'
+              }}
+            >
+              ❌ Chiudi
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function AdminProductsScreen() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
   const scioFileInputRef = useRef(null);
-  const scioCameraInputRef = useRef(null);
   
   const [authenticated, setAuthenticated] = useState(false);
   const [products, setProducts] = useState([]);
@@ -47,6 +207,7 @@ function AdminProductsScreen() {
   const [scioScreenshot, setScioScreenshot] = useState(null);
   const [analyzingScio, setAnalyzingScio] = useState(false);
   const [scioAnalysisStatus, setScioAnalysisStatus] = useState(null); // { type: 'success'|'error', message: string }
+  const [showCamera, setShowCamera] = useState(null); // null | 'product' | 'scio'
 
   useEffect(() => {
     // Check if already authenticated in session
@@ -109,6 +270,75 @@ function AdminProductsScreen() {
         img.src = event.target.result;
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCameraCapture = (base64) => {
+    setShowCamera(null);
+    // Compress the captured image same as handleImageUpload
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxSize = 400;
+      const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      canvas.width = img.width * ratio;
+      canvas.height = img.height * ratio;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.7);
+      setFormData(prev => ({ ...prev, image_base64: compressed }));
+    };
+    img.src = base64;
+  };
+
+  const handleScioCameraCapture = async (base64) => {
+    setShowCamera(null);
+    setScioScreenshot(base64);
+    setScioAnalysisStatus(null);
+    setAnalyzingScio(true);
+
+    try {
+      const response = await fetch('/api/analyze-scio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64 })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Analisi fallita');
+      }
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        scio_brix: data.brix != null ? String(data.brix) : prev.scio_brix,
+        scio_calories: data.calories != null ? String(data.calories) : prev.scio_calories,
+        scio_carbs: data.carbs != null ? String(data.carbs) : prev.scio_carbs,
+        scio_sugar: data.sugar != null ? String(data.sugar) : prev.scio_sugar,
+        scio_water: data.water != null ? String(data.water) : prev.scio_water,
+        scio_protein: data.protein != null ? String(data.protein) : prev.scio_protein,
+        scio_fiber: data.fiber != null ? String(data.fiber) : prev.scio_fiber,
+      }));
+
+      const confidenceEmoji = data.confidence === 'high' ? '🟢' : data.confidence === 'medium' ? '🟡' : '🔴';
+      const foodInfo = data.foodName ? ` — "${data.foodName}"` : '';
+      setScioAnalysisStatus({
+        type: 'success',
+        message: `${confidenceEmoji} Valori estratti con successo${foodInfo} (affidabilità: ${data.confidence || 'n/a'})`
+      });
+    } catch (err) {
+      setScioAnalysisStatus({
+        type: 'error',
+        message: `❌ Errore: ${err.message}`
+      });
+    } finally {
+      setAnalyzingScio(false);
     }
   };
 
@@ -537,7 +767,7 @@ function AdminProductsScreen() {
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <button
                         type="button"
-                        onClick={() => cameraInputRef.current?.click()}
+                        onClick={() => setShowCamera('product')}
                         style={{
                           padding: '10px 16px',
                           background: SWITCH_COLORS.lightBg,
@@ -568,14 +798,6 @@ function AdminProductsScreen() {
                         <Image size={16} /> Scegli foto
                       </button>
                     </div>
-                    <input
-                      ref={cameraInputRef}
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handleImageUpload}
-                      style={{ display: 'none' }}
-                    />
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -631,7 +853,7 @@ function AdminProductsScreen() {
                       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         <button
                           type="button"
-                          onClick={() => scioCameraInputRef.current?.click()}
+                          onClick={() => setShowCamera('scio')}
                           disabled={analyzingScio}
                           style={{
                             padding: '10px 16px',
@@ -677,14 +899,6 @@ function AdminProductsScreen() {
                           📁 Scegli screenshot SCIO
                         </button>
                       </div>
-                      <input
-                        ref={scioCameraInputRef}
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        onChange={handleScioScreenshot}
-                        style={{ display: 'none' }}
-                      />
                       <input
                         ref={scioFileInputRef}
                         type="file"
@@ -829,6 +1043,14 @@ function AdminProductsScreen() {
               </form>
             </div>
           </div>
+        )}
+
+        {/* Camera Modal */}
+        {showCamera && (
+          <CameraModal
+            onCapture={showCamera === 'product' ? handleCameraCapture : handleScioCameraCapture}
+            onClose={() => setShowCamera(null)}
+          />
         )}
 
         {/* Products Grid */}
