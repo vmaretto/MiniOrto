@@ -56,6 +56,9 @@ function ScanScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [recognizedProduct, setRecognizedProduct] = useState(null);
+  
+  // Demo products gallery state
+  const [demoProducts, setDemoProducts] = useState([]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -63,7 +66,46 @@ function ScanScreen() {
     if (storedProduct) {
       setRecognizedProduct(JSON.parse(storedProduct));
     }
+    fetchDemoProducts();
   }, []);
+  
+  const fetchDemoProducts = async () => {
+    try {
+      const response = await fetch('/api/demo-products');
+      if (response.ok) {
+        const data = await response.json();
+        setDemoProducts(data);
+      }
+    } catch (err) {
+      console.error('Error fetching demo products:', err);
+    }
+  };
+  
+  // Handle demo product SCIO data selection
+  const handleUseDemoScioData = (product) => {
+    const scioData = {
+      brix: parseFloat(product.scio_brix) || 0,
+      calories: parseFloat(product.scio_calories) || 0,
+      carbs: parseFloat(product.scio_carbs) || 0,
+      sugar: parseFloat(product.scio_sugar) || 0,
+      water: parseFloat(product.scio_water) || 0,
+      protein: parseFloat(product.scio_protein) || 0,
+      fiber: parseFloat(product.scio_fiber) || 0,
+      isDemoData: true,
+      demoProductId: product.id,
+      demoProductName: product.name
+    };
+    
+    sessionStorage.setItem('scioScanData', JSON.stringify(scioData));
+    sessionStorage.setItem('scanMethod', 'demo');
+    
+    // Update recognized product with SCIO data
+    const currentProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
+    currentProduct.scioData = scioData;
+    sessionStorage.setItem('recognizedProduct', JSON.stringify(currentProduct));
+    
+    navigate('/results');
+  };
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
@@ -289,6 +331,103 @@ function ScanScreen() {
           }} />
           <p style={{ color: '#666', marginTop: '10px' }}>{t('scan.processing')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+
+      {/* Demo products SCIO gallery */}
+      {!loading && demoProducts.length > 0 && (
+        <div style={{ marginTop: '30px' }}>
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '16px',
+            color: '#666',
+            fontSize: '0.9rem'
+          }}>
+            <span style={{ 
+              background: SWITCH_COLORS.lightBg, 
+              padding: '4px 12px', 
+              borderRadius: '20px' 
+            }}>
+              {language === 'it' ? '— oppure usa dati SCIO già registrati —' : '— or use pre-registered SCIO data —'}
+            </span>
+          </div>
+          
+          {/* Horizontal scrollable gallery */}
+          <div style={{
+            display: 'flex',
+            overflowX: 'auto',
+            gap: '12px',
+            padding: '8px 4px',
+            marginBottom: '10px',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin'
+          }}>
+            {demoProducts.map((product) => (
+              <div
+                key={product.id}
+                onClick={() => handleUseDemoScioData(product)}
+                style={{
+                  flex: '0 0 auto',
+                  width: '100px',
+                  padding: '12px 8px',
+                  background: 'white',
+                  border: `2px solid ${SWITCH_COLORS.gold}`,
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                }}
+              >
+                <div style={{ 
+                  fontSize: '2rem', 
+                  marginBottom: '6px',
+                  lineHeight: 1
+                }}>
+                  {product.emoji || '🥬'}
+                </div>
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  fontWeight: '600',
+                  color: SWITCH_COLORS.darkBlue,
+                  lineHeight: 1.2
+                }}>
+                  {translateProductName(product.name)}
+                </div>
+                <div style={{
+                  fontSize: '0.6rem',
+                  color: SWITCH_COLORS.green,
+                  fontWeight: '600',
+                  background: SWITCH_COLORS.green + '15',
+                  padding: '2px 6px',
+                  borderRadius: '8px',
+                  display: 'inline-block',
+                  marginTop: '4px'
+                }}>
+                  Brix: {product.scio_brix}°
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <p style={{ 
+            fontSize: '0.75rem', 
+            color: '#999', 
+            textAlign: 'center',
+            margin: 0 
+          }}>
+            {language === 'it' 
+              ? '👆 Seleziona un prodotto per usare i suoi dati SCIO' 
+              : '👆 Select a product to use its SCIO data'}
+          </p>
         </div>
       )}
     </SwitchLayout>

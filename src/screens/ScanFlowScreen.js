@@ -197,6 +197,31 @@ export default function ScanFlowScreen() {
     }
   };
 
+  // Check if current product is a demo product with SCIO data
+  const hasPreloadedScioData = recognizedFood?.isDemoProduct && recognizedFood?.scioData;
+
+  const handleUsePreloadedScioData = () => {
+    if (!recognizedFood?.scioData) return;
+    const scioData = {
+      brix: parseFloat(recognizedFood.scioData.brix) || 0,
+      calories: parseFloat(recognizedFood.scioData.calories) || 0,
+      carbs: parseFloat(recognizedFood.scioData.carbs) || 0,
+      sugar: parseFloat(recognizedFood.scioData.sugar) || 0,
+      water: parseFloat(recognizedFood.scioData.water) || 0,
+      protein: parseFloat(recognizedFood.scioData.protein) || 0,
+      fiber: parseFloat(recognizedFood.scioData.fiber) || 0,
+      isDemoData: true,
+      demoProductId: recognizedFood.demoProductId,
+      demoProductName: recognizedFood.name
+    };
+    sessionStorage.setItem('scioScanData', JSON.stringify(scioData));
+    sessionStorage.setItem('scanMethod', 'demo');
+    const currentProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
+    currentProduct.scioData = scioData;
+    sessionStorage.setItem('recognizedProduct', JSON.stringify(currentProduct));
+    navigate('/results');
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -272,6 +297,51 @@ export default function ScanFlowScreen() {
             }}>
               <p style={{ margin: 0 }}><strong>{t('scanflow.scan.food')}</strong> {recognizedFood?.name}</p>
             </div>
+
+            {/* Quick action for demo products with pre-loaded SCIO data */}
+            {hasPreloadedScioData && !uploadedScreenshot && !waitingForScan && (
+              <div style={{
+                background: `linear-gradient(135deg, ${SWITCH_COLORS.green}15 0%, ${SWITCH_COLORS.green}05 100%)`,
+                borderRadius: '12px',
+                padding: '16px',
+                marginBottom: '20px',
+                border: `2px solid ${SWITCH_COLORS.green}`
+              }}>
+                <h4 style={{ 
+                  margin: '0 0 10px 0', 
+                  color: SWITCH_COLORS.green,
+                  fontSize: '0.95rem' 
+                }}>
+                  ⚡ {language === 'it' ? 'Azione rapida' : 'Quick action'}
+                </h4>
+                <p style={{ 
+                  margin: '0 0 12px 0', 
+                  color: '#666', 
+                  fontSize: '0.85rem' 
+                }}>
+                  {language === 'it' 
+                    ? 'Questo prodotto ha già dati SCIO registrati. Puoi usarli direttamente!'
+                    : 'This product already has registered SCIO data. You can use it directly!'}
+                </p>
+                <button
+                  onClick={handleUsePreloadedScioData}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    background: SWITCH_COLORS.green,
+                    border: 'none',
+                    borderRadius: '10px',
+                    color: 'white',
+                    fontWeight: '600',
+                    fontSize: '1rem',
+                    cursor: 'pointer',
+                    boxShadow: `0 4px 12px ${SWITCH_COLORS.green}40`
+                  }}
+                >
+                  ✓ {language === 'it' ? 'Usa dati SCIO pre-registrati' : 'Use pre-registered SCIO data'}
+                </button>
+              </div>
+            )}
 
             {/* Screenshot preview mode */}
             {uploadedScreenshot ? (
