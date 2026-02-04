@@ -186,7 +186,7 @@ function EmbedProductScreen() {
           textAlign: 'center'
         }}>
           <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '5px' }}>
-            🔬 Misurazione SCIO
+            🔬 Misurazione Spettrometro
           </div>
           <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
             {parseFloat(measuredSugar).toFixed(1)}%

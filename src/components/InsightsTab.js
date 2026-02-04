@@ -308,7 +308,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       productsAnalyzed: {},
       productRatings: {},
       
-      // SCIO data patterns
+      // spectrometer data patterns
       avgCaloriesByCategory: {},
       avgWaterByCategory: {},
       avgCarbsByCategory: {},
@@ -350,7 +350,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       patterns.productsByCategory[category] = (patterns.productsByCategory[category] || 0) + 1;
       patterns.productsAnalyzed[productName] = (patterns.productsAnalyzed[productName] || 0) + 1;
       
-      // SCIO data analysis
+      // spectrometer data analysis
       if (scio.calories || scio.carbs || scio.water) {
         patterns.scioDataDistribution.withData++;
         

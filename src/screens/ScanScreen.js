@@ -81,7 +81,7 @@ function ScanScreen() {
     }
   };
   
-  // Handle demo product SCIO data selection
+  // Handle demo product spectrometer data selection
   const handleUseDemoScioData = (product) => {
     const scioData = {
       brix: parseFloat(product.scio_brix) || 0,
@@ -99,7 +99,7 @@ function ScanScreen() {
     sessionStorage.setItem('scioScanData', JSON.stringify(scioData));
     sessionStorage.setItem('scanMethod', 'demo');
     
-    // Update recognized product with SCIO data
+    // Update recognized product with spectrometer data
     const currentProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
     currentProduct.scioData = scioData;
     sessionStorage.setItem('recognizedProduct', JSON.stringify(currentProduct));
@@ -245,7 +245,7 @@ function ScanScreen() {
         {imagePreview ? (
           <img 
             src={imagePreview} 
-            alt="SCIO screenshot" 
+            alt="Spectrometer screenshot" 
             style={{
               maxWidth: '100%',
               maxHeight: '300px',

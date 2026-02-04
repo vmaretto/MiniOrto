@@ -173,7 +173,7 @@ function ResultsScreen() {
         ...scanData.nutrition
       });
     } else if (directScanData && storedScanMethod === 'demo') {
-      // Demo SCIO data — nutrition fields are at top level
+      // Demo spectrometer data — nutrition fields are at top level
       const scanData = JSON.parse(directScanData);
       setResults({
         brix: scanData.brix,
@@ -189,7 +189,7 @@ function ResultsScreen() {
         scanDate: new Date().toISOString()
       });
     } else if (directScanData && storedScanMethod === 'manual') {
-      // Manual SCIO data entry
+      // Manual spectrometer data entry
       const scanData = JSON.parse(directScanData);
       setResults({
         brix: scanData.brix,

@@ -75,7 +75,7 @@ export default function QuizScreen() {
     return {};
   });
 
-  // Carica prodotto, dati SWITCH e dati SCIO
+  // Carica prodotto, dati SWITCH e dati spettrometro
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
@@ -88,7 +88,7 @@ export default function QuizScreen() {
     const productData = JSON.parse(storedProduct);
     setProduct(productData);
     
-    // Carica dati SCIO se disponibili (valori misurati realmente)
+    // Carica dati spettrometro se disponibili (valori misurati realmente)
     const storedScioResults = sessionStorage.getItem('scioResults');
     const storedScioScanData = sessionStorage.getItem('scioScanData');
     
@@ -170,7 +170,7 @@ export default function QuizScreen() {
     const hasSwitchData = switchData?.found !== false;
     
     // PRIORITÀ per nutrienti: SCIO > SWITCH (no fallback)
-    // I dati SCIO sono misurati sul prodotto specifico, quindi sono i "veri" valori reali
+    // I dati spettrometro sono misurati sul prodotto specifico, quindi sono i "veri" valori reali
     const getCalories = () => {
       if (scioData?.calories) return scioData.calories;
       if (hasSwitchData && (switchNutrition.calories || switchNutrition.energy)) {
@@ -437,8 +437,8 @@ export default function QuizScreen() {
           </ul>
           <p style={{ margin: '12px 0 0 0', fontWeight: '500', color: SWITCH_COLORS.darkBlue }}>
             {language === 'it' 
-              ? '→ Dopo lo scan SCIO confronteremo le tue stime con i dati reali!'
-              : '→ After SCIO scan we\'ll compare your estimates with real data!'}
+              ? '→ Dopo lo scan spettrometro confronteremo le tue stime con i dati reali!'
+              : '→ After spectrometer scan we\'ll compare your estimates with real data!'}
           </p>
         </div>
 

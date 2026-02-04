@@ -122,7 +122,7 @@ export default function ScanFlowScreen() {
       const data = await response.json();
       setScanData(data);
       
-      // Salva i dati SCIO in sessionStorage
+      // Salva i dati spettrometro in sessionStorage
       sessionStorage.setItem('scioResults', JSON.stringify(data));
       sessionStorage.setItem('scioImage', uploadedScreenshot);
       sessionStorage.setItem('scanMethod', 'screenshot');
@@ -157,7 +157,7 @@ export default function ScanFlowScreen() {
           setWaitingForScan(false);
           setScanData(data.scan);
           
-          // Salva i dati SCIO
+          // Salva i dati spettrometro
           sessionStorage.setItem('scioScanData', JSON.stringify(data.scan));
           sessionStorage.setItem('scanMethod', 'direct');
           
@@ -189,14 +189,14 @@ export default function ScanFlowScreen() {
 
   const getStepTitle = () => {
     switch (currentStep) {
-      case 0: return language === 'it' ? 'Seleziona modello SCIO' : 'Select SCIO model';
-      case 1: return language === 'it' ? 'Scansiona con SCIO' : 'Scan with SCIO';
+      case 0: return language === 'it' ? 'Seleziona modello spettrometro' : 'Select spectrometer model';
+      case 1: return language === 'it' ? 'Scansiona con spettrometro' : 'Scan with spectrometer';
       case 2: return language === 'it' ? 'Scansione completata!' : 'Scan complete!';
       default: return 'Scan Flow';
     }
   };
 
-  // Check if current product is a demo product with SCIO data
+  // Check if current product is a demo product with spectrometer data
   const hasPreloadedScioData = recognizedFood?.isDemoProduct && recognizedFood?.scioData;
 
   const handleUsePreloadedScioData = () => {
@@ -297,7 +297,7 @@ export default function ScanFlowScreen() {
               <p style={{ margin: 0 }}><strong>{t('scanflow.scan.food')}</strong> {recognizedFood?.name}</p>
             </div>
 
-            {/* Quick action for demo products with pre-loaded SCIO data */}
+            {/* Quick action for demo products with pre-loaded spectrometer data */}
             {hasPreloadedScioData && !uploadedScreenshot && !waitingForScan && (
               <div style={{
                 background: `linear-gradient(135deg, ${SWITCH_COLORS.green}15 0%, ${SWITCH_COLORS.green}05 100%)`,
@@ -319,8 +319,8 @@ export default function ScanFlowScreen() {
                   fontSize: '0.85rem' 
                 }}>
                   {language === 'it' 
-                    ? 'Questo prodotto ha già dati SCIO registrati. Puoi usarli direttamente!'
-                    : 'This product already has registered SCIO data. You can use it directly!'}
+                    ? 'Questo prodotto ha già dati spettrometro registrati. Puoi usarli direttamente!'
+                    : 'This product already has registered spectrometer data. You can use it directly!'}
                 </p>
                 <button
                   onClick={handleUsePreloadedScioData}
@@ -458,7 +458,7 @@ export default function ScanFlowScreen() {
                   <Upload size={20} /> {t('scanflow.scan.screenshot.button')}
                 </label>
 
-                {/* Manual SCIO data entry form */}
+                {/* Manual spectrometer data entry form */}
                 <div style={{ marginTop: '30px' }}>
                   <div style={{ 
                     textAlign: 'center', 

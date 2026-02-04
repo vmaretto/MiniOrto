@@ -161,7 +161,7 @@ const StatsTab = ({ participants }) => {
         
         {/* Differences Found - Pie Chart */}
         {differencesData.length > 0 && (
-          <ChartCard title={t('stats.differencesFound', 'Differenze SCIO vs SWITCH')}>
+          <ChartCard title={t('stats.differencesFound', 'Differenze Spettrometro vs SWITCH')}>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie

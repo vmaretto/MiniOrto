@@ -108,9 +108,9 @@ function SpectrometerScreen() {
     navigate('/recognize');
   };
   
-  // Handle demo product SCIO data selection
+  // Handle demo product spectrometer data selection
   const handleUseDemoScioData = (product) => {
-    // Create SCIO scan data from demo product
+    // Create spectrometer scan data from demo product
     const scioData = {
       brix: parseFloat(product.scio_brix) || 0,
       calories: parseFloat(product.scio_calories) || 0,
@@ -127,7 +127,7 @@ function SpectrometerScreen() {
     sessionStorage.setItem('scioScanData', JSON.stringify(scioData));
     sessionStorage.setItem('scanMethod', 'demo');
     
-    // Update recognized product with SCIO data
+    // Update recognized product with spectrometer data
     const currentProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
     currentProduct.scioData = scioData;
     sessionStorage.setItem('recognizedProduct', JSON.stringify(currentProduct));
@@ -135,7 +135,7 @@ function SpectrometerScreen() {
     navigate('/results');
   };
   
-  // Check if current product is a demo product with SCIO data
+  // Check if current product is a demo product with spectrometer data
   const hasPreloadedScioData = recognizedProduct.isDemoProduct && recognizedProduct.scioData;
   
   // Filter demo products for gallery (show all or filtered by matching product)
@@ -186,7 +186,7 @@ function SpectrometerScreen() {
 
       {!waitingForScan ? (
         <>
-          {/* Quick action for demo products with pre-loaded SCIO data */}
+          {/* Quick action for demo products with pre-loaded spectrometer data */}
           {hasPreloadedScioData && (
             <div style={{
               background: `linear-gradient(135deg, ${SWITCH_COLORS.green}15 0%, ${SWITCH_COLORS.green}05 100%)`,

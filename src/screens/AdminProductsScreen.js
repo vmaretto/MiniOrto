@@ -1,5 +1,5 @@
 // src/screens/AdminProductsScreen.js
-// Admin backoffice for managing demo products with SCIO data
+// Admin backoffice for managing demo products with spectrometer data
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Edit2, Plus, Save, X, RefreshCw } from 'lucide-react';

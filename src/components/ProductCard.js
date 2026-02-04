@@ -437,7 +437,7 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
                   alignItems: 'center', 
                   gap: '8px' 
                 }}>
-                  🔬 {t('productCard.scioMeasurements', 'Misurazioni SCIO')}
+                  🔬 {t('productCard.scioMeasurements', 'Misurazioni Spettrometro')}
                 </h3>
                 {isDemo && (
                   <span style={{
@@ -581,7 +581,7 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '5px' }}>
-              🔬 {t('productCard.scioMeasurement', 'Misurazione SCIO')}
+              🔬 {t('productCard.scioMeasurement', 'Misurazione Spettrometro')}
             </div>
             <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
               {parseFloat(measuredValue).toFixed(1)}%
