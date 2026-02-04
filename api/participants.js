@@ -12,7 +12,7 @@ const pool = new Pool({
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
@@ -52,6 +52,31 @@ export default async function handler(req, res) {
       console.log('Successfully saved participant ID:', result.rows[0].id);
       
       return res.status(201).json({
+        success: true,
+        id: result.rows[0].id,
+        timestamp: result.rows[0].timestamp
+      });
+    }
+
+    // PUT - Update existing participant (e.g. add feedback data)
+    if (req.method === 'PUT') {
+      const { id } = req.query;
+      if (!id) {
+        return res.status(400).json({ error: 'Participant id is required' });
+      }
+      const body = req.body;
+      const { timestamp, ...dataWithoutTimestamp } = body;
+      
+      const result = await pool.query(
+        'UPDATE participants SET data = $1, language = COALESCE($2, language) WHERE id = $3 RETURNING *',
+        [dataWithoutTimestamp, body.language || null, id]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Participant not found' });
+      }
+      
+      return res.status(200).json({
         success: true,
         id: result.rows[0].id,
         timestamp: result.rows[0].timestamp

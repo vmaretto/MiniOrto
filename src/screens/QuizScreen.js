@@ -312,7 +312,7 @@ export default function QuizScreen() {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Salva sempre il valore corrente (modificato o default)
     const currentValue = answers[currentQ.id] !== undefined ? answers[currentQ.id] : currentQ.default;
     const updatedAnswers = { ...answers, [currentQ.id]: currentValue };
@@ -372,18 +372,63 @@ export default function QuizScreen() {
         }
       };
       sessionStorage.setItem('quizAnswers', JSON.stringify(quizData));
+      
+      // Create participant in DB immediately to get a unique ID
+      try {
+        const profileData = JSON.parse(sessionStorage.getItem('profileData') || '{}');
+        const res = await fetch('/api/participants', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'quiz_completed',
+            language: language,
+            data: { profile: profileData, product: { name: product.name }, quizResults: quizData }
+          })
+        });
+        if (res.ok) {
+          const result = await res.json();
+          sessionStorage.setItem('participantId', result.id.toString());
+        }
+      } catch (err) {
+        console.error('Error creating participant:', err);
+      }
+      
       navigate('/scan-flow');
     }
   };
 
   const handleSkip = () => {
-    sessionStorage.setItem('quizAnswers', JSON.stringify({
+    const skipData = {
       answers: {},
       skipped: true,
       realValues,
       productName: product.name,
       timestamp: new Date().toISOString()
-    }));
+    };
+    sessionStorage.setItem('quizAnswers', JSON.stringify(skipData));
+    
+    // Create participant even when skipping quiz
+    (async () => {
+      try {
+        const profileData = JSON.parse(sessionStorage.getItem('profileData') || '{}');
+        const res = await fetch('/api/participants', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'quiz_skipped',
+            language: language,
+            data: { profile: profileData, product: { name: product.name }, quizResults: skipData }
+          })
+        });
+        if (res.ok) {
+          const result = await res.json();
+          sessionStorage.setItem('participantId', result.id.toString());
+        }
+      } catch (err) {
+        console.error('Error creating participant:', err);
+      }
+    })();
+    
     navigate('/scan-flow');
   };
 

@@ -58,23 +58,29 @@ function FeedbackScreen() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch('/api/participants', {
-        method: 'POST',
+      const existingId = sessionStorage.getItem('participantId');
+      const fullData = {
+        type: 'complete_session',
+        language: localStorage.getItem('language') || 'it',
+        data: {
+          profile: profileData,
+          product: recognizedProduct,
+          scioResults: results,
+          scanMethod: scanMethod,
+          feedback: feedback,
+          quizResults: quizResults
+        }
+      };
+      
+      // If participant already created (from quiz), UPDATE it; otherwise CREATE
+      const url = existingId ? `/api/participants?id=${existingId}` : '/api/participants';
+      const method = existingId ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
-        body: JSON.stringify({
-          type: 'complete_session',
-          timestamp: new Date().toISOString(),
-          language: localStorage.getItem('language') || 'it',
-          data: {
-            profile: profileData,
-            product: recognizedProduct,
-            scioResults: results,
-            scanMethod: scanMethod,
-            feedback: feedback,
-            quizResults: quizResults
-          }
-        })
+        body: JSON.stringify(fullData)
       });
       
       clearTimeout(timeoutId);

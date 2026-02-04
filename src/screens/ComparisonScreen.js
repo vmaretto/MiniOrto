@@ -304,6 +304,16 @@ export default function ComparisonScreen() {
     >
       <GlobalProgress currentStep="comparison" language={language} />
 
+      {/* Participant Number */}
+      {(() => {
+        const pid = sessionStorage.getItem('participantId');
+        return pid ? (
+          <div style={{ textAlign: 'center', marginBottom: '12px', fontSize: '0.85rem', color: SWITCH_COLORS.darkBlue, fontWeight: '600' }}>
+            {language === 'it' ? 'Partecipante' : 'Participant'} #{pid}
+          </div>
+        ) : null;
+      })()}
+
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}

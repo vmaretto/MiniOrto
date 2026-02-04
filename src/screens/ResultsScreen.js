@@ -308,33 +308,12 @@ function ResultsScreen() {
     }
   }, [switchData]);
 
-  // Fetch participant number
+  // Get participant number from sessionStorage (assigned at quiz completion)
   useEffect(() => {
-    const fetchParticipantNumber = async () => {
-      try {
-        // Check if we have a saved participant ID from feedback submission
-        const savedParticipantId = sessionStorage.getItem('participantId');
-        
-        if (savedParticipantId) {
-          // If we have the ID, use it as the participant number
-          setParticipantNumber(parseInt(savedParticipantId));
-        } else {
-          // If no ID, fetch all participants and count them to estimate position
-          const response = await fetch('/api/participants');
-          if (response.ok) {
-            const participants = await response.json();
-            // Use total count + 1 as estimated participant number
-            setParticipantNumber(participants.length + 1);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching participant number:', error);
-        // Fallback: just use a timestamp-based number
-        setParticipantNumber(Math.floor(Date.now() / 1000) % 10000);
-      }
-    };
-
-    fetchParticipantNumber();
+    const savedId = sessionStorage.getItem('participantId');
+    if (savedId) {
+      setParticipantNumber(parseInt(savedId));
+    }
   }, []);
 
   if (!results && !quizAnswers) {
