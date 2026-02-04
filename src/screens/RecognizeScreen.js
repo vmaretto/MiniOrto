@@ -189,10 +189,18 @@ function RecognizeScreen() {
   };
   
   // Handle demo product selection
+  // Map Italian demo product names to English for SWITCH DB lookup
+  const demoNameEnMap = {
+    'mela fuji': 'Apple', 'banana': 'Banana', 'arancia': 'Orange', 'fragola': 'Strawberry',
+    'kiwi': 'Kiwi', 'pomodoro': 'Tomato', 'carota': 'Carrot', 'broccolo': 'Broccoli',
+    'spinaci': 'Spinach', 'peperone rosso': 'Red Bell Pepper'
+  };
+
   const handleSelectDemoProduct = (product) => {
     // Create recognized product object from demo product
     const recognizedData = {
       name: product.name,
+      nameEn: demoNameEnMap[product.name.toLowerCase()] || product.name,
       category: product.category,
       emoji: product.emoji,
       confidence: 'alta',

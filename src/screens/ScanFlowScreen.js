@@ -33,6 +33,13 @@ export default function ScanFlowScreen() {
   const [waitingForScan, setWaitingForScan] = useState(false);
   const [uploadedScreenshot, setUploadedScreenshot] = useState(null); // Preview before analysis
   const [demoProducts, setDemoProducts] = useState([]);
+
+  // Map Italian demo product names to English for SWITCH DB lookup
+  const demoNameEnMap = {
+    'mela fuji': 'Apple', 'banana': 'Banana', 'arancia': 'Orange', 'fragola': 'Strawberry',
+    'kiwi': 'Kiwi', 'pomodoro': 'Tomato', 'carota': 'Carrot', 'broccolo': 'Broccoli',
+    'spinaci': 'Spinach', 'peperone rosso': 'Red Bell Pepper'
+  };
   
   const pollIntervalRef = useRef(null);
 
@@ -506,6 +513,9 @@ export default function ScanFlowScreen() {
                             sessionStorage.setItem('scanMethod', 'demo');
                             const currentProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
                             currentProduct.scioData = scioData;
+                            if (!currentProduct.nameEn) {
+                              currentProduct.nameEn = demoNameEnMap[product.name.toLowerCase()] || product.name;
+                            }
                             sessionStorage.setItem('recognizedProduct', JSON.stringify(currentProduct));
                             navigate('/results');
                           }}
