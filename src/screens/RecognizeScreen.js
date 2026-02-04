@@ -193,7 +193,12 @@ function RecognizeScreen() {
   const demoNameEnMap = {
     'mela fuji': 'Apple', 'banana': 'Banana', 'arancia': 'Orange', 'fragola': 'Strawberry',
     'kiwi': 'Kiwi', 'pomodoro': 'Tomato', 'carota': 'Carrot', 'broccolo': 'Broccoli',
-    'spinaci': 'Spinach', 'peperone rosso': 'Red Bell Pepper'
+    'spinaci': 'Spinach', 'peperone rosso': 'Pepper',
+    'bietola': 'Swiss Chard', 'bietola a coste': 'Swiss Chard',
+    'cavoletto bruxelles': 'Brussels Sprout', 'cavolfiore': 'Cauliflower',
+    'cavolfiore 2': 'Cauliflower', 'cavolo viola': 'Cabbage',
+    'cipolla': 'Onion', 'insalata': 'Lettuce', 'porro': 'Leek',
+    'sedano': 'Celery', 'verza': 'Cabbage'
   };
 
   const handleSelectDemoProduct = (product) => {
