@@ -37,7 +37,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
   const [showHistory, setShowHistory] = useState(false);
   const [favoriteInsights, setFavoriteInsights] = useState([]);
   const [apiConfigured, setApiConfigured] = useState(true);
-  
+
   // Chat state
   const [showChat, setShowChat] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -82,13 +82,13 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
 
   // Track previous language to detect changes
   const prevLanguageRef = useRef(language);
-  
+
   useEffect(() => {
     if (participants.length > 5 && !insights) {
       generateInsights();
     }
   }, [participants]);
-  
+
   // Regenerate insights when language changes
   useEffect(() => {
     if (prevLanguageRef.current !== language && participants.length > 5) {
@@ -104,7 +104,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
   const generateInsights = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Prepare aggregated data for analysis
       const aggregatedData = {
@@ -130,29 +130,29 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        
+
         if (errorData.error === 'Claude API key not configured') {
           setApiConfigured(false);
         }
-        
+
         throw new Error(errorData.message || 'Failed to generate insights');
       }
 
       const data = await response.json();
       const claudeInsights = data.curiosities ? data : data.insights;
-      
+
       setInsights(claudeInsights);
       setApiConfigured(true);
-      
+
       // Save to history
       const newHistory = [claudeInsights, ...insightHistory].slice(0, 10);
       setInsightHistory(newHistory);
       localStorage.setItem('insight_history', JSON.stringify(newHistory));
-      
+
     } catch (err) {
       console.error('Error generating insights:', err);
       setError(err.message);
-      
+
       // Generate local insights as fallback
       const localInsights = generateLocalInsights(participants);
       setInsights(localInsights);
@@ -163,19 +163,19 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
 
   const sendChatMessage = async () => {
     if (!chatInput.trim()) return;
-    
+
     const userMessage = {
       role: 'user',
       content: chatInput,
       timestamp: new Date().toISOString()
     };
-    
+
     const newMessages = [...chatMessages, userMessage];
     setChatMessages(newMessages);
     const currentInput = chatInput; // Save current input
     setChatInput('');
     setChatLoading(true);
-    
+
     try {
       // Prepare context with current insights and data
       const aggregatedData = {
@@ -205,31 +205,31 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       }
 
       const data = await response.json();
-      
+
       const assistantMessage = {
         role: 'assistant',
         content: data.response,
         timestamp: new Date().toISOString()
       };
-      
+
       const updatedMessages = [...newMessages, assistantMessage];
       setChatMessages(updatedMessages);
-      
+
       // Save chat history
       localStorage.setItem('insight_chat_history', JSON.stringify(updatedMessages.slice(-50)));
-      
+
     } catch (err) {
       console.error('Chat error:', err);
-      
+
       const errorMessage = {
         role: 'assistant',
-        content: language === 'it' 
+        content: language === 'it'
           ? '❌ Mi dispiace, non riesco a rispondere in questo momento. Riprova tra poco.'
           : '❌ Sorry, I cannot respond at this moment. Please try again later.',
         timestamp: new Date().toISOString(),
         isError: true
       };
-      
+
       setChatMessages([...newMessages, errorMessage]);
     } finally {
       setChatLoading(false);
@@ -251,15 +251,14 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       purchaseChannels: {},
       sustainability: {},
       labelReading: {},
-      timePatterns: {},
-      dayPatterns: {}
+      // timePatterns and dayPatterns removed - not relevant for single-day events
     };
-    
+
     participants.forEach(p => {
       const data = getParticipantData(p);
       const profile = data.profile || {};
       const timestamp = new Date(p.timestamp);
-      
+
       // Age groups
       const age = parseInt(profile.age);
       let ageGroup = 'unknown';
@@ -269,35 +268,28 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       else if (age < 55) ageGroup = '45-54';
       else ageGroup = '55+';
       demographics.ageGroups[ageGroup] = (demographics.ageGroups[ageGroup] || 0) + 1;
-      
+
       // Gender
       demographics.genders[profile.gender || 'unknown'] = (demographics.genders[profile.gender || 'unknown'] || 0) + 1;
-      
+
       // Profession
       demographics.professions[profile.profession || 'unknown'] = (demographics.professions[profile.profession || 'unknown'] || 0) + 1;
-      
+
       // Consumption habits
       demographics.consumption[profile.consumption || 'unknown'] = (demographics.consumption[profile.consumption || 'unknown'] || 0) + 1;
-      
+
       // Purchase channels
       demographics.purchaseChannels[profile.purchaseChannel || 'unknown'] = (demographics.purchaseChannels[profile.purchaseChannel || 'unknown'] || 0) + 1;
-      
+
       // Sustainability interest
       demographics.sustainability[profile.sustainability || 'unknown'] = (demographics.sustainability[profile.sustainability || 'unknown'] || 0) + 1;
-      
+
       // Label reading habits
       demographics.labelReading[profile.labelReading || 'unknown'] = (demographics.labelReading[profile.labelReading || 'unknown'] || 0) + 1;
-      
-      // Time patterns
-      const hour = timestamp.getHours();
-      const timeSlot = hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
-      demographics.timePatterns[timeSlot] = (demographics.timePatterns[timeSlot] || 0) + 1;
-      
-      // Day patterns
-      const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][timestamp.getDay()];
-      demographics.dayPatterns[dayOfWeek] = (demographics.dayPatterns[dayOfWeek] || 0) + 1;
+
+      // Time/day patterns removed - not relevant for single-day events
     });
-    
+
     return demographics;
   };
 
@@ -307,33 +299,32 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       productsByCategory: {},
       productsAnalyzed: {},
       productRatings: {},
-      
+
       // spectrometer data patterns
       avgCaloriesByCategory: {},
       avgWaterByCategory: {},
       avgCarbsByCategory: {},
       scioDataDistribution: { withData: 0, withoutData: 0 },
-      
+
       // Feedback patterns
       differencesFound: { yes: 0, no: 0, somewhat: 0 },
       spectrometerUsefulByCategory: {},
       ratingsByCategory: {},
       avgRatingByProfession: {},
       avgRatingByAge: {},
-      
+
       // Scan method patterns
       scanMethodByCategory: {},
       scanMethodSuccess: { direct: [], screenshot: [] },
-      
+
       // Comments analysis
       commentsKeywords: {},
       differenceExplanations: [],
-      
+
       // Temporal patterns
-      ratingsByTimeOfDay: {},
-      ratingsByDayOfWeek: {}
+      // ratingsByTimeOfDay and ratingsByDayOfWeek removed - not relevant
     };
-    
+
     participants.forEach(p => {
       const data = getParticipantData(p);
       const profile = data.profile || {};
@@ -342,18 +333,18 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       const feedback = data.feedback || {};
       const scanMethod = data.scanMethod || 'unknown';
       const timestamp = new Date(p.timestamp);
-      
+
       const category = product.category || 'unknown';
       const productName = product.name || 'unknown';
-      
+
       // Product tracking
       patterns.productsByCategory[category] = (patterns.productsByCategory[category] || 0) + 1;
       patterns.productsAnalyzed[productName] = (patterns.productsAnalyzed[productName] || 0) + 1;
-      
+
       // spectrometer data analysis
       if (scio.calories || scio.carbs || scio.water) {
         patterns.scioDataDistribution.withData++;
-        
+
         if (scio.calories) {
           if (!patterns.avgCaloriesByCategory[category]) patterns.avgCaloriesByCategory[category] = [];
           patterns.avgCaloriesByCategory[category].push(parseFloat(scio.calories));
@@ -369,13 +360,13 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       } else {
         patterns.scioDataDistribution.withoutData++;
       }
-      
+
       // Feedback analysis
       if (feedback.foundDifferences) {
-        patterns.differencesFound[feedback.foundDifferences] = 
+        patterns.differencesFound[feedback.foundDifferences] =
           (patterns.differencesFound[feedback.foundDifferences] || 0) + 1;
       }
-      
+
       // Spectrometer usefulness by category
       if (feedback.spectrometerUseful) {
         if (!patterns.spectrometerUsefulByCategory[category]) {
@@ -383,49 +374,41 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         }
         patterns.spectrometerUsefulByCategory[category].push(parseInt(feedback.spectrometerUseful));
       }
-      
+
       // Ratings by category
       if (feedback.overallRating) {
         const rating = parseInt(feedback.overallRating);
-        
+
         if (!patterns.ratingsByCategory[category]) patterns.ratingsByCategory[category] = [];
         patterns.ratingsByCategory[category].push(rating);
-        
+
         if (!patterns.productRatings[productName]) patterns.productRatings[productName] = [];
         patterns.productRatings[productName].push(rating);
-        
+
         // By profession
         const profession = profile.profession || 'unknown';
         if (!patterns.avgRatingByProfession[profession]) patterns.avgRatingByProfession[profession] = [];
         patterns.avgRatingByProfession[profession].push(rating);
-        
+
         // By age
         const ageGroup = getAgeGroup(profile.age);
         if (!patterns.avgRatingByAge[ageGroup]) patterns.avgRatingByAge[ageGroup] = [];
         patterns.avgRatingByAge[ageGroup].push(rating);
-        
-        // Time patterns
-        const hour = timestamp.getHours();
-        const timeSlot = hour < 6 ? 'night' : hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
-        if (!patterns.ratingsByTimeOfDay[timeSlot]) patterns.ratingsByTimeOfDay[timeSlot] = [];
-        patterns.ratingsByTimeOfDay[timeSlot].push(rating);
-        
-        const dayOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][timestamp.getDay()];
-        if (!patterns.ratingsByDayOfWeek[dayOfWeek]) patterns.ratingsByDayOfWeek[dayOfWeek] = [];
-        patterns.ratingsByDayOfWeek[dayOfWeek].push(rating);
+
+        // Time/day patterns removed - not relevant for single-day events
       }
-      
+
       // Scan method tracking
       if (!patterns.scanMethodByCategory[category]) {
         patterns.scanMethodByCategory[category] = { direct: 0, screenshot: 0 };
       }
-      patterns.scanMethodByCategory[category][scanMethod] = 
+      patterns.scanMethodByCategory[category][scanMethod] =
         (patterns.scanMethodByCategory[category][scanMethod] || 0) + 1;
-      
+
       if (feedback.overallRating) {
         patterns.scanMethodSuccess[scanMethod]?.push(parseInt(feedback.overallRating));
       }
-      
+
       // Comments keyword extraction
       if (feedback.comments) {
         const words = feedback.comments.toLowerCase().split(/\s+/);
@@ -435,7 +418,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
           }
         });
       }
-      
+
       // Difference explanations
       if (feedback.differenceExplanation) {
         patterns.differenceExplanations.push({
@@ -445,9 +428,9 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         });
       }
     });
-    
+
     // Calculate averages
-    ['avgCaloriesByCategory', 'avgWaterByCategory', 'avgCarbsByCategory', 
+    ['avgCaloriesByCategory', 'avgWaterByCategory', 'avgCarbsByCategory',
      'spectrometerUsefulByCategory', 'ratingsByCategory', 'productRatings',
      'avgRatingByProfession', 'avgRatingByAge', 'ratingsByTimeOfDay', 'ratingsByDayOfWeek'].forEach(key => {
       Object.keys(patterns[key]).forEach(subKey => {
@@ -462,7 +445,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         }
       });
     });
-    
+
     // Scan method success rates
     ['direct', 'screenshot'].forEach(method => {
       const vals = patterns.scanMethodSuccess[method];
@@ -473,12 +456,12 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         };
       }
     });
-    
+
     // Top keywords
     patterns.topKeywords = Object.entries(patterns.commentsKeywords)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 20);
-    
+
     return patterns;
   };
 
@@ -497,50 +480,50 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         scanMethod: d.scanMethod
       };
     });
-    
+
     const correlations = {
       // Age vs satisfaction
       ageVsRating: calculateSimpleCorrelation(data.map(d => d.age), data.map(d => d.rating)),
-      
+
       // Sustainability interest vs spectrometer appreciation
       sustainabilityVsSpectrometerUseful: calculateSimpleCorrelation(
-        data.map(d => d.sustainability), 
+        data.map(d => d.sustainability),
         data.map(d => d.spectrometerUseful)
       ),
-      
+
       // Label reading habits vs finding differences
       labelReadingVsDifferences: calculateSimpleCorrelation(
         data.map(d => d.labelReading),
         data.map(d => d.foundDifferences)
       ),
-      
+
       // Category preferences by demographic
       categoryByAge: groupByAndCount(data, 'age', 'category'),
       categoryByMethod: groupByAndCount(data, 'scanMethod', 'category'),
-      
+
       // Insights
       insights: generateCorrelationInsights(data)
     };
-    
+
     return correlations;
   };
-  
+
   const calculateSimpleCorrelation = (x, y) => {
     if (x.length !== y.length || x.length < 2) return 0;
-    
+
     const n = x.length;
     const sumX = x.reduce((a, b) => a + b, 0);
     const sumY = y.reduce((a, b) => a + b, 0);
     const sumXY = x.reduce((acc, xi, i) => acc + xi * y[i], 0);
     const sumX2 = x.reduce((acc, xi) => acc + xi * xi, 0);
     const sumY2 = y.reduce((acc, yi) => acc + yi * yi, 0);
-    
+
     const numerator = n * sumXY - sumX * sumY;
     const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-    
+
     return denominator === 0 ? 0 : (numerator / denominator).toFixed(2);
   };
-  
+
   const groupByAndCount = (data, groupKey, countKey) => {
     const result = {};
     data.forEach(d => {
@@ -551,18 +534,18 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
     });
     return result;
   };
-  
+
   const generateCorrelationInsights = (data) => {
     const insights = [];
-    
+
     // Check if people who find differences rate spectrometer higher
     const withDiff = data.filter(d => d.foundDifferences === 1);
     const withoutDiff = data.filter(d => d.foundDifferences === 0);
-    
+
     if (withDiff.length > 0 && withoutDiff.length > 0) {
       const avgWithDiff = withDiff.reduce((a, d) => a + d.spectrometerUseful, 0) / withDiff.length;
       const avgWithoutDiff = withoutDiff.reduce((a, d) => a + d.spectrometerUseful, 0) / withoutDiff.length;
-      
+
       if (avgWithDiff > avgWithoutDiff + 0.5) {
         insights.push({
           type: 'correlation',
@@ -570,15 +553,15 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         });
       }
     }
-    
+
     // Check scan method satisfaction
     const direct = data.filter(d => d.scanMethod === 'direct');
     const screenshot = data.filter(d => d.scanMethod === 'screenshot');
-    
+
     if (direct.length > 2 && screenshot.length > 2) {
       const avgDirect = direct.reduce((a, d) => a + d.rating, 0) / direct.length;
       const avgScreenshot = screenshot.reduce((a, d) => a + d.rating, 0) / screenshot.length;
-      
+
       if (Math.abs(avgDirect - avgScreenshot) > 0.5) {
         const better = avgDirect > avgScreenshot ? 'scansione diretta' : 'screenshot';
         insights.push({
@@ -587,7 +570,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         });
       }
     }
-    
+
     return insights;
   };
 
@@ -620,19 +603,19 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       curiosities: [],
       mainTrend: null,
       funFact: null,
-      methodology: language === 'it' 
+      methodology: language === 'it'
         ? "Analisi statistica locale dei dati raccolti"
         : "Local statistical analysis of collected data",
       generatedAt: new Date().toISOString(),
       participantCount: participants.length
     };
-    
+
     // Analyze real patterns in the data
     const demographics = extractDemographics(participants);
     const patterns = extractPatterns(participants);
-    
+
     // Generate insights based on actual data
-    
+
     // 1. Age pattern insight
     if (demographics.ageGroups) {
       const mostCommonAge = Object.entries(demographics.ageGroups)
@@ -640,7 +623,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       if (mostCommonAge && mostCommonAge[1] > 0) {
         insights.curiosities.push({
           title: language === 'it' ? "Età predominante" : "Predominant age",
-          insight: language === 'it' 
+          insight: language === 'it'
             ? `Il ${Math.round((mostCommonAge[1] / participants.length) * 100)}% dei partecipanti appartiene alla fascia ${mostCommonAge[0]}`
             : `${Math.round((mostCommonAge[1] / participants.length) * 100)}% of participants are in the ${mostCommonAge[0]} age group`,
           emoji: "👥",
@@ -650,7 +633,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         });
       }
     }
-    
+
     // 2. Gender distribution insight
     if (demographics.genders) {
       const femaleCount = demographics.genders['F'] || 0;
@@ -670,7 +653,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         });
       }
     }
-    
+
     // 3. Time pattern insight (if data exists)
     if (demographics.timePatterns) {
       const mostActiveTime = Object.entries(demographics.timePatterns)
@@ -692,7 +675,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         });
       }
     }
-    
+
     // 4. Consumption habits insight
     if (demographics.consumption) {
       const dailyConsumers = demographics.consumption['daily'] || 0;
@@ -709,7 +692,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         });
       }
     }
-    
+
     // 5. Profession insight
     if (demographics.professions) {
       const topProfession = Object.entries(demographics.professions)
@@ -728,31 +711,31 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         });
       }
     }
-    
+
     // Set main trend (most significant finding)
     if (insights.curiosities.length > 0) {
       const mainCuriosity = insights.curiosities[0];
       insights.mainTrend = {
         title: mainCuriosity.title,
         description: mainCuriosity.insight,
-        significance: language === 'it' 
+        significance: language === 'it'
           ? "Questo è il pattern più evidente nei dati raccolti"
           : "This is the most evident pattern in the collected data"
       };
     } else {
       insights.mainTrend = {
         title: language === 'it' ? "Dati in elaborazione" : "Processing data",
-        description: language === 'it' 
+        description: language === 'it'
           ? "Stiamo ancora raccogliendo dati per generare insights significativi"
           : "Still collecting data to generate significant insights",
         significance: ""
       };
     }
-    
+
     // Fun fact based on real data
     const totalParticipants = participants.length;
     insights.funFact = {
-      fact: language === 'it' 
+      fact: language === 'it'
         ? `Abbiamo già raccolto dati da ${totalParticipants} partecipanti!`
         : `We have already collected data from ${totalParticipants} participants!`,
       emoji: "🎉",
@@ -760,18 +743,18 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         ? "Ogni partecipazione contribuisce alla ricerca"
         : "Every participation contributes to the research"
     };
-    
+
     // Don't duplicate - just use what we have (no "(2)" suffixes)
-    
+
     return insights;
   };
 
   const toggleFavorite = (insight) => {
     const newFavorites = [...favoriteInsights];
-    const index = newFavorites.findIndex(f => 
+    const index = newFavorites.findIndex(f =>
       f.title === insight.title && f.insight === insight.insight
     );
-    
+
     if (index >= 0) {
       newFavorites.splice(index, 1);
     } else {
@@ -780,13 +763,13 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         savedAt: new Date().toISOString()
       });
     }
-    
+
     setFavoriteInsights(newFavorites);
     localStorage.setItem('favorite_insights', JSON.stringify(newFavorites));
   };
 
   const isFavorite = (insight) => {
-    return favoriteInsights.some(f => 
+    return favoriteInsights.some(f =>
       f.title === insight.title && f.insight === insight.insight
     );
   };
@@ -814,14 +797,14 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       }}>
         <AlertCircle size={48} style={{ margin: '0 auto 1rem', color: '#f59e0b' }} />
         <p style={{ fontSize: '1.25rem' }}>
-          {language === 'it' 
+          {language === 'it'
             ? 'Servono almeno 5 partecipanti per generare insights'
             : 'Need at least 5 participants to generate insights'}
         </p>
         {filteredCount > 0 && (
           <p style={{ fontSize: '0.875rem', color: '#9ca3af', marginTop: '1rem' }}>
             <Filter size={16} style={{ display: 'inline', marginRight: '0.25rem' }} />
-            {language === 'it' 
+            {language === 'it'
               ? `(${filteredCount} partecipanti di test esclusi)`
               : `(${filteredCount} test participants excluded)`}
           </p>
@@ -850,12 +833,12 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
             {language === 'it' ? 'Configurazione Claude API' : 'Claude API Configuration'}
           </h3>
           <p style={{ opacity: 0.9, marginBottom: '1.5rem' }}>
-            {language === 'it' 
+            {language === 'it'
               ? 'Per abilitare gli insights AI, configura la chiave API su Vercel'
               : 'To enable AI insights, configure the API key on Vercel'}
           </p>
         </div>
-        
+
         <div style={{
           background: 'white',
           borderRadius: '15px',
@@ -883,7 +866,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
             </ul>
             <li>{language === 'it' ? 'Salva e rideploya' : 'Save and redeploy'}</li>
           </ol>
-          
+
           <div style={{
             marginTop: '2rem',
             padding: '1rem',
@@ -891,7 +874,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
             borderRadius: '10px',
             border: '2px solid #fbbf24'
           }}>
-            <p style={{ 
+            <p style={{
               margin: 0,
               color: '#92400e',
               fontSize: '0.875rem',
@@ -901,7 +884,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
             }}>
               <span>💡</span>
               <span>
-                {language === 'it' 
+                {language === 'it'
                   ? 'La chiave API è salvata in modo sicuro su Vercel e non è mai esposta al client'
                   : 'The API key is securely stored on Vercel and never exposed to the client'}
               </span>
@@ -1020,7 +1003,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
         }}>
           <Filter size={20} color="#92400e" />
           <span style={{ color: '#92400e', fontSize: '0.875rem' }}>
-            {language === 'it' 
+            {language === 'it'
               ? `Dati filtrati: ${filteredCount} partecipanti di test (giovedì) esclusi dall'analisi`
               : `Filtered data: ${filteredCount} test participants (Thursday) excluded from analysis`}
           </span>
@@ -1046,11 +1029,11 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
           </h2>
         </div>
         <p style={{ color: '#6b7280', fontSize: '0.75rem', margin: '0 0 12px 0' }}>
-          {language === 'it' 
+          {language === 'it'
             ? `${insights.participantCount} partecipanti • ${new Date(insights.generatedAt).toLocaleDateString()}`
             : `${insights.participantCount} participants • ${new Date(insights.generatedAt).toLocaleDateString()}`}
         </p>
-        
+
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
             onClick={() => setShowChat(!showChat)}
@@ -1091,7 +1074,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
             <History size={16} />
             ({insightHistory.length})
           </button>
-          
+
           <button
             onClick={generateInsights}
             style={{
@@ -1204,7 +1187,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                   marginBottom: '1rem',
                   fontSize: '1rem'
                 }}>
-                  {language === 'it' 
+                  {language === 'it'
                     ? '👋 Ciao! Sono Claude, il tuo assistente AI'
                     : '👋 Hi! I\'m Claude, your AI assistant'}
                 </p>
@@ -1213,11 +1196,11 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                   fontSize: '0.875rem',
                   marginBottom: '1.5rem'
                 }}>
-                  {language === 'it' 
+                  {language === 'it'
                     ? 'Posso aiutarti ad analizzare i dati in modo approfondito. Ecco alcune domande che puoi farmi:'
                     : 'I can help you analyze the data in depth. Here are some questions you can ask:'}
                 </p>
-                
+
                 {/* Example questions */}
                 <div style={{
                   display: 'flex',
@@ -1266,7 +1249,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                 </div>
               </div>
             )}
-            
+
             {chatMessages.map((msg, idx) => (
               <div
                 key={idx}
@@ -1280,14 +1263,14 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                   maxWidth: '85%',
                   padding: '0.75rem 1rem',
                   borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  background: msg.role === 'user' 
+                  background: msg.role === 'user'
                     ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                     : msg.isError ? '#fef2f2' : 'white',
                   color: msg.role === 'user' ? 'white' : msg.isError ? '#dc2626' : '#374151',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                   border: msg.role === 'assistant' && !msg.isError ? '1px solid #e5e7eb' : 'none'
                 }}>
-                  <div style={{ 
+                  <div style={{
                     fontSize: '0.875rem',
                     lineHeight: '1.5',
                     whiteSpace: 'pre-wrap',
@@ -1305,7 +1288,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                 </div>
               </div>
             ))}
-            
+
             {chatLoading && (
               <div style={{
                 display: 'flex',
@@ -1319,7 +1302,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                 }}>
                   <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
-                    <span style={{ 
+                    <span style={{
                       animation: 'bounce 1.4s ease-in-out infinite',
                       display: 'inline-block',
                       width: '8px',
@@ -1327,7 +1310,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                       borderRadius: '50%',
                       background: '#667eea'
                     }}></span>
-                    <span style={{ 
+                    <span style={{
                       animation: 'bounce 1.4s ease-in-out 0.2s infinite',
                       display: 'inline-block',
                       width: '8px',
@@ -1335,7 +1318,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                       borderRadius: '50%',
                       background: '#764ba2'
                     }}></span>
-                    <span style={{ 
+                    <span style={{
                       animation: 'bounce 1.4s ease-in-out 0.4s infinite',
                       display: 'inline-block',
                       width: '8px',
@@ -1347,7 +1330,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                 </div>
               </div>
             )}
-            
+
             <div ref={chatEndRef} />
           </div>
 
@@ -1452,7 +1435,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
               <Trash2 size={14} style={{ display: 'inline' }} />
             </button>
           </div>
-          
+
           {insightHistory.map((histInsight, idx) => (
             <div
               key={idx}
@@ -1536,7 +1519,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
           }}>
             {(() => {
               let displayCuriosities = insights.curiosities || [];
-              
+
               if (displayCuriosities.length === 0) {
                 displayCuriosities = [{
                   title: language === 'it' ? 'Analisi in corso' : 'Analyzing',
@@ -1546,14 +1529,14 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                   strength: 3
                 }];
               }
-              
+
               displayCuriosities = displayCuriosities.slice(0, 6);
 
               // SWITCH colors
               const GOLD = '#FFC300';
               const DARK_BLUE = '#1E3A5F';
               const GREEN = '#28A745';
-              
+
               return displayCuriosities.map((curiosity, index) => (
                 <div
                   key={index}
@@ -1581,7 +1564,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                   >
                     <Star size={16} fill={isFavorite(curiosity) ? GOLD : 'none'} />
                   </button>
-                  
+
                   <div style={{
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -1599,7 +1582,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                     }}>
                       <span style={{ fontSize: '1.25rem' }}>{curiosity.emoji}</span>
                     </div>
-                    
+
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <h4 style={{
                         fontSize: '0.9rem',
@@ -1611,7 +1594,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                       }}>
                         {curiosity.title}
                       </h4>
-                      
+
                       <p style={{
                         fontSize: '0.8rem',
                         color: '#4b5563',
@@ -1620,7 +1603,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
                       }}>
                         {curiosity.insight}
                       </p>
-                      
+
                       {/* Strength bar */}
                       <div style={{
                         marginTop: '8px',
