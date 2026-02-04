@@ -297,6 +297,9 @@ const Leaderboard = ({ ranking, language = 'it', currentParticipantId = null }) 
                     {profile.age && (
                       <span>{profile.age} {language === 'it' ? 'anni' : 'y/o'}</span>
                     )}
+                    {profile.gender && (
+                      <span>• {profile.gender}</span>
+                    )}
                     {profile.profession && (
                       <span>• {profile.profession.length > 15 ? profile.profession.substring(0, 15) + '...' : profile.profession}</span>
                     )}
