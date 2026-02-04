@@ -187,6 +187,21 @@ function ResultsScreen() {
         demoProductName: scanData.demoProductName,
         scanDate: new Date().toISOString()
       });
+    } else if (directScanData && storedScanMethod === 'manual') {
+      // Manual SCIO data entry
+      const scanData = JSON.parse(directScanData);
+      setResults({
+        brix: scanData.brix,
+        calories: scanData.calories,
+        carbs: scanData.carbs,
+        sugar: scanData.sugar,
+        water: scanData.water,
+        protein: scanData.protein,
+        fiber: scanData.fiber,
+        source: 'manual-scio',
+        isManualData: true,
+        scanDate: new Date().toISOString()
+      });
     } else if (storedResults) {
       setResults(JSON.parse(storedResults));
     }

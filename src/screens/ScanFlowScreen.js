@@ -32,33 +32,15 @@ export default function ScanFlowScreen() {
   const [error, setError] = useState(null);
   const [waitingForScan, setWaitingForScan] = useState(false);
   const [uploadedScreenshot, setUploadedScreenshot] = useState(null); // Preview before analysis
-  const [demoProducts, setDemoProducts] = useState([]);
-
-  // Map Italian demo product names to English for SWITCH DB lookup
-  const demoNameEnMap = {
-    'mela fuji': 'Apple', 'banana': 'Banana', 'arancia': 'Orange', 'fragola': 'Strawberry',
-    'kiwi': 'Kiwi', 'pomodoro': 'Tomato', 'carota': 'Carrot', 'broccolo': 'Broccoli',
-    'spinaci': 'Spinach', 'peperone rosso': 'Red Bell Pepper'
-  };
+  const [manualScio, setManualScio] = useState({
+    brix: '', calories: '', carbs: '', sugar: '', water: '', protein: '', fiber: ''
+  });
   
   const pollIntervalRef = useRef(null);
-
-  const fetchDemoProducts = async () => {
-    try {
-      const response = await fetch('/api/demo-products');
-      if (response.ok) {
-        const data = await response.json();
-        setDemoProducts(data);
-      }
-    } catch (err) {
-      console.error('Error fetching demo products:', err);
-    }
-  };
 
   // Carica dati prodotto riconosciuto
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    fetchDemoProducts();
     
     const storedProduct = sessionStorage.getItem('recognizedProduct');
     const storedImage = sessionStorage.getItem('productImage');
@@ -466,96 +448,109 @@ export default function ScanFlowScreen() {
                   <Upload size={20} /> {t('scanflow.scan.screenshot.button')}
                 </label>
 
-                {/* Demo products SCIO gallery */}
-                {demoProducts.length > 0 && (
-                  <div style={{ marginTop: '30px' }}>
-                    <div style={{ 
-                      textAlign: 'center', 
-                      marginBottom: '16px',
-                      color: '#666',
-                      fontSize: '0.9rem'
+                {/* Manual SCIO data entry form */}
+                <div style={{ marginTop: '30px' }}>
+                  <div style={{ 
+                    textAlign: 'center', 
+                    marginBottom: '16px',
+                    color: '#666',
+                    fontSize: '0.9rem'
+                  }}>
+                    <span style={{ 
+                      background: SWITCH_COLORS.lightBg, 
+                      padding: '4px 12px', 
+                      borderRadius: '20px' 
                     }}>
-                      <span style={{ 
-                        background: SWITCH_COLORS.lightBg, 
-                        padding: '4px 12px', 
-                        borderRadius: '20px' 
-                      }}>
-                        {language === 'it' ? '— oppure usa dati SCIO già registrati —' : '— or use pre-registered SCIO data —'}
-                      </span>
-                    </div>
-                    
-                    <div style={{
-                      display: 'flex',
-                      overflowX: 'auto',
-                      gap: '12px',
-                      padding: '8px 4px',
-                      marginBottom: '10px',
-                      WebkitOverflowScrolling: 'touch',
-                      scrollbarWidth: 'thin'
-                    }}>
-                      {demoProducts.map((product) => (
-                        <div
-                          key={product.id}
-                          onClick={() => {
-                            const scioData = {
-                              brix: parseFloat(product.scio_brix) || 0,
-                              calories: parseFloat(product.scio_calories) || 0,
-                              carbs: parseFloat(product.scio_carbs) || 0,
-                              sugar: parseFloat(product.scio_sugar) || 0,
-                              water: parseFloat(product.scio_water) || 0,
-                              protein: parseFloat(product.scio_protein) || 0,
-                              fiber: parseFloat(product.scio_fiber) || 0,
-                              isDemoData: true,
-                              demoProductId: product.id,
-                              demoProductName: product.name
-                            };
-                            sessionStorage.setItem('scioScanData', JSON.stringify(scioData));
-                            sessionStorage.setItem('scanMethod', 'demo');
-                            const currentProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
-                            currentProduct.scioData = scioData;
-                            if (!currentProduct.nameEn) {
-                              currentProduct.nameEn = demoNameEnMap[product.name.toLowerCase()] || product.name;
-                            }
-                            sessionStorage.setItem('recognizedProduct', JSON.stringify(currentProduct));
-                            navigate('/results');
-                          }}
-                          style={{
-                            flex: '0 0 auto',
-                            width: '100px',
-                            padding: '12px 8px',
-                            background: 'white',
-                            border: `2px solid ${SWITCH_COLORS.gold}`,
-                            borderRadius: '12px',
-                            textAlign: 'center',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                          }}
-                        >
-                          <div style={{ fontSize: '2rem', marginBottom: '6px' }}>
-                            {product.emoji || '🥬'}
-                          </div>
-                          <div style={{ 
-                            fontSize: '0.75rem', 
-                            fontWeight: '600', 
-                            color: SWITCH_COLORS.darkBlue,
-                            lineHeight: 1.2
-                          }}>
-                            {product.name}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                      {language === 'it' ? '— oppure inserisci manualmente —' : '— or enter manually —'}
+                    </span>
                   </div>
-                )}
+                  
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '10px',
+                    marginBottom: '16px'
+                  }}>
+                    {[
+                      { key: 'brix', label: 'Brix (°)', placeholder: '12.5' },
+                      { key: 'calories', label: language === 'it' ? 'Calorie (kcal)' : 'Calories (kcal)', placeholder: '52' },
+                      { key: 'carbs', label: language === 'it' ? 'Carboidrati (g)' : 'Carbs (g)', placeholder: '14' },
+                      { key: 'sugar', label: language === 'it' ? 'Zuccheri (g)' : 'Sugars (g)', placeholder: '10' },
+                      { key: 'water', label: language === 'it' ? 'Acqua (%)' : 'Water (%)', placeholder: '86' },
+                      { key: 'protein', label: language === 'it' ? 'Proteine (g)' : 'Protein (g)', placeholder: '0.3' },
+                      { key: 'fiber', label: language === 'it' ? 'Fibre (g)' : 'Fiber (g)', placeholder: '2.4' },
+                    ].map(({ key, label, placeholder }) => (
+                      <div key={key} style={{ display: 'flex', flexDirection: 'column' }}>
+                        <label style={{ 
+                          fontSize: '0.75rem', 
+                          fontWeight: '600', 
+                          color: SWITCH_COLORS.darkBlue,
+                          marginBottom: '4px'
+                        }}>
+                          {label}
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          placeholder={placeholder}
+                          value={manualScio[key]}
+                          onChange={(e) => setManualScio(prev => ({ ...prev, [key]: e.target.value }))}
+                          style={{
+                            padding: '10px 12px',
+                            border: `2px solid ${SWITCH_COLORS.lightBg}`,
+                            borderRadius: '8px',
+                            fontSize: '0.95rem',
+                            color: SWITCH_COLORS.darkBlue,
+                            background: 'white',
+                            outline: 'none',
+                            transition: 'border-color 0.2s'
+                          }}
+                          onFocus={(e) => e.target.style.borderColor = SWITCH_COLORS.gold}
+                          onBlur={(e) => e.target.style.borderColor = SWITCH_COLORS.lightBg}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const hasAnyValue = Object.values(manualScio).some(v => v !== '' && v !== undefined);
+                      if (!hasAnyValue) return;
+                      const scioData = {
+                        brix: parseFloat(manualScio.brix) || 0,
+                        calories: parseFloat(manualScio.calories) || 0,
+                        carbs: parseFloat(manualScio.carbs) || 0,
+                        sugar: parseFloat(manualScio.sugar) || 0,
+                        water: parseFloat(manualScio.water) || 0,
+                        protein: parseFloat(manualScio.protein) || 0,
+                        fiber: parseFloat(manualScio.fiber) || 0,
+                        isManualData: true
+                      };
+                      sessionStorage.setItem('scioScanData', JSON.stringify(scioData));
+                      sessionStorage.setItem('scanMethod', 'manual');
+                      navigate('/results');
+                    }}
+                    disabled={!Object.values(manualScio).some(v => v !== '' && v !== undefined)}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      background: Object.values(manualScio).some(v => v !== '' && v !== undefined) 
+                        ? SWITCH_COLORS.green 
+                        : '#ccc',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: 'white',
+                      fontWeight: '600',
+                      fontSize: '1rem',
+                      cursor: Object.values(manualScio).some(v => v !== '' && v !== undefined) ? 'pointer' : 'not-allowed',
+                      boxShadow: Object.values(manualScio).some(v => v !== '' && v !== undefined) 
+                        ? `0 4px 12px ${SWITCH_COLORS.green}40` 
+                        : 'none'
+                    }}
+                  >
+                    ✓ {language === 'it' ? 'Usa questi dati' : 'Use this data'}
+                  </button>
+                </div>
               </>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
