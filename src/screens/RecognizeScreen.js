@@ -288,17 +288,12 @@ function RecognizeScreen() {
           <div style={{ 
             textAlign: 'center', 
             marginBottom: '16px',
-            color: SWITCH_COLORS.darkBlue,
-            fontSize: '1rem',
-            fontWeight: '600'
+            padding: '12px 16px',
+            background: `linear-gradient(135deg, ${SWITCH_COLORS.darkBlue} 0%, #2d5a8f 100%)`,
+            borderRadius: '12px',
+            color: 'white'
           }}>
-            <span style={{ 
-              background: `linear-gradient(135deg, ${SWITCH_COLORS.gold}20 0%, ${SWITCH_COLORS.gold}10 100%)`,
-              padding: '10px 20px',
-              borderRadius: '25px',
-              border: `3px solid ${SWITCH_COLORS.gold}`,
-              boxShadow: `0 4px 12px ${SWITCH_COLORS.gold}30`
-            }}>
+            <span style={{ fontSize: '1rem', fontWeight: '700' }}>
               🌟 {language === 'it' ? 'Prodotti Demo con Dati Spettrometro' : 'Demo Products with Spectrometer Data'}
             </span>
           </div>
