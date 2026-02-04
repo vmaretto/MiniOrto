@@ -65,7 +65,7 @@ const Leaderboard = ({ ranking, language = 'it', currentParticipantId = null }) 
     if (data.nickname && data.nickname.trim()) {
       return data.nickname.trim();
     }
-    return `${language === 'it' ? 'Partecipante' : 'Participant'} #${participant.id}`;
+    return `${language === 'it' ? 'Partecipante' : 'Participant'} N.${participant.id}`;
   };
 
   const toggleExpand = (id) => {
