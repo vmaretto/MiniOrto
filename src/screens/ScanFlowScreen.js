@@ -32,11 +32,21 @@ export default function ScanFlowScreen() {
   const [error, setError] = useState(null);
   const [waitingForScan, setWaitingForScan] = useState(false);
   const [uploadedScreenshot, setUploadedScreenshot] = useState(null); // Preview before analysis
-  const [manualScio, setManualScio] = useState({
-    brix: '', calories: '', carbs: '', sugar: '', water: '', protein: '', fiber: ''
+  const [manualScio, setManualScio] = useState(() => {
+    // Restore manual input values when navigating back
+    const saved = sessionStorage.getItem('manualScioInput');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) {}
+    }
+    return { brix: '', calories: '', carbs: '', sugar: '', water: '', protein: '', fiber: '' };
   });
   
   const pollIntervalRef = useRef(null);
+
+  // Save manual input values for back navigation
+  useEffect(() => {
+    sessionStorage.setItem('manualScioInput', JSON.stringify(manualScio));
+  }, [manualScio]);
 
   // Carica dati prodotto riconosciuto
   useEffect(() => {

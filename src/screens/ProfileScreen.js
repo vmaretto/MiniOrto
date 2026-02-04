@@ -14,14 +14,21 @@ function ProfileScreen() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
   
-  const [formData, setFormData] = useState({
-    age: '',
-    gender: '',
-    profession: '',
-    consumption: '',
-    purchaseChannel: '',
-    sustainability: '',
-    labelReading: ''
+  const [formData, setFormData] = useState(() => {
+    // Restore previously saved data when navigating back
+    const saved = sessionStorage.getItem('profileData');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) {}
+    }
+    return {
+      age: '',
+      gender: '',
+      profession: '',
+      consumption: '',
+      purchaseChannel: '',
+      sustainability: '',
+      labelReading: ''
+    };
   });
 
   const handleChange = (field, value) => {

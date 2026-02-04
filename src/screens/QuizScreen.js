@@ -59,8 +59,21 @@ export default function QuizScreen() {
   const [switchData, setSwitchData] = useState(null);
   const [scioData, setScioData] = useState(null); // Dati misurati dallo spettrometro
   const [loading, setLoading] = useState(true);
-  const [currentQuestion, setCurrentQuestion] = useState(-1); // Show intro screen first
-  const [answers, setAnswers] = useState({});
+  const [currentQuestion, setCurrentQuestion] = useState(() => {
+    // Restore quiz progress when navigating back
+    const savedProgress = sessionStorage.getItem('quizProgress');
+    if (savedProgress) {
+      try { return JSON.parse(savedProgress).currentQuestion || -1; } catch(e) {}
+    }
+    return -1;
+  });
+  const [answers, setAnswers] = useState(() => {
+    const savedProgress = sessionStorage.getItem('quizProgress');
+    if (savedProgress) {
+      try { return JSON.parse(savedProgress).answers || {}; } catch(e) {}
+    }
+    return {};
+  });
 
   // Carica prodotto, dati SWITCH e dati SCIO
   useEffect(() => {
@@ -115,6 +128,11 @@ export default function QuizScreen() {
     
     fetchSwitchData();
   }, [navigate]);
+
+  // Save quiz progress for back navigation
+  useEffect(() => {
+    sessionStorage.setItem('quizProgress', JSON.stringify({ currentQuestion, answers }));
+  }, [currentQuestion, answers]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
