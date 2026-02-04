@@ -184,9 +184,16 @@ function AdminProductsScreen() {
     
     try {
       const method = editingProduct ? 'PUT' : 'POST';
+      // Convert comma decimals to dots for PostgreSQL
+      const cleanedData = { ...formData };
+      ['scio_brix', 'scio_calories', 'scio_carbs', 'scio_sugar', 'scio_water', 'scio_protein', 'scio_fiber'].forEach(key => {
+        if (cleanedData[key] && typeof cleanedData[key] === 'string') {
+          cleanedData[key] = cleanedData[key].replace(',', '.');
+        }
+      });
       const body = editingProduct 
-        ? { ...formData, id: editingProduct.id }
-        : formData;
+        ? { ...cleanedData, id: editingProduct.id }
+        : cleanedData;
       
       const response = await fetch('/api/demo-products', {
         method,
