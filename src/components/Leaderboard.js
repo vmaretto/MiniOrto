@@ -386,7 +386,7 @@ const Leaderboard = ({ ranking, language = 'it', currentParticipantId = null }) 
         }}>
           <div style={{ flex: 1, minWidth: '70px' }}>
             <div style={{ fontSize: '0.7rem', color: '#6b7280' }}>
-              {language === 'it' ? 'Totale' : 'Total'}
+              {language === 'it' ? 'Partecipanti' : 'Participants'}
             </div>
             <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#667eea' }}>
               {ranking.length}
@@ -394,7 +394,7 @@ const Leaderboard = ({ ranking, language = 'it', currentParticipantId = null }) 
           </div>
           <div style={{ flex: 1, minWidth: '70px' }}>
             <div style={{ fontSize: '0.7rem', color: '#6b7280' }}>
-              {language === 'it' ? 'Media' : 'Avg'}
+              {language === 'it' ? 'Punti medi' : 'Avg score'}
             </div>
             <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#667eea' }}>
               {(ranking.reduce((sum, p) => sum + p.totalScore, 0) / ranking.length).toFixed(0)}
@@ -402,7 +402,7 @@ const Leaderboard = ({ ranking, language = 'it', currentParticipantId = null }) 
           </div>
           <div style={{ flex: 1, minWidth: '70px' }}>
             <div style={{ fontSize: '0.7rem', color: '#6b7280' }}>
-              Top
+              {language === 'it' ? 'Punti max' : 'Top score'}
             </div>
             <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#10b981' }}>
               {ranking[0].totalScore}
