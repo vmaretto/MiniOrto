@@ -90,6 +90,9 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Name and category are required' });
       }
       
+      // Sanitize decimal values (comma → dot)
+      const sanitize = (v) => v != null && v !== '' ? parseFloat(String(v).replace(',', '.')) || null : null;
+      
       const result = await pool.query(
         `INSERT INTO demo_products 
          (name, category, emoji, image_base64, scio_brix, scio_calories, scio_carbs, scio_sugar, scio_water, scio_protein, scio_fiber, active)
@@ -100,13 +103,13 @@ export default async function handler(req, res) {
           category, 
           emoji || '🥬', 
           image_base64 || null,
-          scio_brix || null,
-          scio_calories || null,
-          scio_carbs || null,
-          scio_sugar || null,
-          scio_water || null,
-          scio_protein || null,
-          scio_fiber || null,
+          sanitize(scio_brix),
+          sanitize(scio_calories),
+          sanitize(scio_carbs),
+          sanitize(scio_sugar),
+          sanitize(scio_water),
+          sanitize(scio_protein),
+          sanitize(scio_fiber),
           active !== false
         ]
       );
@@ -126,6 +129,9 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Product id is required' });
       }
       
+      // Sanitize decimal values (comma → dot)
+      const sanitize = (v) => v != null && v !== '' ? parseFloat(String(v).replace(',', '.')) || null : null;
+      
       const result = await pool.query(
         `UPDATE demo_products 
          SET name = $1, category = $2, emoji = $3, image_base64 = $4,
@@ -134,9 +140,9 @@ export default async function handler(req, res) {
          WHERE id = $13
          RETURNING *`,
         [
-          name, category, emoji, image_base64,
-          scio_brix, scio_calories, scio_carbs, scio_sugar,
-          scio_water, scio_protein, scio_fiber, active, id
+          name, category, emoji, image_base64 || null,
+          sanitize(scio_brix), sanitize(scio_calories), sanitize(scio_carbs), sanitize(scio_sugar),
+          sanitize(scio_water), sanitize(scio_protein), sanitize(scio_fiber), active !== false, id
         ]
       );
       

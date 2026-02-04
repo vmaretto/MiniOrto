@@ -203,7 +203,7 @@ function AdminProductsScreen() {
       
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.error || 'Failed to save product');
+        throw new Error(err.details || err.error || 'Failed to save product');
       }
       
       await fetchProducts();
