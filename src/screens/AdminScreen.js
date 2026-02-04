@@ -5,6 +5,8 @@ import { Download, Trash2, RefreshCw, Settings, Package } from 'lucide-react';
 import Leaderboard from '../components/Leaderboard';
 import { generateRanking } from '../utils/rankingUtils';
 
+const ADMIN_PASSWORD = 'switch2026';
+
 const AdminScreen = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -12,10 +14,27 @@ const AdminScreen = () => {
   const [ranking, setRanking] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    fetchParticipants();
-  }, []);
+    const auth = sessionStorage.getItem('adminAuth');
+    if (auth === 'true') {
+      setAuthenticated(true);
+      fetchParticipants();
+    } else {
+      const pwd = window.prompt('Inserisci la password admin / Enter admin password:');
+      if (pwd === ADMIN_PASSWORD) {
+        setAuthenticated(true);
+        sessionStorage.setItem('adminAuth', 'true');
+        fetchParticipants();
+      } else if (pwd !== null) {
+        alert('❌ Password errata / Wrong password');
+        navigate('/');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [navigate]);
 
   const fetchParticipants = async () => {
     try {
@@ -170,6 +189,8 @@ const AdminScreen = () => {
       </div>
     );
   }
+
+  if (!authenticated) return null;
 
   return (
     <div style={{

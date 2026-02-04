@@ -65,9 +65,9 @@ function AdminProductsScreen() {
       fetchProducts();
     } else if (pwd !== null) {
       alert('❌ Password errata / Wrong password');
-      navigate('/admin');
+      navigate('/');
     } else {
-      navigate('/admin');
+      navigate('/');
     }
   };
 
