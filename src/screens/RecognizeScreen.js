@@ -190,22 +190,14 @@ function RecognizeScreen() {
   
   // Handle demo product selection
   // Map Italian demo product names to English for SWITCH DB lookup
-  const demoNameEnMap = {
-    'mela fuji': 'Apple', 'banana': 'Banana', 'arancia': 'Orange', 'fragola': 'Strawberry',
-    'kiwi': 'Kiwi', 'pomodoro': 'Tomato', 'carota': 'Carrot', 'broccolo': 'Broccoli',
-    'spinaci': 'Spinach', 'peperone rosso': 'Pepper',
-    'bietola': 'Swiss Chard', 'bietola a coste': 'Swiss Chard',
-    'cavoletto bruxelles': 'Brussels Sprout', 'cavolfiore': 'Cauliflower',
-    'cavolfiore 2': 'Cauliflower', 'cavolo viola': 'Cabbage',
-    'cipolla': 'Onion', 'insalata': 'Lettuce', 'porro': 'Leek',
-    'sedano': 'Celery', 'verza': 'Cabbage'
-  };
+  // No manual IT→EN map needed — switch-lookup API handles translation automatically
+  // via the comprehensive food-translations.js dictionary
 
   const handleSelectDemoProduct = (product) => {
     // Create recognized product object from demo product
     const recognizedData = {
       name: product.name,
-      nameEn: demoNameEnMap[product.name.toLowerCase()] || product.name,
+      nameEn: product.name, // Backend translates IT→EN automatically
       category: product.category,
       emoji: product.emoji,
       confidence: 'alta',

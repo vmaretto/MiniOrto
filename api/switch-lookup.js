@@ -1,5 +1,8 @@
 // api/switch-lookup.js
-// Lookup environmental data from SWITCH Food Explorer API
+// Lookup environmental + nutritional data from SWITCH Food Explorer API
+// Uses comprehensive IT→EN dictionary for automatic translation
+
+const { IT_TO_EN } = require('./food-translations.js');
 
 module.exports = async (req, res) => {
   // CORS headers
@@ -13,7 +16,7 @@ module.exports = async (req, res) => {
 
   try {
     const { nameEn, name } = req.method === 'GET' ? req.query : req.body;
-    const searchTerm = nameEn || name;
+    const searchTerm = (nameEn || name || '').trim();
 
     if (!searchTerm) {
       return res.status(400).json({ error: 'No search term provided (nameEn or name)' });
@@ -29,230 +32,122 @@ module.exports = async (req, res) => {
     }
 
     const foodItems = await response.json();
-
-    // Normalize search term
     const normalizedSearch = searchTerm.toLowerCase().trim();
+
+    // Step 1: Check IT→EN dictionary for translation
+    const translatedName = IT_TO_EN[normalizedSearch];
     
-    // Semantic mapping: different names that should match the same base food
-    const semanticMappings = {
-      // Yogurt variants → YOGURT
-      'yogurt greco': 'yogurt',
-      'yogurt bianco': 'yogurt',
-      'yogurt naturale': 'yogurt',
-      'yogurt magro': 'yogurt',
-      'yogurt intero': 'yogurt',
-      'greek yogurt': 'yogurt',
-      'plain yogurt': 'yogurt',
-      // Milk variants → COW MILK
-      'latte intero': 'cow milk',
-      'latte parzialmente scremato': 'cow milk',
-      'latte scremato': 'cow milk',
-      'whole milk': 'cow milk',
-      'skim milk': 'cow milk',
-      // Tomato variants → TOMATO
-      'pomodoro ciliegino': 'tomato',
-      'pomodoro datterino': 'tomato',
-      'pomodoro cuore di bue': 'tomato',
-      'cherry tomato': 'tomato',
-      'pomodorino': 'tomato',
-      // Cheese variants → CHEESE (generic)
-      'mozzarella': 'cheese',
-      'parmigiano': 'cheese',
-      'grana': 'cheese',
-      'pecorino': 'cheese',
-      'ricotta': 'cheese',
-      // Italian vegetable names → SWITCH DB names
-      'bietola': 'swiss chard',
-      'bietola a coste': 'swiss chard',
-      'cavoletto bruxelles': 'brussels sprout',
-      'cavoletti di bruxelles': 'brussels sprout',
-      'cavolfiore': 'cauliflower',
-      'cavolo viola': 'cabbage',
-      'cipolla': 'onion',
-      'insalata': 'lettuce',
-      'porro': 'leek',
-      'sedano': 'celery',
-      'verza': 'cabbage',
-      'broccolo': 'broccoli',
-      'carota': 'carrot',
-      'peperone': 'pepper',
-      'peperone rosso': 'pepper',
-      'spinaci': 'spinach',
-      'zucchina': 'zucchini',
-      'melanzana': 'eggplant',
-      'patata': 'potato',
-      'aglio': 'garlic',
-      'cetriolo': 'cucumber',
-      'finocchio': 'fennel',
-      'zucca': 'pumpkin',
-      'carciofo': 'artichoke',
-      'asparago': 'asparagus',
-      'asparagi': 'asparagus',
-      'barbabietola': 'beetroot',
-      'funghi': 'mushroom',
-      'fungo': 'mushroom',
-      'ravanello': 'radish',
-      'rucola': 'rocket',
-    };
+    // Step 2: Build search candidates (in priority order)
+    const searchCandidates = [];
+    if (translatedName) {
+      searchCandidates.push(translatedName.toLowerCase());
+    }
+    searchCandidates.push(normalizedSearch);
     
-    // Check if we have a semantic mapping first
-    let semanticSearch = semanticMappings[normalizedSearch] || null;
-    
-    // Remove common adjectives to get the main food item
-    const removeWords = ['bianco', 'white', 'fresh', 'fresco', 'naturale', 'natural', 'intero', 'whole', 'magro', 'low-fat', 'greco', 'greek', 'scremato', 'parzialmente'];
+    // Also try without common Italian adjectives
+    const removeWords = ['bianco', 'bianca', 'rosso', 'rossa', 'verde', 'giallo', 'gialla',
+      'fresco', 'fresca', 'intero', 'intera', 'magro', 'magra', 'greco', 'greca',
+      'naturale', 'scremato', 'parzialmente', 'white', 'fresh', 'whole', 'low-fat', 'greek'];
     let cleanedSearch = normalizedSearch;
     removeWords.forEach(word => {
       cleanedSearch = cleanedSearch.replace(new RegExp(`\\b${word}\\b`, 'gi'), '').trim();
     });
     cleanedSearch = cleanedSearch.replace(/\s+/g, ' ').trim();
     
-    // Use semantic search if available, otherwise cleaned search
-    const primarySearch = semanticSearch || cleanedSearch;
-    
-    // Extract main keyword (e.g., "Cherry tomato" → "tomato")
-    const searchWords = primarySearch.split(' ');
-    
-    // Try to find best match
+    if (cleanedSearch !== normalizedSearch) {
+      // Check dictionary for cleaned version too
+      const cleanedTranslation = IT_TO_EN[cleanedSearch];
+      if (cleanedTranslation) {
+        searchCandidates.push(cleanedTranslation.toLowerCase());
+      }
+      searchCandidates.push(cleanedSearch);
+    }
+
+    // Step 3: Find best match across all candidates
     let bestMatch = null;
     let bestScore = 0;
 
     for (const item of foodItems) {
-      const itemName = (item['FOOD COMMODITY ITEM'] || '').toLowerCase();
-      
-      // Skip items without a name
-      if (!itemName || itemName.trim() === '') continue;
-      
-      // Check for exact match first (original, semantic, or cleaned)
-      if (itemName === normalizedSearch || itemName === primarySearch || itemName === cleanedSearch) {
-        bestMatch = item;
-        bestScore = 100;
-        break;
-      }
+      const itemName = (item['FOOD COMMODITY ITEM'] || '').toLowerCase().trim();
+      if (!itemName) continue;
 
-      // Check semantic/primary search match
-      if (primarySearch && (itemName.includes(primarySearch) || primarySearch.includes(itemName))) {
-        const score = itemName === primarySearch ? 98 : 92;
+      for (const candidate of searchCandidates) {
+        let score = 0;
+
+        // Exact match
+        if (itemName === candidate) {
+          score = 100;
+        }
+        // Item name contains the candidate exactly
+        else if (itemName.includes(candidate) && candidate.length > 2) {
+          score = 90 + Math.min(9, candidate.length);
+        }
+        // Candidate contains the item name
+        else if (candidate.includes(itemName) && itemName.length > 2) {
+          score = 85;
+        }
+        // Check Italian name in parentheses
+        else {
+          const italianMatch = itemName.match(/\(([^)]+)\)/);
+          if (italianMatch) {
+            const italianName = italianMatch[1].toLowerCase();
+            if (italianName === normalizedSearch || normalizedSearch.includes(italianName) || italianName.includes(normalizedSearch)) {
+              score = 92;
+            }
+          }
+        }
+
+        // Word-level matching as fallback
+        if (score === 0) {
+          const candidateWords = candidate.split(/\s+/).filter(w => w.length > 2);
+          for (const word of candidateWords) {
+            if (itemName === word) score = Math.max(score, 80);
+            else if (itemName.startsWith(word)) score = Math.max(score, 70);
+            else if (itemName.includes(word) && word.length > 3) score = Math.max(score, 55);
+          }
+        }
+
         if (score > bestScore) {
           bestMatch = item;
           bestScore = score;
         }
-        continue;
-      }
 
-      // Check if item name contains search term (cleaned version)
-      if (itemName.includes(cleanedSearch) || cleanedSearch.includes(itemName)) {
-        const score = itemName === cleanedSearch ? 95 : 90;
-        if (score > bestScore) {
-          bestMatch = item;
-          bestScore = score;
-        }
-        continue;
+        // Early exit on exact match
+        if (bestScore === 100) break;
       }
-
-      // Check if item name contains search term (original)
-      if (itemName.includes(normalizedSearch)) {
-        const score = 85;
-        if (score > bestScore) {
-          bestMatch = item;
-          bestScore = score;
-        }
-        continue;
-      }
-
-      // Check if search term contains item name
-      if (normalizedSearch.includes(itemName) && itemName.length > 2) {
-        const score = 80;
-        if (score > bestScore) {
-          bestMatch = item;
-          bestScore = score;
-        }
-        continue;
-      }
-
-      // Check each word in search term
-      for (const word of searchWords) {
-        if (word.length < 3) continue;
-        
-        // Exact word match in item name
-        if (itemName === word) {
-          const score = 85;
-          if (score > bestScore) {
-            bestMatch = item;
-            bestScore = score;
-          }
-        }
-        // Item name starts with word
-        else if (itemName.startsWith(word)) {
-          const score = 75;
-          if (score > bestScore) {
-            bestMatch = item;
-            bestScore = score;
-          }
-        }
-        // Item name contains word
-        else if (itemName.includes(word)) {
-          const score = 60;
-          if (score > bestScore) {
-            bestMatch = item;
-            bestScore = score;
-          }
-        }
-        // Word contains item name
-        else if (word.includes(itemName) && itemName.length > 3) {
-          const score = 50;
-          if (score > bestScore) {
-            bestMatch = item;
-            bestScore = score;
-          }
-        }
-      }
-
-      // Also check Italian name in parentheses if present
-      const italianMatch = itemName.match(/\(([^)]+)\)/);
-      if (italianMatch) {
-        const italianName = italianMatch[1].toLowerCase();
-        if (italianName === normalizedSearch || normalizedSearch.includes(italianName)) {
-          const score = 85;
-          if (score > bestScore) {
-            bestMatch = item;
-            bestScore = score;
-          }
-        }
-      }
+      if (bestScore === 100) break;
     }
 
     if (!bestMatch || bestScore < 40) {
       return res.status(200).json({
         found: false,
         searchTerm,
+        translatedTo: translatedName || null,
         message: 'No matching food item found in SWITCH database'
       });
     }
 
-    // Format response with environmental data
+    // Format response
     const result = {
       found: true,
       matchScore: bestScore,
       searchTerm,
+      translatedTo: translatedName || null,
       matchedItem: bestMatch['FOOD COMMODITY ITEM'],
       switchId: bestMatch.id,
       
-      // Environmental data
       environmental: {
         carbonFootprint: parseFloat(bestMatch.carbonFootprint) || null,
         carbonFootprintUnit: bestMatch.unitsCarbonFootprint || 'kg CO2e/kg',
         carbonFootprintBanding: bestMatch.carbonFootprintBanding,
         carbonFootprintImpact: bestMatch.carbonFootprintBandingImpactDescription,
-        
         waterFootprint: parseFloat(bestMatch.waterFootprint) || null,
         waterFootprintUnit: bestMatch.unitsWaterfootprint || 'liters/kg',
         waterFootprintBanding: bestMatch.waterFootprintBanding,
         waterFootprintImpact: bestMatch.waterFootprintBandingImpactDescription,
-        
         environmentalScore: bestMatch.environmentalScore,
       },
       
-      // Nutritional data (per 100g)
       nutrition: {
         energy: parseFloat(bestMatch.energy) || null,
         proteins: parseFloat(bestMatch.proteins) || null,
@@ -265,13 +160,11 @@ module.exports = async (req, res) => {
         fiber: parseFloat(bestMatch.fiber) || null,
       },
       
-      // Category info
       category: {
         group: bestMatch['FOOD COMMODITY GROUP'],
         subGroup: bestMatch['FOOD COMMODITY SUB-GROUP'],
       },
       
-      // Recommendations
       recommendations: {
         frequency: bestMatch.frequencyOfConsumption,
         recommendation: bestMatch.recommendation,
