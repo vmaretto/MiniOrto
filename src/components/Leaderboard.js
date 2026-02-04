@@ -293,7 +293,7 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
 
                     {/* SCIO Results */}
                     {data.scioResults && (
-                      <DetailSection icon={<BarChart2 size={16} />} title={language === 'it' ? 'Risultati SCIO' : 'SCIO Results'}>
+                      <DetailSection icon={<BarChart2 size={16} />} title={language === 'it' ? 'Risultati Spettrometro' : 'Spectrometer Results'}>
                         <DataRow label="Brix" value={data.scioResults.brix} />
                         <DataRow label={language === 'it' ? 'Calorie' : 'Calories'} value={data.scioResults.calories ? `${data.scioResults.calories} kcal` : null} />
                         <DataRow label={language === 'it' ? 'Carboidrati' : 'Carbs'} value={data.scioResults.carbs ? `${data.scioResults.carbs}g` : null} />

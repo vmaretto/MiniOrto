@@ -597,7 +597,7 @@ function AdminProductsScreen() {
                       {scioScreenshot && (
                         <img 
                           src={scioScreenshot} 
-                          alt="SCIO Screenshot"
+                          alt="Screenshot Spettrometro"
                           style={{
                             width: '60px',
                             height: '60px',
@@ -631,7 +631,7 @@ function AdminProductsScreen() {
                             Analisi in corso...
                           </>
                         ) : (
-                          <>📸 Scegli screenshot SCIO</>
+                          <>📸 Scegli screenshot spettrometro</>
                         )}
                       </button>
                       <input

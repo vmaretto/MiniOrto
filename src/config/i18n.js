@@ -284,7 +284,10 @@ const resources = {
       "feedback.skip": "Salta",
       "feedback.pleaseRate": "Per favore, dai una valutazione con le stelle",
       "feedback.thankYou": "Grazie!",
-      "feedback.thankYouMessage": "Il tuo feedback è prezioso per migliorare l'esperienza."
+      "feedback.thankYouMessage": "Il tuo feedback è prezioso per migliorare l'esperienza.",
+      
+      // Stats
+      "stats.differencesFound": "Differenze Spettrometro vs SWITCH"
     }
   },
   en: {
@@ -568,7 +571,10 @@ const resources = {
       "feedback.skip": "Skip",
       "feedback.pleaseRate": "Please give a star rating",
       "feedback.thankYou": "Thank you!",
-      "feedback.thankYouMessage": "Your feedback is valuable to improve the experience."
+      "feedback.thankYouMessage": "Your feedback is valuable to improve the experience.",
+      
+      // Stats  
+      "stats.differencesFound": "Spectrometer vs SWITCH Differences"
     }
   }
 };

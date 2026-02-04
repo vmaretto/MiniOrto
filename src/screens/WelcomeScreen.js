@@ -18,14 +18,14 @@ function WelcomeScreen() {
     { icon: '👤', text: 'Compila il tuo profilo' },
     { icon: '📸', text: 'Fotografa il prodotto' },
     { icon: '🧠', text: 'Stima i valori nel quiz' },
-    { icon: '🔬', text: 'Scansiona con SCIO' },
+    { icon: '🔬', text: 'Scansiona con spettrometro' },
     { icon: '📊', text: 'Confronta percezione vs realtà' },
     { icon: '⭐', text: 'Dai il tuo feedback' }
   ] : [
     { icon: '👤', text: 'Complete your profile' },
     { icon: '📸', text: 'Take a product photo' },
     { icon: '🧠', text: 'Estimate values in quiz' },
-    { icon: '🔬', text: 'Scan with SCIO' },
+    { icon: '🔬', text: 'Scan with spectrometer' },
     { icon: '📊', text: 'Compare perception vs reality' },
     { icon: '⭐', text: 'Give your feedback' }
   ];

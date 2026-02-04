@@ -406,7 +406,7 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
       </div>
 
       <div style={{ padding: '20px' }}>
-        {/* MISURAZIONI SCIO — Gold bordered card with comparison */}
+        {/* MISURAZIONI SPETTROMETRO — Gold bordered card with comparison */}
         {measuredData && (measuredData.calories || measuredData.water || measuredData.protein || measuredData.fat || measuredData.carbs || measuredData.sugar || measuredData.fiber || measuredData.brix) && (() => {
           const isDemo = scanMethod === 'demo' || measuredData?.isDemoData;
           const hasSwitch = switchData?.found && switchData?.nutrition;
@@ -570,7 +570,7 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
           );
         })()}
 
-        {/* Vecchia sezione SCIO singolo valore - manteniamo per °Brix se presente */}
+        {/* Vecchia sezione spettrometro singolo valore - manteniamo per °Brix se presente */}
         {measuredValue && !measuredData?.calories && (
           <div style={{
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',

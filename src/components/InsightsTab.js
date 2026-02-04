@@ -566,7 +566,7 @@ const InsightsTab = ({ participants: allParticipants, language = 'it' }) => {
       if (avgWithDiff > avgWithoutDiff + 0.5) {
         insights.push({
           type: 'correlation',
-          text: `Chi trova differenze SCIO/SWITCH valuta lo spettrometro più utile (${avgWithDiff.toFixed(1)} vs ${avgWithoutDiff.toFixed(1)})`
+          text: `Chi trova differenze spettrometro/SWITCH valuta lo spettrometro più utile (${avgWithDiff.toFixed(1)} vs ${avgWithoutDiff.toFixed(1)})`
         });
       }
     }
