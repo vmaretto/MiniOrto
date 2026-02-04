@@ -209,6 +209,7 @@ const resources = {
       
       // Product Card
       "productCard.scioMeasurement": "Misurazione Spettrometro",
+      "productCard.scioMeasurements": "Misurazioni Spettrometro", 
       "productCard.sugarContent": "Contenuto zuccherino",
       "productCard.nutritionalValues": "Valori Nutrizionali",
       "productCard.sugar": "Zuccheri",
@@ -416,7 +417,7 @@ const resources = {
       "scanflow.scan.screenshot.desc": "Upload a screenshot from the spectrometer app",
       "scanflow.scan.screenshot.button": "Upload screenshot",
       "scanflow.scan.waiting": "Waiting for scan...",
-      "scanflow.scan.waitingDesc": "Open the SCIO app on your iPhone and scan. Data will arrive automatically.",
+      "scanflow.scan.waitingDesc": "Open the spectrometer app on your iPhone and scan. Data will arrive automatically.",
       "scanflow.scan.cancel": "Cancel",
       "scanflow.scan.timeout": "Timeout: no scan received. Try again.",
       "scanflow.results.title": "📊 Results",
@@ -462,7 +463,7 @@ const resources = {
       "recognize.category": "Category",
       "recognize.wrongProduct": "Not correct? Try again",
       "recognize.chooseMethod": "How do you want to analyze nutritional values?",
-      "recognize.uploadScreenshot": "Upload SCIO screenshot",
+      "recognize.uploadScreenshot": "Upload spectrometer screenshot",
       "recognize.startScan": "Start spectrometer scan",
       "recognize.goToScan": "Go to scan",
       "recognize.recognized": "Product recognized",
@@ -471,27 +472,28 @@ const resources = {
       "spectrometer.title": "Spectrometer Scan",
       "spectrometer.productToAnalyze": "Product to analyze",
       "spectrometer.instructions": "Data will arrive automatically, or take a screenshot",
-      "spectrometer.waitForScan": "Wait for direct scan from SCIO app",
+      "spectrometer.waitForScan": "Wait for direct scan from spectrometer app",
       "spectrometer.uploadScreenshot": "I already have the screenshot, upload it",
       "spectrometer.waiting": "Waiting for scan...",
-      "spectrometer.waitingDesc": "Open the SCIO app on your iPhone and scan. Data will arrive automatically.",
+      "spectrometer.waitingDesc": "Open the spectrometer app on your iPhone and scan. Data will arrive automatically.",
       "spectrometer.cancel": "Cancel",
       "spectrometer.timeout": "Timeout: no scan received. Try again.",
       "spectrometer.goBack": "Go back",
       
       // Additional Results
       "results.productCard": "Product Card",
-      "results.scioData": "SCIO Data",
+      "results.scioData": "Spectrometer Data",
       "results.lowConfidence": "Low confidence",
       "results.goodConfidence": "Reliable data",
       "results.noDetailedNutrition": "Nutritional details not available for this model",
       
       // Additional Scan
-      "scan.uploadScioFor": "Upload the SCIO screenshot for this product",
+      "scan.uploadScioFor": "Upload the spectrometer screenshot for this product",
       "scan.changePhoto": "Change photo",
       
       // Product Card
-      "productCard.scioMeasurement": "SCIO Measurement",
+      "productCard.scioMeasurement": "Spectrometer Measurement",
+      "productCard.scioMeasurements": "Spectrometer Measurements",
       "productCard.sugarContent": "Sugar content",
       "productCard.nutritionalValues": "Nutritional Values",
       "productCard.sugar": "Sugar",
@@ -549,7 +551,7 @@ const resources = {
       
       // Feedback Screen
       "feedback.title": "Your Feedback",
-      "feedback.q1_differences": "Did you find differences between SCIO measurements and SWITCH database average values?",
+      "feedback.q1_differences": "Did you find differences between spectrometer measurements and SWITCH database average values?",
       "feedback.option_yes": "Yes",
       "feedback.option_somewhat": "Somewhat",
       "feedback.option_no": "No",

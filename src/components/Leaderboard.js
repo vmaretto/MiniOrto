@@ -92,12 +92,19 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
-        padding: '3px 0', 
+        padding: '4px 0', 
         borderBottom: '1px solid #e5e7eb',
-        fontSize: '0.8rem'
+        fontSize: '0.75rem',
+        gap: '8px'
       }}>
-        <span style={{ color: '#6b7280' }}>{label}</span>
-        <span style={{ fontWeight: '500', textAlign: 'right', maxWidth: '60%', wordBreak: 'break-word' }}>{value}</span>
+        <span style={{ color: '#6b7280', minWidth: '35%', flexShrink: 0 }}>{label}</span>
+        <span style={{ 
+          fontWeight: '500', 
+          textAlign: 'right', 
+          wordBreak: 'break-word', 
+          lineHeight: '1.3',
+          maxWidth: '65%'
+        }}>{value}</span>
       </div>
     ) : null
   );
@@ -232,20 +239,21 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
                     </div>
                   </div>
 
-                  {/* Bottom row: Details */}
+                  {/* Bottom row: Details - Mobile responsive */}
                   <div style={{
                     display: 'flex',
                     flexWrap: 'wrap',
-                    gap: '6px',
-                    fontSize: '0.75rem',
+                    gap: '4px',
+                    fontSize: '0.7rem',
                     color: '#6b7280',
-                    paddingLeft: '54px'
+                    paddingLeft: '48px',
+                    lineHeight: '1.3'
                   }}>
                     {profile.age && (
                       <span>{profile.age} {language === 'it' ? 'anni' : 'y/o'}</span>
                     )}
                     {profile.profession && (
-                      <span>• {profile.profession}</span>
+                      <span>• {profile.profession.length > 15 ? profile.profession.substring(0, 15) + '...' : profile.profession}</span>
                     )}
                     <span style={{ color: '#9ca3af' }}>
                       • {formatDate(participant.timestamp)}
@@ -319,38 +327,39 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
         </div>
       )}
 
-      {/* Stats Footer */}
+      {/* Stats Footer - Mobile optimized */}
       {ranking.length > 0 && (
         <div style={{
-          marginTop: '16px',
-          padding: '12px',
+          marginTop: '12px',
+          padding: '10px',
           background: '#f3f4f6',
           borderRadius: '12px',
           display: 'flex',
           justifyContent: 'space-around',
-          textAlign: 'center'
+          textAlign: 'center',
+          gap: '8px'
         }}>
-          <div>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+          <div style={{ flex: 1, minWidth: '70px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#6b7280' }}>
               {language === 'it' ? 'Totale' : 'Total'}
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#667eea' }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#667eea' }}>
               {ranking.length}
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+          <div style={{ flex: 1, minWidth: '70px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#6b7280' }}>
               {language === 'it' ? 'Media' : 'Avg'}
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#667eea' }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#667eea' }}>
               {(ranking.reduce((sum, p) => sum + p.totalScore, 0) / ranking.length).toFixed(0)}
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+          <div style={{ flex: 1, minWidth: '70px' }}>
+            <div style={{ fontSize: '0.7rem', color: '#6b7280' }}>
               Top
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#10b981' }}>
+            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#10b981' }}>
               {ranking[0].totalScore}
             </div>
           </div>

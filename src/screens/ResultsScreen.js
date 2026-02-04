@@ -374,6 +374,29 @@ function ResultsScreen() {
     >
       <GlobalProgress currentStep="results" language={language} />
 
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        style={{
+          background: 'transparent',
+          border: `1px solid ${SWITCH_COLORS.darkBlue}`,
+          color: SWITCH_COLORS.darkBlue,
+          cursor: 'pointer',
+          padding: '8px 12px',
+          fontSize: '0.9rem',
+          borderRadius: '6px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          alignSelf: 'flex-start',
+          marginBottom: '16px',
+          minHeight: '36px',
+          fontWeight: '500'
+        }}
+      >
+        ← {language === 'it' ? 'Indietro' : 'Back'}
+      </button>
+
       {/* PARTICIPANT NUMBER - Show prominently */}
       {participantNumber && (
         <div style={{

@@ -304,6 +304,29 @@ export default function ComparisonScreen() {
     >
       <GlobalProgress currentStep="comparison" language={language} />
 
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        style={{
+          background: 'transparent',
+          border: `1px solid ${SWITCH_COLORS.darkBlue}`,
+          color: SWITCH_COLORS.darkBlue,
+          cursor: 'pointer',
+          padding: '8px 12px',
+          fontSize: '0.9rem',
+          borderRadius: '6px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          alignSelf: 'flex-start',
+          marginBottom: '16px',
+          minHeight: '36px',
+          fontWeight: '500'
+        }}
+      >
+        ← {language === 'it' ? 'Indietro' : 'Back'}
+      </button>
+
       {/* Punteggio */}
       {score !== null && (
         <div style={{
@@ -351,7 +374,7 @@ export default function ComparisonScreen() {
         </div>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <span><strong style={{ color: SWITCH_COLORS.darkBlue }}>{language === 'it' ? 'Tua Stima' : 'Your Estimate'}</strong> = {language === 'it' ? 'quello che hai indicato' : 'what you estimated'}</span>
-          <span><strong style={{ color: '#1d4ed8' }}>{language === 'it' ? 'Misurato' : 'Measured'}</strong> = {language === 'it' ? 'dallo SCIO' : 'from SCIO'}</span>
+          <span><strong style={{ color: '#1d4ed8' }}>{language === 'it' ? 'Misurato' : 'Measured'}</strong> = {language === 'it' ? 'dallo spettrometro' : 'from spectrometer'}</span>
           <span><strong style={{ color: '#15803d' }}>DB SWITCH</strong> = {language === 'it' ? 'valore medio' : 'average value'}</span>
         </div>
       </div>

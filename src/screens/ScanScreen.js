@@ -174,9 +174,32 @@ function ScanScreen() {
   return (
     <SwitchLayout 
       title={t('scan.title')}
-      subtitle={language === 'it' ? 'Carica lo screenshot SCIO' : 'Upload SCIO screenshot'}
+      subtitle={language === 'it' ? 'Carica lo screenshot spettrometro' : 'Upload spectrometer screenshot'}
       compact={true}
     >
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        style={{
+          background: 'transparent',
+          border: `1px solid ${SWITCH_COLORS.darkBlue}`,
+          color: SWITCH_COLORS.darkBlue,
+          cursor: 'pointer',
+          padding: '8px 12px',
+          fontSize: '0.9rem',
+          borderRadius: '6px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          alignSelf: 'flex-start',
+          marginBottom: '16px',
+          minHeight: '36px',
+          fontWeight: '500'
+        }}
+      >
+        ← {language === 'it' ? 'Indietro' : 'Back'}
+      </button>
+      
       {/* Show recognized product if available */}
       {recognizedProduct && (
         <div style={{
@@ -348,7 +371,7 @@ function ScanScreen() {
               padding: '4px 12px', 
               borderRadius: '20px' 
             }}>
-              {language === 'it' ? '— oppure usa dati SCIO già registrati —' : '— or use pre-registered SCIO data —'}
+              {language === 'it' ? '— oppure usa dati spettrometro già registrati —' : '— or use pre-registered spectrometer data —'}
             </span>
           </div>
           
@@ -425,8 +448,8 @@ function ScanScreen() {
             margin: 0 
           }}>
             {language === 'it' 
-              ? '👆 Seleziona un prodotto per usare i suoi dati SCIO' 
-              : '👆 Select a product to use its SCIO data'}
+              ? '👆 Seleziona un prodotto per usare i suoi dati spettrometro' 
+              : '👆 Select a product to use its spectrometer data'}
           </p>
         </div>
       )}

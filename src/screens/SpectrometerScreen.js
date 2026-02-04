@@ -177,7 +177,7 @@ function SpectrometerScreen() {
                 color: SWITCH_COLORS.green,
                 fontWeight: '600'
               }}>
-                ✓ {language === 'it' ? 'Dati SCIO disponibili' : 'SCIO data available'}
+                ✓ {language === 'it' ? 'Dati spettrometro disponibili' : 'Spectrometer data available'}
               </span>
             )}
           </div>
@@ -208,8 +208,8 @@ function SpectrometerScreen() {
                 fontSize: '0.85rem' 
               }}>
                 {language === 'it' 
-                  ? 'Questo prodotto ha già dati SCIO registrati. Puoi usarli direttamente!'
-                  : 'This product already has registered SCIO data. You can use it directly!'}
+                  ? 'Questo prodotto ha già dati spettrometro registrati. Puoi usarli direttamente!'
+                  : 'This product already has registered spectrometer data. You can use it directly!'}
               </p>
               <button
                 onClick={() => handleUseDemoScioData({
@@ -236,7 +236,7 @@ function SpectrometerScreen() {
                   boxShadow: `0 4px 12px ${SWITCH_COLORS.green}40`
                 }}
               >
-                ✓ {language === 'it' ? 'Usa dati SCIO pre-registrati' : 'Use pre-registered SCIO data'}
+                ✓ {language === 'it' ? 'Usa dati spettrometro pre-registrati' : 'Use pre-registered spectrometer data'}
               </button>
             </div>
           )}
@@ -335,7 +335,7 @@ function SpectrometerScreen() {
                   padding: '4px 12px', 
                   borderRadius: '20px' 
                 }}>
-                  {language === 'it' ? '— oppure usa dati SCIO già registrati —' : '— or use pre-registered SCIO data —'}
+                  {language === 'it' ? '— oppure usa dati spettrometro già registrati —' : '— or use pre-registered spectrometer data —'}
                 </span>
               </div>
               
@@ -416,8 +416,8 @@ function SpectrometerScreen() {
                 margin: 0 
               }}>
                 {language === 'it' 
-                  ? '👆 Seleziona un prodotto per usare i suoi dati SCIO' 
-                  : '👆 Select a product to use its SCIO data'}
+                  ? '👆 Seleziona un prodotto per usare i suoi dati spettrometro' 
+                  : '👆 Select a product to use its spectrometer data'}
               </p>
             </div>
           )}

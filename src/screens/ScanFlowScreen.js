@@ -327,7 +327,7 @@ export default function ScanFlowScreen() {
                     boxShadow: `0 4px 12px ${SWITCH_COLORS.green}40`
                   }}
                 >
-                  ✓ {language === 'it' ? 'Usa dati SCIO pre-registrati' : 'Use pre-registered SCIO data'}
+                  ✓ {language === 'it' ? 'Usa dati spettrometro pre-registrati' : 'Use pre-registered spectrometer data'}
                 </button>
               </div>
             )}
@@ -505,6 +505,7 @@ export default function ScanFlowScreen() {
                             outline: 'none',
                             transition: 'border-color 0.2s'
                           }}
+                          className="faded-placeholder"
                           onFocus={(e) => e.target.style.borderColor = SWITCH_COLORS.gold}
                           onBlur={(e) => e.target.style.borderColor = SWITCH_COLORS.lightBg}
                         />
@@ -702,7 +703,24 @@ export default function ScanFlowScreen() {
       {/* Step content */}
       {renderStepContent()}
       
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .faded-placeholder::placeholder {
+          color: rgba(150, 150, 150, 0.3) !important;
+          opacity: 0.3;
+        }
+        
+        .faded-placeholder::-webkit-input-placeholder {
+          color: rgba(150, 150, 150, 0.3) !important;
+          opacity: 0.3;
+        }
+        
+        .faded-placeholder::-moz-placeholder {
+          color: rgba(150, 150, 150, 0.3) !important;
+          opacity: 0.3;
+        }
+      `}</style>
     </SwitchLayout>
   );
 }

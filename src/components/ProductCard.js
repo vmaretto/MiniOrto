@@ -449,7 +449,7 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
                     fontWeight: '600',
                     whiteSpace: 'nowrap'
                   }}>
-                    📊 {language === 'en' ? 'SCIO demo data' : 'Dati demo SCIO'}
+                    📊 {language === 'en' ? 'Spectrometer demo data' : 'Dati demo Spettrometro'}
                   </span>
                 )}
               </div>

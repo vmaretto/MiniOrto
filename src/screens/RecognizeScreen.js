@@ -241,11 +241,196 @@ function RecognizeScreen() {
     >
       <GlobalProgress currentStep="recognize" language={language} />
 
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        style={{
+          background: 'transparent',
+          border: `1px solid ${SWITCH_COLORS.darkBlue}`,
+          color: SWITCH_COLORS.darkBlue,
+          cursor: 'pointer',
+          padding: '8px 12px',
+          fontSize: '0.9rem',
+          borderRadius: '6px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          alignSelf: 'flex-start',
+          marginBottom: '16px',
+          minHeight: '36px',
+          fontWeight: '500'
+        }}
+      >
+        ← {language === 'it' ? 'Indietro' : 'Back'}
+      </button>
+
       <p style={{ color: '#666', marginBottom: '20px', textAlign: 'center' }}>
         {t('recognize.instructions')}
       </p>
 
-      {/* Camera/Upload Area */}
+      {/* Demo Products Gallery - SHOW FIRST, PROMINENTLY */}
+      {!recognized && !loading && demoProducts.length > 0 && (
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '16px',
+            color: SWITCH_COLORS.darkBlue,
+            fontSize: '1rem',
+            fontWeight: '600'
+          }}>
+            <span style={{ 
+              background: `linear-gradient(135deg, ${SWITCH_COLORS.gold}20 0%, ${SWITCH_COLORS.gold}10 100%)`,
+              padding: '10px 20px',
+              borderRadius: '25px',
+              border: `3px solid ${SWITCH_COLORS.gold}`,
+              boxShadow: `0 4px 12px ${SWITCH_COLORS.gold}30`
+            }}>
+              🌟 {language === 'it' ? 'Prodotti Demo con Dati SCIO' : 'Demo Products with SCIO Data'}
+            </span>
+          </div>
+          
+          {/* Horizontal scrollable gallery - enhanced */}
+          <div style={{
+            display: 'flex',
+            overflowX: 'auto',
+            gap: '16px',
+            padding: '12px 8px 16px 8px',
+            marginBottom: '16px',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none'
+          }}>
+            {demoProducts.map((product) => (
+              <div
+                key={product.id}
+                onClick={() => handleSelectDemoProduct(product)}
+                style={{
+                  flex: '0 0 auto',
+                  width: '130px',
+                  minHeight: '160px',
+                  padding: '16px 12px',
+                  background: 'white',
+                  border: `3px solid ${SWITCH_COLORS.gold}`,
+                  borderRadius: '18px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: `0 6px 20px ${SWITCH_COLORS.gold}25`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  position: 'relative'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05) translateY(-2px)';
+                  e.currentTarget.style.boxShadow = `0 8px 25px ${SWITCH_COLORS.gold}40`;
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = `0 6px 20px ${SWITCH_COLORS.gold}25`;
+                }}
+              >
+                {/* Premium badge */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-8px',
+                  right: '-8px',
+                  background: SWITCH_COLORS.green,
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.7rem',
+                  fontWeight: '600',
+                  border: '2px solid white'
+                }}>
+                  ✓
+                </div>
+                
+                <div style={{ 
+                  fontSize: '2.5rem', 
+                  marginBottom: '10px',
+                  lineHeight: 1
+                }}>
+                  {product.emoji || '🥬'}
+                </div>
+                <div style={{ 
+                  fontSize: '0.85rem', 
+                  fontWeight: '700',
+                  color: SWITCH_COLORS.darkBlue,
+                  marginBottom: '8px',
+                  lineHeight: '1.2',
+                  minHeight: '35px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {translateProductName(product.name)}
+                </div>
+                <div style={{
+                  fontSize: '0.7rem',
+                  color: 'white',
+                  fontWeight: '700',
+                  background: SWITCH_COLORS.green,
+                  padding: '4px 10px',
+                  borderRadius: '15px',
+                  display: 'inline-block',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                }}>
+                  🔬 SCIO Ready
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <p style={{ 
+            fontSize: '0.85rem', 
+            color: SWITCH_COLORS.darkBlue, 
+            textAlign: 'center',
+            margin: '0 0 20px 0',
+            fontWeight: '600',
+            background: `${SWITCH_COLORS.green}15`,
+            padding: '8px 16px',
+            borderRadius: '20px',
+            border: `1px solid ${SWITCH_COLORS.green}30`
+          }}>
+            👆 {language === 'it' 
+              ? 'Tocca un prodotto per iniziare subito con i dati SCIO!' 
+              : 'Tap a product to start instantly with SCIO data!'}
+          </p>
+
+          {/* Divider */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            margin: '24px 0',
+            color: '#999',
+            fontSize: '0.9rem',
+            fontWeight: '500'
+          }}>
+            <hr style={{ 
+              flex: 1, 
+              border: 'none', 
+              borderTop: `2px solid ${SWITCH_COLORS.gold}30`
+            }} />
+            <span style={{ 
+              padding: '0 20px',
+              background: 'white'
+            }}>
+              {language === 'it' ? 'oppure scatta una foto' : 'or take a photo'}
+            </span>
+            <hr style={{ 
+              flex: 1, 
+              border: 'none', 
+              borderTop: `2px solid ${SWITCH_COLORS.gold}30`
+            }} />
+          </div>
+        </div>
+      )}
+
+      {/* Camera/Upload Area - NOW SECONDARY */}
       <div 
         onClick={handleCameraClick}
         style={{
@@ -364,112 +549,7 @@ function RecognizeScreen() {
       )}
 
       {/* Demo Products Gallery - Only show when not recognized */}
-      {!recognized && !loading && demoProducts.length > 0 && (
-        <div style={{ marginTop: '30px' }}>
-          <div style={{ 
-            textAlign: 'center', 
-            marginBottom: '16px',
-            color: '#666',
-            fontSize: '0.9rem'
-          }}>
-            <span style={{ 
-              background: SWITCH_COLORS.lightBg, 
-              padding: '4px 12px', 
-              borderRadius: '20px' 
-            }}>
-              {language === 'it' ? '— oppure scegli un prodotto demo —' : '— or choose a demo product —'}
-            </span>
-          </div>
-          
-          {/* Horizontal scrollable gallery */}
-          <div style={{
-            display: 'flex',
-            overflowX: 'auto',
-            gap: '12px',
-            padding: '8px 4px',
-            marginBottom: '10px',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'thin'
-          }}>
-            {demoProducts.map((product) => (
-              <div
-                key={product.id}
-                onClick={() => handleSelectDemoProduct(product)}
-                style={{
-                  flex: '0 0 auto',
-                  width: '100px',
-                  padding: '12px 8px',
-                  background: 'white',
-                  border: `2px solid ${SWITCH_COLORS.gold}`,
-                  borderRadius: '12px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                }}
-              >
-                {product.image_base64 ? (
-                  <img 
-                    src={product.image_base64} 
-                    alt={product.name}
-                    style={{
-                      width: '60px',
-                      height: '60px',
-                      objectFit: 'cover',
-                      borderRadius: '8px',
-                      marginBottom: '8px'
-                    }}
-                  />
-                ) : (
-                  <div style={{ 
-                    fontSize: '2.5rem', 
-                    marginBottom: '8px',
-                    lineHeight: 1
-                  }}>
-                    {product.emoji || '🥬'}
-                  </div>
-                )}
-                <div style={{ 
-                  fontSize: '0.75rem', 
-                  fontWeight: '600',
-                  color: SWITCH_COLORS.darkBlue,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  {translateProductName(product.name)}
-                </div>
-                <div style={{
-                  fontSize: '0.65rem',
-                  color: '#888',
-                  marginTop: '2px'
-                }}>
-                  {translateCategory(product.category)}
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <p style={{ 
-            fontSize: '0.75rem', 
-            color: '#999', 
-            textAlign: 'center',
-            margin: 0 
-          }}>
-            {language === 'it' 
-              ? '👆 Scorri per vedere tutti i prodotti demo con dati SCIO pre-registrati' 
-              : '👆 Scroll to see all demo products with pre-registered SCIO data'}
-          </p>
-        </div>
-      )}
+      {/* Gallery moved above camera section */}
 
       {/* Recognition Result */}
       {recognized && (
@@ -567,6 +647,13 @@ function RecognizeScreen() {
           </button>
         </div>
       )}
+      
+      <style>{`
+        /* Hide scrollbar for mobile gallery */
+        div::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </SwitchLayout>
   );
 }

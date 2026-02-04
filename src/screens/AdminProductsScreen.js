@@ -588,7 +588,7 @@ function AdminProductsScreen() {
                   marginBottom: '16px'
                 }}>
                   <h4 style={{ margin: '0 0 12px', color: SWITCH_COLORS.darkBlue }}>
-                    🔬 Dati SCIO (per 100g)
+                    🔬 Dati Spettrometro (per 100g)
                   </h4>
                   
                   {/* SCIO Screenshot Upload */}
