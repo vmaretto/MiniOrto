@@ -32,7 +32,9 @@ const emptyProduct = {
 function AdminProductsScreen() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
   const scioFileInputRef = useRef(null);
+  const scioCameraInputRef = useRef(null);
   
   const [authenticated, setAuthenticated] = useState(false);
   const [products, setProducts] = useState([]);
@@ -532,22 +534,48 @@ function AdminProductsScreen() {
                         }}
                       />
                     )}
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      style={{
-                        padding: '10px 16px',
-                        background: SWITCH_COLORS.lightBg,
-                        border: `2px dashed ${SWITCH_COLORS.gold}`,
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <Image size={16} /> Carica immagine
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => cameraInputRef.current?.click()}
+                        style={{
+                          padding: '10px 16px',
+                          background: SWITCH_COLORS.lightBg,
+                          border: `2px dashed ${SWITCH_COLORS.gold}`,
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        📷 Scatta foto
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          padding: '10px 16px',
+                          background: SWITCH_COLORS.lightBg,
+                          border: `2px dashed ${SWITCH_COLORS.gold}`,
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <Image size={16} /> Scegli foto
+                      </button>
+                    </div>
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageUpload}
+                      style={{ display: 'none' }}
+                    />
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -600,33 +628,63 @@ function AdminProductsScreen() {
                           }}
                         />
                       )}
-                      <button
-                        type="button"
-                        onClick={() => scioFileInputRef.current?.click()}
-                        disabled={analyzingScio}
-                        style={{
-                          padding: '10px 16px',
-                          background: analyzingScio ? '#f3f4f6' : SWITCH_COLORS.lightBg,
-                          border: `2px dashed ${SWITCH_COLORS.gold}`,
-                          borderRadius: '8px',
-                          cursor: analyzingScio ? 'not-allowed' : 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          fontSize: '0.9rem',
-                          color: SWITCH_COLORS.darkBlue,
-                          fontWeight: '500'
-                        }}
-                      >
-                        {analyzingScio ? (
-                          <>
-                            <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                            Analisi in corso...
-                          </>
-                        ) : (
-                          <>📸 Carica screenshot SCIO</>
-                        )}
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          onClick={() => scioCameraInputRef.current?.click()}
+                          disabled={analyzingScio}
+                          style={{
+                            padding: '10px 16px',
+                            background: analyzingScio ? '#f3f4f6' : SWITCH_COLORS.lightBg,
+                            border: `2px dashed ${SWITCH_COLORS.gold}`,
+                            borderRadius: '8px',
+                            cursor: analyzingScio ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '0.9rem',
+                            color: SWITCH_COLORS.darkBlue,
+                            fontWeight: '500'
+                          }}
+                        >
+                          {analyzingScio ? (
+                            <>
+                              <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                              Analisi in corso...
+                            </>
+                          ) : (
+                            <>📷 Scatta screenshot SCIO</>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => scioFileInputRef.current?.click()}
+                          disabled={analyzingScio}
+                          style={{
+                            padding: '10px 16px',
+                            background: analyzingScio ? '#f3f4f6' : SWITCH_COLORS.lightBg,
+                            border: `2px dashed ${SWITCH_COLORS.gold}`,
+                            borderRadius: '8px',
+                            cursor: analyzingScio ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '0.9rem',
+                            color: SWITCH_COLORS.darkBlue,
+                            fontWeight: '500'
+                          }}
+                        >
+                          📁 Scegli screenshot SCIO
+                        </button>
+                      </div>
+                      <input
+                        ref={scioCameraInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleScioScreenshot}
+                        style={{ display: 'none' }}
+                      />
                       <input
                         ref={scioFileInputRef}
                         type="file"
