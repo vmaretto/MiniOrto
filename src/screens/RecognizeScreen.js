@@ -285,7 +285,7 @@ function RecognizeScreen() {
               border: `3px solid ${SWITCH_COLORS.gold}`,
               boxShadow: `0 4px 12px ${SWITCH_COLORS.gold}30`
             }}>
-              🌟 {language === 'it' ? 'Prodotti Demo con Dati SCIO' : 'Demo Products with SCIO Data'}
+              🌟 {language === 'it' ? 'Prodotti Demo con Dati Spettrometro' : 'Demo Products with Spectrometer Data'}
             </span>
           </div>
           
@@ -349,13 +349,27 @@ function RecognizeScreen() {
                   ✓
                 </div>
                 
-                <div style={{ 
-                  fontSize: '2.5rem', 
-                  marginBottom: '10px',
-                  lineHeight: 1
-                }}>
-                  {product.emoji || '🥬'}
-                </div>
+                {product.image_base64 ? (
+                  <img 
+                    src={product.image_base64} 
+                    alt={product.name}
+                    style={{
+                      width: '80px',
+                      height: '80px',
+                      objectFit: 'cover',
+                      borderRadius: '12px',
+                      marginBottom: '8px'
+                    }}
+                  />
+                ) : (
+                  <div style={{ 
+                    fontSize: '2.5rem', 
+                    marginBottom: '10px',
+                    lineHeight: 1
+                  }}>
+                    {product.emoji || '🥬'}
+                  </div>
+                )}
                 <div style={{ 
                   fontSize: '0.85rem', 
                   fontWeight: '700',
@@ -379,7 +393,7 @@ function RecognizeScreen() {
                   display: 'inline-block',
                   textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                 }}>
-                  🔬 SCIO Ready
+                  🔬 Ready
                 </div>
               </div>
             ))}
@@ -397,8 +411,8 @@ function RecognizeScreen() {
             border: `1px solid ${SWITCH_COLORS.green}30`
           }}>
             👆 {language === 'it' 
-              ? 'Tocca un prodotto per iniziare subito con i dati SCIO!' 
-              : 'Tap a product to start instantly with SCIO data!'}
+              ? 'Tocca un prodotto per iniziare subito con i dati dello spettrometro!' 
+              : 'Tap a product to start instantly with spectrometer data!'}
           </p>
 
           {/* Divider */}
@@ -590,7 +604,7 @@ function RecognizeScreen() {
                 color: SWITCH_COLORS.green,
                 fontWeight: '600'
               }}>
-                ✓ {language === 'it' ? 'Dati SCIO disponibili' : 'SCIO data available'}
+                ✓ {language === 'it' ? 'Dati spettrometro disponibili' : 'Spectrometer data available'}
               </div>
             )}
           </div>
