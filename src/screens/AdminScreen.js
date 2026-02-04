@@ -91,11 +91,11 @@ const AdminScreen = () => {
 
     // Prepare CSV rows
     const rows = participants.map(p => {
-      const profile = p.data?.profile || {};
-      const part2 = p.data?.part2 || {};
-      const measurements = p.data?.measurements || {};
-      const part4 = p.data?.part4 || {};
-      const part5 = p.data?.part5 || {};
+      const profile = p.data?.data?.profile || p.data?.profile || {};
+      const part2 = p.data?.data?.part2 || p.data?.part2 || {};
+      const measurements = p.data?.data?.measurements || p.data?.measurements || {};
+      const part4 = p.data?.data?.part4 || p.data?.part4 || {};
+      const part5 = p.data?.data?.part5 || p.data?.part5 || {};
 
       return [
         p.timestamp,
@@ -444,8 +444,10 @@ const AdminScreen = () => {
                     </td>
                     <td style={{ padding: '1rem' }}>
                       <div>
-                        <strong>Age:</strong> {participant.data?.profile?.age || 'N/A'}<br />
-                        <strong>Gender:</strong> {participant.data?.profile?.gender || 'N/A'}
+                        <strong>Age:</strong> {participant.data?.data?.profile?.age || participant.data?.profile?.age || 'N/A'}<br />
+                        <strong>Gender:</strong> {participant.data?.data?.profile?.gender || participant.data?.profile?.gender || 'N/A'}<br />
+                        <strong>Product:</strong> {participant.data?.data?.product?.name || participant.data?.product?.name || 'N/A'}<br />
+                        <strong>Score:</strong> {participant.data?.data?.quizResults?.score?.total ?? participant.data?.quizResults?.score?.total ?? 'N/A'}
                       </div>
                     </td>
                     <td style={{ padding: '1rem' }}>

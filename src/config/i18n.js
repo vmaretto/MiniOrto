@@ -287,7 +287,25 @@ const resources = {
       "feedback.thankYouMessage": "Il tuo feedback è prezioso per migliorare l'esperienza.",
       
       // Stats
-      "stats.differencesFound": "Differenze Spettrometro vs SWITCH"
+      "stats.differencesFound": "Differenze Spettrometro vs SWITCH",
+      
+      // Admin
+      "admin.title": "Pannello Admin",
+      "admin.totalParticipants": "Partecipanti totali",
+      "admin.refresh": "Aggiorna",
+      "admin.exportCSV": "Esporta CSV",
+      "admin.deleteAll": "Elimina Tutti",
+      "admin.backToHome": "Torna alla Home",
+      "admin.timestamp": "Data/Ora",
+      "admin.language": "Lingua",
+      "admin.profile": "Profilo",
+      "admin.data": "Dati",
+      "admin.viewDetails": "Dettagli",
+      "admin.loading": "Caricamento...",
+      "admin.noData": "Nessun dato",
+      "admin.confirmDelete": "Sei sicuro di voler eliminare?",
+      "admin.deleteSuccess": "Eliminato con successo",
+      "admin.deleteError": "Errore durante l'eliminazione"
     }
   },
   en: {
@@ -574,7 +592,25 @@ const resources = {
       "feedback.thankYouMessage": "Your feedback is valuable to improve the experience.",
       
       // Stats  
-      "stats.differencesFound": "Spectrometer vs SWITCH Differences"
+      "stats.differencesFound": "Spectrometer vs SWITCH Differences",
+      
+      // Admin
+      "admin.title": "Admin Panel",
+      "admin.totalParticipants": "Total participants",
+      "admin.refresh": "Refresh",
+      "admin.exportCSV": "Export CSV",
+      "admin.deleteAll": "Delete All",
+      "admin.backToHome": "Back to Home",
+      "admin.timestamp": "Date/Time",
+      "admin.language": "Language",
+      "admin.profile": "Profile",
+      "admin.data": "Data",
+      "admin.viewDetails": "View Details",
+      "admin.loading": "Loading...",
+      "admin.noData": "No data",
+      "admin.confirmDelete": "Are you sure you want to delete?",
+      "admin.deleteSuccess": "Deleted successfully",
+      "admin.deleteError": "Error during deletion"
     }
   }
 };
