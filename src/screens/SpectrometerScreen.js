@@ -309,7 +309,7 @@ function SpectrometerScreen() {
           </div>
           
           {/* Demo products SCIO gallery */}
-          {!hasPreloadedScioData && filteredDemoProducts.length > 0 && (
+          {filteredDemoProducts.length > 0 && (
             <div style={{ marginTop: '30px' }}>
               <div style={{ 
                 textAlign: 'center', 
