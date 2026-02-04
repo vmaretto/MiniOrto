@@ -148,19 +148,47 @@ function FeedbackScreen() {
             {t('feedback.thankYou')}
           </h2>
           
+          {/* Participant ID */}
+          {sessionStorage.getItem('participantId') && (
+            <div style={{
+              background: '#f0f4ff',
+              borderRadius: '12px',
+              padding: '14px 20px',
+              margin: '16px 0 8px 0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              border: `2px solid ${SWITCH_COLORS.darkBlue}30`
+            }}>
+              <span style={{ fontSize: '1rem' }}>📋</span>
+              <span style={{ fontSize: '0.9rem', color: '#555' }}>
+                {language === 'it' ? 'Il tuo identificativo:' : 'Your ID:'}
+              </span>
+              <span style={{ 
+                fontSize: '1.2rem', 
+                fontWeight: 'bold', 
+                color: SWITCH_COLORS.darkBlue 
+              }}>
+                N. {sessionStorage.getItem('participantId')}
+              </span>
+            </div>
+          )}
+
+          {/* Leaderboard Position */}
           {ranking && ranking.position > 0 && (
             <div style={{
               background: `linear-gradient(135deg, ${SWITCH_COLORS.darkBlue} 0%, #2d4a6f 100%)`,
               borderRadius: '16px',
               padding: '20px',
-              margin: '20px 0',
+              margin: '8px 0 20px 0',
               color: 'white'
             }}>
               <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '8px' }}>
                 {language === 'it' ? '🏆 La tua posizione in classifica' : '🏆 Your leaderboard position'}
               </div>
               <div style={{ fontSize: '3rem', fontWeight: 'bold' }}>
-                #{ranking.position}
+                {ranking.position}°
               </div>
               <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>
                 {language === 'it' 
