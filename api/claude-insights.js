@@ -42,12 +42,22 @@ export default async function handler(req, res) {
       correlations: aggregatedData.correlations
     };
 
-    const prompt = `Sei un data scientist. Analizza questi dati di un esperimento sulla percezione alimentare.
+    const prompt = `Sei un data scientist. Analizza questi dati di un esperimento sulla percezione alimentare (MyFreshFood - SWITCH Project).
 
 DATI AGGREGATI:
 ${JSON.stringify(summaryData, null, 2)}
 
-Genera insights interessanti e curiosità sui pattern trovati.
+FOCUS PRINCIPALE (in ordine di priorità):
+1. **Alimenti scelti**: quali prodotti sono stati analizzati più spesso? Ci sono preferenze?
+2. **Gap stime vs realtà**: dove i partecipanti sbagliano di più? Su calorie, acqua, CO2, impronta idrica? Chi sovrastima, chi sottostima?
+3. **Valori nutrizionali/ambientali**: pattern interessanti nei dati misurati (calorie, acqua, etc.)
+4. **Correlazioni profilo-performance**: età, professione o abitudini influenzano la precisione delle stime?
+5. **Feedback e consapevolezza**: cosa hanno detto i partecipanti? Cosa li ha sorpresi?
+
+NON FOCALIZZARTI su:
+- Orari o giorni dell'esperimento (è un evento di una giornata)
+- Pattern temporali (irrilevanti)
+
 ${isItalian ? 'Rispondi in italiano.' : 'Respond in English.'}
 
 IMPORTANTE: Rispondi SOLO con JSON valido in questo formato:
@@ -57,7 +67,7 @@ IMPORTANTE: Rispondi SOLO con JSON valido in questo formato:
       "title": "titolo breve (max 5 parole)",
       "insight": "spiegazione con numeri reali dai dati",
       "emoji": "emoji appropriata",
-      "type": "demographic|behavioral|performance|correlation",
+      "type": "food|perception|nutrition|correlation|feedback",
       "strength": 1-5
     }
   ],
@@ -71,7 +81,7 @@ IMPORTANTE: Rispondi SOLO con JSON valido in questo formato:
   }
 }
 
-Genera 5-7 curiosities basate sui dati reali.`;
+Genera 5-7 curiosities basate sui dati reali. Concentrati sugli ALIMENTI e sulle DIFFERENZE tra percezione e realtà.`;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
