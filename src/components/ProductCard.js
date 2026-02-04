@@ -162,7 +162,79 @@ function NutrientBox({ label, value, unit, icon }) {
   );
 }
 
-function ProductCard({ productName, measuredValue, measuredData, productImage, switchData }) {
+// Componente per riga di confronto SCIO vs SWITCH
+function ComparisonRow({ label, icon, scioValue, switchValue, unit }) {
+  if (scioValue === null || scioValue === undefined || !scioValue) return null;
+  
+  const hasBoth = switchValue !== null && switchValue !== undefined && switchValue > 0;
+  const diff = hasBoth ? ((scioValue - switchValue) / switchValue * 100) : null;
+  
+  const getDiffColor = () => {
+    if (diff === null) return '#888';
+    const absDiff = Math.abs(diff);
+    if (absDiff <= 15) return '#4CAF50'; // green — close
+    if (absDiff <= 35) return '#FF9800'; // orange — moderate
+    return '#f44336'; // red — far
+  };
+  
+  const getDiffIcon = () => {
+    if (diff === null) return '—';
+    if (diff > 5) return '▲';
+    if (diff < -5) return '▼';
+    return '≈';
+  };
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: hasBoth ? '2fr 1fr 1fr 1.2fr' : '2fr 1fr',
+      gap: '8px',
+      alignItems: 'center',
+      padding: '10px 0',
+      borderBottom: '1px solid rgba(218, 165, 32, 0.15)'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#444' }}>
+        <span>{icon}</span> {label}
+      </div>
+      <div style={{ 
+        textAlign: 'center', 
+        fontWeight: 'bold', 
+        color: '#1565c0',
+        fontSize: '0.95rem'
+      }}>
+        {typeof scioValue === 'number' ? scioValue.toFixed(1) : scioValue}
+        <span style={{ fontSize: '0.7rem', fontWeight: 'normal', color: '#888' }}> {unit}</span>
+      </div>
+      {hasBoth && (
+        <>
+          <div style={{ 
+            textAlign: 'center', 
+            color: '#666',
+            fontSize: '0.85rem'
+          }}>
+            {typeof switchValue === 'number' ? switchValue.toFixed(1) : switchValue}
+            <span style={{ fontSize: '0.7rem', color: '#999' }}> {unit}</span>
+          </div>
+          <div style={{
+            textAlign: 'center',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+            color: getDiffColor(),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '3px'
+          }}>
+            <span>{getDiffIcon()}</span>
+            <span>{diff > 0 ? '+' : ''}{diff.toFixed(0)}%</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ProductCard({ productName, measuredValue, measuredData, productImage, switchData, scanMethod }) {
   const { t, i18n } = useTranslation();
   const [aiProductInfo, setAiProductInfo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -334,67 +406,169 @@ function ProductCard({ productName, measuredValue, measuredData, productImage, s
       </div>
 
       <div style={{ padding: '20px' }}>
-        {/* VALORI MISURATI (SCIO) - mostrati solo se disponibili */}
-        {measuredData && (measuredData.calories || measuredData.water || measuredData.protein || measuredData.fat || measuredData.carbs || measuredData.sugar || measuredData.fiber) && (
-          <div style={{
-            background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
-            borderRadius: '16px',
-            padding: '20px',
-            marginBottom: '20px',
-            color: 'white'
-          }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🔬 {t('productCard.measuredValues', 'Valori Misurati')}
-              <span style={{ fontSize: '0.8rem', opacity: 1, fontWeight: 'normal', color: '#b3d4fc' }}>
-                ({t('productCard.fromScio', 'dal tuo prodotto')})
-              </span>
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-              {measuredData.calories && (
-                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🔥 {language === 'en' ? 'Calories' : 'Calorie'}</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.calories} <span style={{ fontSize: '0.75rem' }}>kcal</span></div>
+        {/* MISURAZIONI SCIO — Gold bordered card with comparison */}
+        {measuredData && (measuredData.calories || measuredData.water || measuredData.protein || measuredData.fat || measuredData.carbs || measuredData.sugar || measuredData.fiber || measuredData.brix) && (() => {
+          const isDemo = scanMethod === 'demo' || measuredData?.isDemoData;
+          const hasSwitch = switchData?.found && switchData?.nutrition;
+          
+          return (
+            <div style={{
+              background: 'linear-gradient(135deg, #fffdf5 0%, #fff8e1 100%)',
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '20px',
+              border: '2px solid #DAA520',
+              boxShadow: '0 4px 16px rgba(218, 165, 32, 0.2)'
+            }}>
+              {/* Header */}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                marginBottom: '16px',
+                flexWrap: 'wrap',
+                gap: '8px'
+              }}>
+                <h3 style={{ 
+                  margin: 0, 
+                  fontSize: '1.1rem', 
+                  color: '#5D4037',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px' 
+                }}>
+                  🔬 {t('productCard.scioMeasurements', 'Misurazioni SCIO')}
+                </h3>
+                {isDemo && (
+                  <span style={{
+                    background: 'linear-gradient(135deg, #DAA520 0%, #B8860B 100%)',
+                    color: 'white',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    📊 {language === 'en' ? 'SCIO demo data' : 'Dati demo SCIO'}
+                  </span>
+                )}
+              </div>
+              
+              {/* Brix in evidenza se presente */}
+              {measuredData.brix > 0 && (
+                <div style={{
+                  background: 'linear-gradient(135deg, #DAA520 0%, #B8860B 100%)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  marginBottom: '16px',
+                  color: 'white',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '0.85rem', opacity: 0.9, marginBottom: '4px' }}>
+                    🍯 {language === 'en' ? 'Brix Index (sugar content)' : 'Indice Brix (contenuto zuccherino)'}
+                  </div>
+                  <div style={{ fontSize: '2.2rem', fontWeight: 'bold' }}>
+                    {parseFloat(measuredData.brix).toFixed(1)}
+                    <span style={{ fontSize: '1rem', fontWeight: 'normal' }}> °Brix</span>
+                  </div>
                 </div>
               )}
-              {measuredData.carbs && (
-                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🍞 {language === 'en' ? 'Carbs' : 'Carboidrati'}</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.carbs} <span style={{ fontSize: '0.75rem' }}>g</span></div>
+              
+              {/* Table header */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: hasSwitch ? '2fr 1fr 1fr 1.2fr' : '2fr 1fr',
+                gap: '8px',
+                padding: '8px 0',
+                borderBottom: '2px solid rgba(218, 165, 32, 0.3)',
+                marginBottom: '4px'
+              }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#888', textTransform: 'uppercase' }}>
+                  {language === 'en' ? 'Nutrient' : 'Nutriente'}
                 </div>
-              )}
-              {measuredData.sugar && (
-                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🍬 {language === 'en' ? 'Sugar' : 'Zuccheri'}</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.sugar} <span style={{ fontSize: '0.75rem' }}>g</span></div>
+                <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#1565c0', textAlign: 'center', textTransform: 'uppercase' }}>
+                  🔬 {language === 'en' ? 'Measured' : 'Misurato'}
                 </div>
-              )}
-              {measuredData.protein && (
-                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>💪 {language === 'en' ? 'Protein' : 'Proteine'}</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.protein} <span style={{ fontSize: '0.75rem' }}>g</span></div>
-                </div>
-              )}
-              {measuredData.fiber && (
-                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🌾 {language === 'en' ? 'Fiber' : 'Fibre'}</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.fiber} <span style={{ fontSize: '0.75rem' }}>g</span></div>
-                </div>
-              )}
-              {measuredData.fat && (
-                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>🧈 {language === 'en' ? 'Fat' : 'Grassi'}</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.fat} <span style={{ fontSize: '0.75rem' }}>g</span></div>
-                </div>
-              )}
-              {measuredData.water && (
-                <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '0.8rem', color: '#b3d4fc', fontWeight: '500' }}>💧 {language === 'en' ? 'Water' : 'Acqua'}</div>
-                  <div style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{measuredData.water} <span style={{ fontSize: '0.75rem' }}>g</span></div>
+                {hasSwitch && (
+                  <>
+                    <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#888', textAlign: 'center', textTransform: 'uppercase' }}>
+                      📊 {language === 'en' ? 'Average' : 'Media'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#888', textAlign: 'center', textTransform: 'uppercase' }}>
+                      {language === 'en' ? 'Diff' : 'Diff.'}
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              {/* Comparison rows */}
+              <ComparisonRow 
+                label={language === 'en' ? 'Calories' : 'Calorie'} 
+                icon="🔥" 
+                scioValue={measuredData.calories} 
+                switchValue={hasSwitch ? switchData.nutrition.energy : null} 
+                unit="kcal" 
+              />
+              <ComparisonRow 
+                label={language === 'en' ? 'Carbs' : 'Carboidrati'} 
+                icon="🍞" 
+                scioValue={measuredData.carbs} 
+                switchValue={hasSwitch ? switchData.nutrition.carbohydrates : null} 
+                unit="g" 
+              />
+              <ComparisonRow 
+                label={language === 'en' ? 'Sugar' : 'Zuccheri'} 
+                icon="🍬" 
+                scioValue={measuredData.sugar} 
+                switchValue={hasSwitch ? switchData.nutrition.soluble : null} 
+                unit="g" 
+              />
+              <ComparisonRow 
+                label={language === 'en' ? 'Protein' : 'Proteine'} 
+                icon="💪" 
+                scioValue={measuredData.protein} 
+                switchValue={hasSwitch ? switchData.nutrition.proteins : null} 
+                unit="g" 
+              />
+              <ComparisonRow 
+                label={language === 'en' ? 'Fiber' : 'Fibre'} 
+                icon="🌾" 
+                scioValue={measuredData.fiber} 
+                switchValue={hasSwitch ? switchData.nutrition.fiber : null} 
+                unit="g" 
+              />
+              <ComparisonRow 
+                label={language === 'en' ? 'Water' : 'Acqua'} 
+                icon="💧" 
+                scioValue={measuredData.water} 
+                switchValue={null} 
+                unit="%" 
+              />
+              
+              {/* Legend */}
+              {hasSwitch && (
+                <div style={{ 
+                  marginTop: '12px', 
+                  padding: '10px', 
+                  background: 'rgba(218, 165, 32, 0.08)', 
+                  borderRadius: '8px',
+                  fontSize: '0.72rem',
+                  color: '#888',
+                  textAlign: 'center'
+                }}>
+                  <span style={{ color: '#4CAF50' }}>●</span> {language === 'en' ? '≤15% close' : '≤15% vicino'} &nbsp;
+                  <span style={{ color: '#FF9800' }}>●</span> {language === 'en' ? '15-35% moderate' : '15-35% moderato'} &nbsp;
+                  <span style={{ color: '#f44336' }}>●</span> {language === 'en' ? '>35% far' : '>35% distante'}
+                  <div style={{ marginTop: '4px' }}>
+                    {language === 'en' 
+                      ? `Average data: ${switchData.matchedItem} (SWITCH Database)` 
+                      : `Dati medi: ${switchData.matchedItem} (Database SWITCH)`}
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Vecchia sezione SCIO singolo valore - manteniamo per °Brix se presente */}
         {measuredValue && !measuredData?.calories && (

@@ -140,6 +140,7 @@ function ResultsScreen() {
   const [switchLoading, setSwitchLoading] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState(null);
   const [showFullResults, setShowFullResults] = useState(false);
+  const [scanMethod, setScanMethod] = useState(null);
   const language = i18n?.language || 'it';
 
   useEffect(() => {
@@ -155,9 +156,10 @@ function ResultsScreen() {
     const storedQuiz = sessionStorage.getItem('quizAnswers');
     
     const directScanData = sessionStorage.getItem('scioScanData');
-    const scanMethod = sessionStorage.getItem('scanMethod');
+    const storedScanMethod = sessionStorage.getItem('scanMethod');
+    setScanMethod(storedScanMethod);
     
-    if (directScanData && scanMethod === 'direct') {
+    if (directScanData && storedScanMethod === 'direct') {
       const scanData = JSON.parse(directScanData);
       setResults({
         value: scanData.value,
@@ -168,6 +170,22 @@ function ResultsScreen() {
         source: 'direct-scio',
         scanDate: scanData.scanDate || new Date().toISOString(),
         ...scanData.nutrition
+      });
+    } else if (directScanData && storedScanMethod === 'demo') {
+      // Demo SCIO data — nutrition fields are at top level
+      const scanData = JSON.parse(directScanData);
+      setResults({
+        brix: scanData.brix,
+        calories: scanData.calories,
+        carbs: scanData.carbs,
+        sugar: scanData.sugar,
+        water: scanData.water,
+        protein: scanData.protein,
+        fiber: scanData.fiber,
+        source: 'demo-scio',
+        isDemoData: true,
+        demoProductName: scanData.demoProductName,
+        scanDate: new Date().toISOString()
       });
     } else if (storedResults) {
       setResults(JSON.parse(storedResults));
@@ -320,6 +338,7 @@ function ResultsScreen() {
             measuredData={results}
             productImage={productImage}
             switchData={switchData}
+            scanMethod={scanMethod}
           />
         </div>
       )}
