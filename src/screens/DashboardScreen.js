@@ -19,6 +19,12 @@ const DashboardScreen = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('leaderboard');
+  const [currentParticipantId, setCurrentParticipantId] = useState(null);
+
+  useEffect(() => {
+    const savedId = sessionStorage.getItem('participantId');
+    if (savedId) setCurrentParticipantId(parseInt(savedId));
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -429,7 +435,7 @@ const DashboardScreen = () => {
       }}>
         {activeTab === 'leaderboard' && (
           <div style={{ padding: '16px' }}>
-            <Leaderboard ranking={ranking} language={language} />
+            <Leaderboard ranking={ranking} language={language} currentParticipantId={currentParticipantId} />
           </div>
         )}
 

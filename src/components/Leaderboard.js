@@ -2,8 +2,18 @@
 import React, { useState } from 'react';
 import { Trophy, Medal, Award, ChevronDown, ChevronUp, User, Leaf, BarChart2, MessageSquare } from 'lucide-react';
 
-const Leaderboard = ({ ranking, language = 'it' }) => {
+const Leaderboard = ({ ranking, language = 'it', currentParticipantId = null }) => {
   const [expandedId, setExpandedId] = useState(null);
+  const currentRef = React.useRef(null);
+
+  // Auto-scroll to current participant after render
+  React.useEffect(() => {
+    if (currentRef.current) {
+      setTimeout(() => {
+        currentRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [ranking, currentParticipantId]);
 
   const getRankIcon = (rank) => {
     if (rank === 1) return <Trophy size={20} color="#FFD700" />;
@@ -117,6 +127,15 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
       maxWidth: '100%',
       overflow: 'hidden'
     }}>
+      {/* Pulse animation for current user highlight */}
+      {currentParticipantId && (
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+        `}</style>
+      )}
       {/* Header */}
       <div style={{
         display: 'flex',
@@ -150,21 +169,47 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
             const displayName = getDisplayName(participant);
             const data = getParticipantData(participant);
             const isExpanded = expandedId === participant.id;
+            const isCurrentUser = currentParticipantId && participant.id === currentParticipantId;
             
             return (
-              <div key={participant.id}>
+              <div key={participant.id} ref={isCurrentUser ? currentRef : null}>
+                {/* "Tu sei qui" label for current user */}
+                {isCurrentUser && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    marginBottom: '6px',
+                    padding: '4px 12px',
+                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                    borderRadius: '20px',
+                    color: 'white',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    letterSpacing: '0.5px',
+                    animation: 'pulse 2s infinite'
+                  }}>
+                    📍 {language === 'it' ? 'SEI QUI' : 'YOU ARE HERE'}
+                  </div>
+                )}
                 {/* Main Card */}
                 <div
                   onClick={() => toggleExpand(participant.id)}
                   style={{
                     padding: '12px',
-                    background: index < 3 
-                      ? `linear-gradient(135deg, ${getRankColor(participant.rank)}20 0%, ${getRankColor(participant.rank)}08 100%)`
-                      : '#fafafa',
-                    border: index < 3 ? `2px solid ${getRankColor(participant.rank)}` : '1px solid #e5e7eb',
+                    background: isCurrentUser
+                      ? 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)'
+                      : index < 3 
+                        ? `linear-gradient(135deg, ${getRankColor(participant.rank)}20 0%, ${getRankColor(participant.rank)}08 100%)`
+                        : '#fafafa',
+                    border: isCurrentUser 
+                      ? '3px solid #667eea' 
+                      : index < 3 ? `2px solid ${getRankColor(participant.rank)}` : '1px solid #e5e7eb',
                     borderRadius: isExpanded ? '12px 12px 0 0' : '12px',
                     cursor: 'pointer',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s',
+                    boxShadow: isCurrentUser ? '0 4px 16px rgba(102, 126, 234, 0.3)' : 'none'
                   }}
                 >
                   {/* Top row: Rank + Name + Score - Mobile optimized */}
@@ -197,14 +242,14 @@ const Leaderboard = ({ ranking, language = 'it' }) => {
                       flex: 1,
                       minWidth: '120px', // Minimum width for readability
                       fontSize: '0.9rem',
-                      fontWeight: '600',
-                      color: '#1f2937',
+                      fontWeight: isCurrentUser ? '700' : '600',
+                      color: isCurrentUser ? '#667eea' : '#1f2937',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
                       lineHeight: '1.3'
                     }}>
-                      {displayName}
+                      {displayName} {isCurrentUser && <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>({language === 'it' ? 'Tu' : 'You'})</span>}
                     </div>
 
                     {/* Score badge - responsive */}
