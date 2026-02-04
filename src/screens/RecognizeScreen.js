@@ -268,8 +268,22 @@ function RecognizeScreen() {
         {t('recognize.instructions')}
       </p>
 
+      {/* Loading state while gallery loads */}
+      {!recognized && !loading && loadingDemoProducts && (
+        <div style={{
+          textAlign: 'center',
+          padding: '40px 20px',
+          color: SWITCH_COLORS.darkBlue
+        }}>
+          <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🔄</div>
+          <p style={{ fontSize: '1rem', fontWeight: '500' }}>
+            {language === 'it' ? 'Caricamento prodotti...' : 'Loading products...'}
+          </p>
+        </div>
+      )}
+
       {/* Demo Products Gallery - SHOW FIRST, PROMINENTLY */}
-      {!recognized && !loading && demoProducts.length > 0 && (
+      {!recognized && !loading && !loadingDemoProducts && demoProducts.length > 0 && (
         <div style={{ marginBottom: '24px' }}>
           <div style={{ 
             textAlign: 'center', 
@@ -444,8 +458,8 @@ function RecognizeScreen() {
         </div>
       )}
 
-      {/* Camera/Upload Area - NOW SECONDARY */}
-      <div 
+      {/* Camera/Upload Area - NOW SECONDARY, hidden while gallery loads */}
+      {loadingDemoProducts ? null : <div 
         onClick={handleCameraClick}
         style={{
           border: `3px dashed ${SWITCH_COLORS.gold}`,
@@ -476,7 +490,7 @@ function RecognizeScreen() {
             </p>
           </>
         )}
-      </div>
+      </div>}
 
       {/* Change Photo Button */}
       {imagePreview && !recognized && (
