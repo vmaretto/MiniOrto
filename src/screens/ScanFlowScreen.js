@@ -32,12 +32,26 @@ export default function ScanFlowScreen() {
   const [error, setError] = useState(null);
   const [waitingForScan, setWaitingForScan] = useState(false);
   const [uploadedScreenshot, setUploadedScreenshot] = useState(null); // Preview before analysis
+  const [demoProducts, setDemoProducts] = useState([]);
   
   const pollIntervalRef = useRef(null);
+
+  const fetchDemoProducts = async () => {
+    try {
+      const response = await fetch('/api/demo-products');
+      if (response.ok) {
+        const data = await response.json();
+        setDemoProducts(data);
+      }
+    } catch (err) {
+      console.error('Error fetching demo products:', err);
+    }
+  };
 
   // Carica dati prodotto riconosciuto
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    fetchDemoProducts();
     
     const storedProduct = sessionStorage.getItem('recognizedProduct');
     const storedImage = sessionStorage.getItem('productImage');
@@ -374,6 +388,94 @@ export default function ScanFlowScreen() {
                 >
                   <Upload size={20} /> {t('scanflow.scan.screenshot.button')}
                 </label>
+
+                {/* Demo products SCIO gallery */}
+                {demoProducts.length > 0 && (
+                  <div style={{ marginTop: '30px' }}>
+                    <div style={{ 
+                      textAlign: 'center', 
+                      marginBottom: '16px',
+                      color: '#666',
+                      fontSize: '0.9rem'
+                    }}>
+                      <span style={{ 
+                        background: SWITCH_COLORS.lightBg, 
+                        padding: '4px 12px', 
+                        borderRadius: '20px' 
+                      }}>
+                        {language === 'it' ? '— oppure usa dati SCIO già registrati —' : '— or use pre-registered SCIO data —'}
+                      </span>
+                    </div>
+                    
+                    <div style={{
+                      display: 'flex',
+                      overflowX: 'auto',
+                      gap: '12px',
+                      padding: '8px 4px',
+                      marginBottom: '10px',
+                      WebkitOverflowScrolling: 'touch',
+                      scrollbarWidth: 'thin'
+                    }}>
+                      {demoProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          onClick={() => {
+                            const scioData = {
+                              brix: parseFloat(product.scio_brix) || 0,
+                              calories: parseFloat(product.scio_calories) || 0,
+                              carbs: parseFloat(product.scio_carbs) || 0,
+                              sugar: parseFloat(product.scio_sugar) || 0,
+                              water: parseFloat(product.scio_water) || 0,
+                              protein: parseFloat(product.scio_protein) || 0,
+                              fiber: parseFloat(product.scio_fiber) || 0,
+                              isDemoData: true,
+                              demoProductId: product.id,
+                              demoProductName: product.name
+                            };
+                            sessionStorage.setItem('scioScanData', JSON.stringify(scioData));
+                            sessionStorage.setItem('scanMethod', 'demo');
+                            const currentProduct = JSON.parse(sessionStorage.getItem('recognizedProduct') || '{}');
+                            currentProduct.scioData = scioData;
+                            sessionStorage.setItem('recognizedProduct', JSON.stringify(currentProduct));
+                            navigate('/results');
+                          }}
+                          style={{
+                            flex: '0 0 auto',
+                            width: '100px',
+                            padding: '12px 8px',
+                            background: 'white',
+                            border: `2px solid ${SWITCH_COLORS.gold}`,
+                            borderRadius: '12px',
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                          }}
+                        >
+                          <div style={{ fontSize: '2rem', marginBottom: '6px' }}>
+                            {product.emoji || '🥬'}
+                          </div>
+                          <div style={{ 
+                            fontSize: '0.75rem', 
+                            fontWeight: '600', 
+                            color: SWITCH_COLORS.darkBlue,
+                            lineHeight: 1.2
+                          }}>
+                            {product.name}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
