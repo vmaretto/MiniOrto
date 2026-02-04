@@ -32,6 +32,7 @@ const emptyProduct = {
 function AdminProductsScreen() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const scioFileInputRef = useRef(null);
   
   const [authenticated, setAuthenticated] = useState(false);
   const [products, setProducts] = useState([]);
@@ -41,6 +42,9 @@ function AdminProductsScreen() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState(emptyProduct);
   const [saving, setSaving] = useState(false);
+  const [scioScreenshot, setScioScreenshot] = useState(null);
+  const [analyzingScio, setAnalyzingScio] = useState(false);
+  const [scioAnalysisStatus, setScioAnalysisStatus] = useState(null); // { type: 'success'|'error', message: string }
 
   useEffect(() => {
     // Check if already authenticated in session
@@ -106,6 +110,68 @@ function AdminProductsScreen() {
     }
   };
 
+  const handleScioScreenshot = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const dataUrl = event.target.result;
+      setScioScreenshot(dataUrl);
+      setScioAnalysisStatus(null);
+      setAnalyzingScio(true);
+      
+      try {
+        const response = await fetch('/api/analyze-scio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl })
+        });
+        
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Analisi fallita');
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        // Map extracted values to form fields
+        setFormData(prev => ({
+          ...prev,
+          scio_brix: data.brix != null ? String(data.brix) : prev.scio_brix,
+          scio_calories: data.calories != null ? String(data.calories) : prev.scio_calories,
+          scio_carbs: data.carbs != null ? String(data.carbs) : prev.scio_carbs,
+          scio_sugar: data.sugar != null ? String(data.sugar) : prev.scio_sugar,
+          scio_water: data.water != null ? String(data.water) : prev.scio_water,
+          scio_protein: data.protein != null ? String(data.protein) : prev.scio_protein,
+          scio_fiber: data.fiber != null ? String(data.fiber) : prev.scio_fiber,
+        }));
+        
+        const confidenceEmoji = data.confidence === 'high' ? '🟢' : data.confidence === 'medium' ? '🟡' : '🔴';
+        const foodInfo = data.foodName ? ` — "${data.foodName}"` : '';
+        setScioAnalysisStatus({
+          type: 'success',
+          message: `${confidenceEmoji} Valori estratti con successo${foodInfo} (affidabilità: ${data.confidence || 'n/a'})`
+        });
+        
+      } catch (err) {
+        setScioAnalysisStatus({
+          type: 'error',
+          message: `❌ Errore: ${err.message}`
+        });
+      } finally {
+        setAnalyzingScio(false);
+      }
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -161,6 +227,8 @@ function AdminProductsScreen() {
       scio_fiber: product.scio_fiber || '',
       active: product.active !== false
     });
+    setScioScreenshot(null);
+    setScioAnalysisStatus(null);
     setShowForm(true);
   };
 
@@ -297,6 +365,8 @@ function AdminProductsScreen() {
               onClick={() => {
                 setEditingProduct(null);
                 setFormData(emptyProduct);
+                setScioScreenshot(null);
+                setScioAnalysisStatus(null);
                 setShowForm(true);
               }}
               style={{
@@ -513,6 +583,87 @@ function AdminProductsScreen() {
                   <h4 style={{ margin: '0 0 12px', color: SWITCH_COLORS.darkBlue }}>
                     🔬 Dati SCIO (per 100g)
                   </h4>
+                  
+                  {/* SCIO Screenshot Upload */}
+                  <div style={{ marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {scioScreenshot && (
+                        <img 
+                          src={scioScreenshot} 
+                          alt="SCIO Screenshot"
+                          style={{
+                            width: '60px',
+                            height: '60px',
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            border: `2px solid ${SWITCH_COLORS.gold}`
+                          }}
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => scioFileInputRef.current?.click()}
+                        disabled={analyzingScio}
+                        style={{
+                          padding: '10px 16px',
+                          background: analyzingScio ? '#f3f4f6' : SWITCH_COLORS.lightBg,
+                          border: `2px dashed ${SWITCH_COLORS.gold}`,
+                          borderRadius: '8px',
+                          cursor: analyzingScio ? 'not-allowed' : 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.9rem',
+                          color: SWITCH_COLORS.darkBlue,
+                          fontWeight: '500'
+                        }}
+                      >
+                        {analyzingScio ? (
+                          <>
+                            <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                            Analisi in corso...
+                          </>
+                        ) : (
+                          <>📸 Carica screenshot SCIO</>
+                        )}
+                      </button>
+                      <input
+                        ref={scioFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleScioScreenshot}
+                        style={{ display: 'none' }}
+                      />
+                      {scioScreenshot && !analyzingScio && (
+                        <button
+                          type="button"
+                          onClick={() => { setScioScreenshot(null); setScioAnalysisStatus(null); }}
+                          style={{
+                            padding: '6px',
+                            background: '#fee2e2',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <X size={16} color="#ef4444" />
+                        </button>
+                      )}
+                    </div>
+                    {scioAnalysisStatus && (
+                      <div style={{
+                        marginTop: '8px',
+                        padding: '8px 12px',
+                        background: scioAnalysisStatus.type === 'success' ? '#d1fae5' : '#fee2e2',
+                        border: `1px solid ${scioAnalysisStatus.type === 'success' ? '#10b981' : '#ef4444'}`,
+                        borderRadius: '8px',
+                        fontSize: '0.85rem',
+                        color: scioAnalysisStatus.type === 'success' ? '#065f46' : '#991b1b'
+                      }}>
+                        {scioAnalysisStatus.message}
+                      </div>
+                    )}
+                  </div>
                   
                   <div style={{ 
                     display: 'grid', 
